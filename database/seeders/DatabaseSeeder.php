@@ -39,14 +39,6 @@ class DatabaseSeeder extends Seeder
             'last_checked_at' => now()->subHours(2),
         ]);
 
-        $gitlabCredential = Credential::factory()->create([
-            'name' => 'GitLab Enterprise',
-            'provider' => 'gitlab',
-            'username' => 'demo-enterprise',
-            'status' => CredentialStatus::Ok,
-            'last_checked_at' => now()->subHours(5),
-        ]);
-
         $failedCredential = Credential::factory()->create([
             'name' => 'Old GitHub Token',
             'provider' => 'github',
@@ -111,7 +103,7 @@ class DatabaseSeeder extends Seeder
             'url' => 'https://github.com/acme-corp/vue-design-system',
             'visibility' => RepositoryVisibility::PrivateRepo,
             'format' => PackageFormat::Npm,
-            'credential_id' => $gitlabCredential->id,
+            'credential_id' => $githubCredential->id,
             'enabled' => true,
             'package_count' => 8,
             'last_sync_at' => now()->subHours(3),

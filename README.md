@@ -23,6 +23,26 @@ Packgrid is a self-hosted solution for teams who need to manage and distribute p
 - **Credential Isolation** — Your GitHub token never leaves the Packgrid server
 - **Two-Factor Authentication** — Secure admin accounts with TOTP-based 2FA using authenticator apps
 
+## Screenshots
+
+### Dashboard
+![Dashboard](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/dashboard.jpg)
+
+### Repositories
+![Repositories](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/repositories.jpg)
+
+### Credentials
+![Credentials](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/credentials.jpg)
+
+### Tokens
+![Tokens](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/tokens.jpg)
+
+### Documentation
+![Documentation](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/documentation.jpg)
+
+### Login
+![Login](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/login.jpg)
+
 ## Requirements
 
 - PHP 8.2 or higher

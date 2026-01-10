@@ -112,6 +112,16 @@ class IntroductionContent extends Component implements HasSchemas
                             ])
                             ->features([
                                 [
+                                    'name' => 'Multi-Protocol',
+                                    'description' => 'Composer (PHP) + npm (JS)',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'packagist' => false,
+                                        'satis' => false,
+                                        'repman' => false,
+                                    ],
+                                ],
+                                [
                                     'name' => 'Hosting',
                                     'values' => [
                                         'packgrid' => 'Self-hosted',

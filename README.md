@@ -434,6 +434,8 @@ Or via CLI flags:
 
 ## Comparison with Alternatives
 
+### Composer (PHP) Private Package Managers
+
 | Feature | Packgrid | Private Packagist | Satis | Repman |
 |---------|----------|-------------------|-------|--------|
 | Hosting | Self-hosted | Cloud or Self-hosted | Self-hosted | Self-hosted |
@@ -452,6 +454,24 @@ Or via CLI flags:
 | Setup Complexity | Simple | Managed | Manual | Moderate |
 
 **Packgrid's niche:** If you need a simple, free, self-hosted solution for distributing private GitHub packages (both Composer and NPM) without the complexity of Satis or the cost of Private Packagist, Packgrid is a good fit.
+
+### NPM (Node.js) Private Package Managers
+
+| Feature | Packgrid | Verdaccio | GitHub Packages | JFrog Artifactory |
+|---------|----------|-----------|-----------------|-------------------|
+| Hosting | Self-hosted | Self-hosted | Cloud | Both |
+| Cost | Free | Free | Free tier + Paid | Paid |
+| Open Source | Yes | Yes | No | No |
+| Composer Support | Yes | No | Yes | Yes |
+| NPM Support | Yes | Yes | Yes | Yes |
+| Web Admin Panel | Yes | Yes | Yes | Yes |
+| GitHub Integration | Yes | No | Yes | Partial |
+| Public Mirroring | Yes | Yes | No | Yes |
+| Token Management | Advanced | Basic | Yes | Yes |
+| IP Restrictions | Yes | No | No | Yes |
+| Setup Complexity | Simple | Simple | Managed | Complex |
+
+**Packgrid's advantage:** If you already use Packgrid for Composer packages, adding npm support requires zero additional setup. You get a unified registry for both PHP and JavaScript packages with the same token management and GitHub integration.
 
 ## Roadmap
 

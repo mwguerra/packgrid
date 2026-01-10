@@ -4,6 +4,7 @@ namespace App\Livewire\Docs\Npm;
 
 use App\Filament\Schemas\Components\AlertBox;
 use App\Filament\Schemas\Components\BulletList;
+use App\Filament\Schemas\Components\ComparisonTable;
 use App\Filament\Schemas\Components\HeroSection;
 use App\Filament\Schemas\Components\StatCard;
 use App\Filament\Schemas\Components\StatCards;
@@ -101,6 +102,119 @@ class IntroductionContent extends Component implements HasSchemas
                             '<strong>Bearer token auth</strong> — Standard npm authentication via .npmrc',
                             '<strong>Works with npm, yarn, pnpm</strong> — Compatible with all major package managers',
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
+                    ]),
+
+                Section::make('How Packgrid Compares')
+                    ->icon('heroicon-o-scale')
+                    ->iconColor('primary')
+                    ->description('Comparison with npm private registry alternatives')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        TextContent::make('There are several solutions for hosting private npm packages. Here\'s how Packgrid compares:'),
+                        ComparisonTable::make()
+                            ->products([
+                                'packgrid' => ['name' => 'Packgrid', 'highlight' => true],
+                                'verdaccio' => ['name' => 'Verdaccio'],
+                                'github' => ['name' => 'GitHub Packages'],
+                                'artifactory' => ['name' => 'JFrog Artifactory'],
+                            ])
+                            ->features([
+                                [
+                                    'name' => 'Multi-Protocol',
+                                    'description' => 'Composer (PHP) + npm (JS)',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => false,
+                                        'github' => true,
+                                        'artifactory' => true,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Hosting',
+                                    'values' => [
+                                        'packgrid' => 'Self-hosted',
+                                        'verdaccio' => 'Self-hosted',
+                                        'github' => 'Cloud',
+                                        'artifactory' => 'Both',
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Cost',
+                                    'values' => [
+                                        'packgrid' => 'Free',
+                                        'verdaccio' => 'Free',
+                                        'github' => 'Free tier + Paid',
+                                        'artifactory' => 'Paid',
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Open Source',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => true,
+                                        'github' => false,
+                                        'artifactory' => false,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Web Admin Panel',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => true,
+                                        'github' => true,
+                                        'artifactory' => true,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'GitHub Integration',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => false,
+                                        'github' => true,
+                                        'artifactory' => 'partial',
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Public Mirroring',
+                                    'description' => 'Mirror npmjs.com',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => true,
+                                        'github' => false,
+                                        'artifactory' => true,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Token Management',
+                                    'description' => 'Advanced token controls',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => 'partial',
+                                        'github' => true,
+                                        'artifactory' => true,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'IP Restrictions',
+                                    'values' => [
+                                        'packgrid' => true,
+                                        'verdaccio' => false,
+                                        'github' => false,
+                                        'artifactory' => true,
+                                    ],
+                                ],
+                                [
+                                    'name' => 'Setup Complexity',
+                                    'values' => [
+                                        'packgrid' => 'Simple',
+                                        'verdaccio' => 'Simple',
+                                        'github' => 'Managed',
+                                        'artifactory' => 'Complex',
+                                    ],
+                                ],
+                            ]),
+                        TextContent::make('<strong>Packgrid\'s advantage:</strong> If you already use Packgrid for Composer packages, adding npm support requires zero additional setup. You get a unified registry for both PHP and JavaScript packages with the same token management and GitHub integration.'),
                     ]),
 
                 Section::make('Getting Started')

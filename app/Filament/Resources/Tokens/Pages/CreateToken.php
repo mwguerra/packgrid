@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Tokens\Pages;
 
 use App\Filament\Resources\Tokens\TokenResource;
-use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -25,6 +25,8 @@ class CreateToken extends CreateRecord
 
     protected function afterCreate(): void
     {
+        $token = $this->record->token;
+
         Notification::make()
             ->title(__('token.notification.created'))
             ->body(__('token.notification.created_body'))
@@ -34,9 +36,7 @@ class CreateToken extends CreateRecord
                 Action::make('copy')
                     ->label(__('token.action.copy'))
                     ->icon('heroicon-o-clipboard-document')
-                    ->extraAttributes([
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode($this->record->token).')',
-                    ])
+                    ->url("javascript:navigator.clipboard.writeText('{$token}')")
                     ->close(),
             ])
             ->send();

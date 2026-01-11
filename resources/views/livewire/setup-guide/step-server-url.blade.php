@@ -1,6 +1,6 @@
 <x-filament::section icon="heroicon-o-server" icon-color="warning" collapsible>
-    <x-slot name="heading">Server URL</x-slot>
-    <x-slot name="description">Your Packgrid endpoint</x-slot>
+    <x-slot name="heading">{{ __('docs.setup.step2.heading') }}</x-slot>
+    <x-slot name="description">{{ __('docs.setup.step2.description') }}</x-slot>
     <x-slot name="headerEnd">
         <x-filament::button
             color="gray"
@@ -8,7 +8,7 @@
             icon="heroicon-o-clipboard-document"
             x-on:click="navigator.clipboard.writeText(@js($this->serverUrl)); $wire.showCopiedNotification('URL')"
         >
-            Copy URL
+            {{ __('docs.setup.step2.copy_button') }}
         </x-filament::button>
     </x-slot>
 

@@ -18,7 +18,7 @@ class SetupGuideContent extends Component implements HasSchemas
     public function showCopiedNotification(string $label = 'Content'): void
     {
         Notification::make()
-            ->title("{$label} copied to clipboard")
+            ->title(__('docs.setup.copied_notification', ['label' => $label]))
             ->success()
             ->send();
     }
@@ -65,9 +65,9 @@ class SetupGuideContent extends Component implements HasSchemas
             ->schema([
                 HeroSection::make()
                     ->badgeIcon('heroicon-s-rocket-launch')
-                    ->badgeLabel('Quick Start')
-                    ->title('Get Up and Running in 5 Minutes')
-                    ->description('Follow these simple steps to configure Packgrid and start installing your private packages with Composer.')
+                    ->badgeLabel(__('docs.setup.badge'))
+                    ->title(__('docs.setup.title'))
+                    ->description(__('docs.setup.description'))
                     ->heroIcon('heroicon-o-cog-6-tooth')
                     ->heroIconGradient('emerald', 'teal'),
 
@@ -93,12 +93,12 @@ class SetupGuideContent extends Component implements HasSchemas
 
                 QuickTips::make()
                     ->icon('heroicon-o-light-bulb')
-                    ->title('Quick Tips')
+                    ->title(__('docs.setup.tips_title'))
                     ->items([
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Private repos require a GitHub credential in Packgrid'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Create Packgrid tokens for Composer authentication'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Run a sync after adding repositories'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Place auth.json next to composer.json or globally'],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip1')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip2')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip3')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip4')],
                     ]),
             ]);
     }

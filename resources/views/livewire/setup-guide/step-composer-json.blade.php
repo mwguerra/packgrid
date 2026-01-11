@@ -1,6 +1,6 @@
 <x-filament::section icon="heroicon-o-document-text" icon-color="info" collapsible>
-    <x-slot name="heading">composer.json</x-slot>
-    <x-slot name="description">Add Packgrid as a Composer repository</x-slot>
+    <x-slot name="heading">{{ __('docs.setup.step3.heading') }}</x-slot>
+    <x-slot name="description">{{ __('docs.setup.step3.description') }}</x-slot>
     <x-slot name="headerEnd">
         <x-filament::button
             color="gray"
@@ -8,7 +8,7 @@
             icon="heroicon-o-clipboard-document"
             x-on:click="navigator.clipboard.writeText(@js($this->composerSnippet)); $wire.showCopiedNotification('Snippet')"
         >
-            Copy Snippet
+            {{ __('docs.setup.step3.copy_button') }}
         </x-filament::button>
     </x-slot>
 

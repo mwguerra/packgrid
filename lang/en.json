@@ -114,6 +114,8 @@
     "credential.status.ok_short": "Valid",
     "credential.status.fail": "GitHub token authentication failed",
     "credential.status.fail_short": "Failed",
+    "credential.status.unknown_short": "Untested",
+    "credential.status.unknown_tooltip": "Click the test button to verify this credential",
     "credential.tooltip.last_checked": "Last checked :time",
     "credential.section.health": "Health Status",
     "credential.infolist.repositories_using": "Repositories",

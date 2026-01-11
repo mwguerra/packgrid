@@ -114,6 +114,8 @@
     "credential.status.ok_short": "Valide",
     "credential.status.fail": "Échec de l'authentification du jeton GitHub",
     "credential.status.fail_short": "Échoué",
+    "credential.status.unknown_short": "Non testé",
+    "credential.status.unknown_tooltip": "Cliquez sur le bouton de test pour vérifier cet identifiant",
     "credential.tooltip.last_checked": "Dernière vérification :time",
     "credential.section.health": "État de Santé",
     "credential.infolist.repositories_using": "Dépôts",

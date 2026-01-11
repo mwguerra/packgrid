@@ -20,7 +20,7 @@ class TroubleshootingContent extends Component implements HasSchemas
     public function showCopiedNotification(string $label = 'Content'): void
     {
         Notification::make()
-            ->title("{$label} copied to clipboard")
+            ->title(__('docs.npm.troubleshooting.copied_notification', ['label' => $label]))
             ->success()
             ->send();
     }
@@ -35,26 +35,25 @@ class TroubleshootingContent extends Component implements HasSchemas
         return $form
             ->schema([
                 SearchComponent::make()
-                    ->heading('npm Error Solutions')
-                    ->placeholder('Search npm errors...')
+                    ->heading(__('docs.npm.troubleshooting.heading'))
+                    ->placeholder(__('docs.npm.troubleshooting.search_placeholder'))
                     ->githubUrl('https://github.com/mwguerra/packgrid/issues')
                     ->haystack([
                         // E401 Unauthorized
                         ErrorSection::make()
                             ->searchId('e401')
                             ->errorIcon('heroicon-o-key')
-                            ->errorTitle('E401 Unauthorized')
-                            ->errorDescription('Authentication failed with Bearer token')
-                            ->errorMessage('npm ERR! code E401
-npm ERR! 401 Unauthorized - GET https://packgrid.test/npm/@myorg/package')
+                            ->errorTitle(__('docs.npm.troubleshooting.e401.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.e401.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.e401.message'))
                             ->solutionSchema([
-                                TextContent::make('This error occurs when npm cannot authenticate with Packgrid. Check your <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">.npmrc</code> configuration:'),
+                                TextContent::make(__('docs.npm.troubleshooting.e401.solution_intro')),
                                 BulletList::make([
-                                    'Verify the token in .npmrc is correct and active',
-                                    'Ensure the registry URL matches your Packgrid server',
-                                    'Check that the _authToken line uses the correct host',
+                                    __('docs.npm.troubleshooting.e401.solution1'),
+                                    __('docs.npm.troubleshooting.e401.solution2'),
+                                    __('docs.npm.troubleshooting.e401.solution3'),
                                 ]),
-                                TextContent::make('Your .npmrc should look like:'),
+                                TextContent::make(__('docs.npm.troubleshooting.e401.solution_example')),
                                 CodeBlock::make($this->npmrcExample)
                                     ->copyLabel('.npmrc'),
                             ]),
@@ -63,16 +62,15 @@ npm ERR! 401 Unauthorized - GET https://packgrid.test/npm/@myorg/package')
                         ErrorSection::make()
                             ->searchId('e404')
                             ->errorIcon('heroicon-o-cube')
-                            ->errorTitle('E404 Package Not Found')
-                            ->errorDescription('Package does not exist or not synced')
-                            ->errorMessage('npm ERR! code E404
-npm ERR! 404 Not Found - GET https://packgrid.test/npm/@myorg/package')
+                            ->errorTitle(__('docs.npm.troubleshooting.e404.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.e404.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.e404.message'))
                             ->solutionSchema([
                                 BulletList::make([
-                                    'Verify the package name matches the "name" field in package.json',
-                                    'Ensure the repository is registered in Packgrid',
-                                    'Run a <strong>Sync</strong> on the repository in Packgrid',
-                                    'Check that the scope in your install command matches the package scope',
+                                    __('docs.npm.troubleshooting.e404.solution1'),
+                                    __('docs.npm.troubleshooting.e404.solution2'),
+                                    __('docs.npm.troubleshooting.e404.solution3'),
+                                    __('docs.npm.troubleshooting.e404.solution4'),
                                 ]),
                             ]),
 
@@ -80,16 +78,15 @@ npm ERR! 404 Not Found - GET https://packgrid.test/npm/@myorg/package')
                         ErrorSection::make()
                             ->searchId('e400')
                             ->errorIcon('heroicon-o-exclamation-triangle')
-                            ->errorTitle('E400 Bad Request')
-                            ->errorDescription('URL encoding issue with scoped packages')
-                            ->errorMessage('npm ERR! code E400
-npm ERR! 400 Bad Request - GET https://packgrid.test/npm/%40myorg%2Fpackage')
+                            ->errorTitle(__('docs.npm.troubleshooting.e400.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.e400.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.e400.message'))
                             ->solutionSchema([
-                                TextContent::make('This usually indicates a URL encoding issue with scoped package names. Packgrid should handle URL-encoded scopes (like <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">%40</code> for <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">@</code>).'),
+                                TextContent::make(__('docs.npm.troubleshooting.e400.solution_intro')),
                                 BulletList::make([
-                                    'Verify Packgrid is running the latest version',
-                                    'Check that the registry URL in .npmrc ends with a trailing slash',
-                                    'Try clearing npm cache: <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">npm cache clean --force</code>',
+                                    __('docs.npm.troubleshooting.e400.solution1'),
+                                    __('docs.npm.troubleshooting.e400.solution2'),
+                                    __('docs.npm.troubleshooting.e400.solution3'),
                                 ]),
                             ]),
 
@@ -97,34 +94,32 @@ npm ERR! 400 Bad Request - GET https://packgrid.test/npm/%40myorg%2Fpackage')
                         ErrorSection::make()
                             ->searchId('ssl')
                             ->errorIcon('heroicon-o-shield-exclamation')
-                            ->errorTitle('SSL Certificate Error')
-                            ->errorDescription('Self-signed certificate issues')
-                            ->errorMessage('npm ERR! code UNABLE_TO_GET_ISSUER_CERT_LOCALLY
-npm ERR! unable to get local issuer certificate')
+                            ->errorTitle(__('docs.npm.troubleshooting.ssl.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.ssl.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.ssl.message'))
                             ->solutionSchema([
-                                TextContent::make('For local development with self-signed certificates, you can configure npm to skip SSL verification:'),
+                                TextContent::make(__('docs.npm.troubleshooting.ssl.solution_intro')),
                                 CodeBlock::make('npm config set strict-ssl false')
                                     ->copyLabel('Command'),
-                                TextContent::make('Or add to your .npmrc:'),
+                                TextContent::make(__('docs.npm.troubleshooting.ssl.or_npmrc')),
                                 CodeBlock::make('strict-ssl=false')
                                     ->copyLabel('.npmrc'),
-                                TextContent::make('<strong>Warning:</strong> Only use this for local development. In production, use valid SSL certificates.'),
+                                TextContent::make(__('docs.npm.troubleshooting.ssl.warning')),
                             ]),
 
                         // Registry Scope Mismatch
                         ErrorSection::make()
                             ->searchId('scope')
                             ->errorIcon('heroicon-o-at-symbol')
-                            ->errorTitle('Registry Scope Mismatch')
-                            ->errorDescription('Package installed from wrong registry')
-                            ->errorMessage('npm ERR! code E404
-npm ERR! 404 Not Found - GET https://registry.npmjs.org/@myorg/package')
+                            ->errorTitle(__('docs.npm.troubleshooting.scope.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.scope.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.scope.message'))
                             ->solutionSchema([
-                                TextContent::make('npm is trying to fetch from the public registry instead of Packgrid. Check your .npmrc scope configuration:'),
+                                TextContent::make(__('docs.npm.troubleshooting.scope.solution_intro')),
                                 BulletList::make([
-                                    'The scope line must match your package scope exactly (e.g., <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">@myorg</code>)',
-                                    'The .npmrc file must be in your project root or home directory',
-                                    'Try specifying the registry explicitly: <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">npm install @myorg/package --registry=https://packgrid.test/npm/</code>',
+                                    __('docs.npm.troubleshooting.scope.solution1'),
+                                    __('docs.npm.troubleshooting.scope.solution2'),
+                                    __('docs.npm.troubleshooting.scope.solution3'),
                                 ]),
                             ]),
 
@@ -132,16 +127,15 @@ npm ERR! 404 Not Found - GET https://registry.npmjs.org/@myorg/package')
                         ErrorSection::make()
                             ->searchId('tarball')
                             ->errorIcon('heroicon-o-archive-box')
-                            ->errorTitle('Tarball Download Failed')
-                            ->errorDescription('Failed to download package tarball')
-                            ->errorMessage('npm ERR! code EINTEGRITY
-npm ERR! sha512 integrity checksum failed')
+                            ->errorTitle(__('docs.npm.troubleshooting.tarball.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.tarball.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.tarball.message'))
                             ->solutionSchema([
                                 BulletList::make([
-                                    'Clear npm cache: <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">npm cache clean --force</code>',
-                                    'Delete node_modules and package-lock.json, then reinstall',
-                                    'Ensure Packgrid has access to the GitHub repository',
-                                    'Check that the repository has been synced recently',
+                                    __('docs.npm.troubleshooting.tarball.solution1'),
+                                    __('docs.npm.troubleshooting.tarball.solution2'),
+                                    __('docs.npm.troubleshooting.tarball.solution3'),
+                                    __('docs.npm.troubleshooting.tarball.solution4'),
                                 ]),
                             ]),
 
@@ -149,11 +143,11 @@ npm ERR! sha512 integrity checksum failed')
                         ErrorSection::make()
                             ->searchId('packagejson')
                             ->errorIcon('heroicon-o-document-text')
-                            ->errorTitle('Invalid package.json')
-                            ->errorDescription('Package.json missing or invalid')
-                            ->errorMessage('Repository sync failed: package.json not found or invalid')
+                            ->errorTitle(__('docs.npm.troubleshooting.packagejson.title'))
+                            ->errorDescription(__('docs.npm.troubleshooting.packagejson.description'))
+                            ->errorMessage(__('docs.npm.troubleshooting.packagejson.message'))
                             ->solutionSchema([
-                                TextContent::make('The repository must have a valid package.json with a scoped name:'),
+                                TextContent::make(__('docs.npm.troubleshooting.packagejson.solution_intro')),
                                 CodeBlock::make('{
   "name": "@myorg/package-name",
   "version": "1.0.0",
@@ -161,9 +155,9 @@ npm ERR! sha512 integrity checksum failed')
 }')
                                     ->copyLabel('package.json'),
                                 BulletList::make([
-                                    'The "name" field must be a scoped package name',
-                                    'The package.json must be valid JSON',
-                                    'Ensure the file is in the repository root',
+                                    __('docs.npm.troubleshooting.packagejson.solution1'),
+                                    __('docs.npm.troubleshooting.packagejson.solution2'),
+                                    __('docs.npm.troubleshooting.packagejson.solution3'),
                                 ]),
                             ]),
                     ]),

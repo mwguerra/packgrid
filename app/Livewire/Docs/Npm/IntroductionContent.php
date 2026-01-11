@@ -25,9 +25,9 @@ class IntroductionContent extends Component implements HasSchemas
             ->schema([
                 HeroSection::make()
                     ->badgeIcon('heroicon-s-server')
-                    ->badgeLabel('npm Registry')
-                    ->title('Private npm packages from GitHub.')
-                    ->description('Serve your private GitHub repositories as npm packages with simple Bearer token authentication.')
+                    ->badgeLabel(__('docs.npm.intro.badge'))
+                    ->title(__('docs.npm.intro.title'))
+                    ->description(__('docs.npm.intro.description'))
                     ->heroIcon('heroicon-o-cube')
                     ->heroIconGradient('red', 'orange'),
 
@@ -36,93 +36,93 @@ class IntroductionContent extends Component implements HasSchemas
                         StatCard::make()
                             ->icon('heroicon-s-key')
                             ->color('amber')
-                            ->title('One Credential')
-                            ->description('GitHub token stays here'),
+                            ->title(__('docs.npm.intro.stat.one_credential'))
+                            ->description(__('docs.npm.intro.stat.one_credential_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-users')
                             ->color('blue')
-                            ->title('Bearer Tokens')
-                            ->description('Simple .npmrc auth'),
+                            ->title(__('docs.npm.intro.stat.bearer_tokens'))
+                            ->description(__('docs.npm.intro.stat.bearer_tokens_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-cube')
                             ->color('red')
-                            ->title('Standard npm')
-                            ->description('Works with npm, yarn, pnpm'),
+                            ->title(__('docs.npm.intro.stat.standard_npm'))
+                            ->description(__('docs.npm.intro.stat.standard_npm_desc')),
                     ])
                     ->gridColumns(3),
 
                 AlertBox::make()
                     ->warning()
                     ->icon('heroicon-o-exclamation-triangle')
-                    ->title('Important Notice')
-                    ->description('Please read before using Packgrid for npm packages.')
+                    ->title(__('docs.npm.intro.warning.title'))
+                    ->description(__('docs.npm.intro.warning.description'))
                     ->items([
-                        '<strong>Scoped packages only</strong> — npm packages must be scoped (e.g., @myorg/package)',
-                        '<strong>Bearer token authentication</strong> — npm uses Bearer tokens in .npmrc, not http-basic like Composer',
-                        '<strong>Tarball proxying</strong> — Packgrid proxies .tgz downloads from GitHub releases or generates them from zipballs',
-                        '<strong>Security is your responsibility</strong> — Ensure your server is properly secured with HTTPS',
+                        __('docs.npm.intro.warning.item1'),
+                        __('docs.npm.intro.warning.item2'),
+                        __('docs.npm.intro.warning.item3'),
+                        __('docs.npm.intro.warning.item4'),
                     ]),
 
-                Section::make('What is npm Support?')
+                Section::make(__('docs.npm.intro.section.what_is'))
                     ->icon('heroicon-o-question-mark-circle')
                     ->iconColor('primary')
-                    ->description('How Packgrid serves npm packages')
+                    ->description(__('docs.npm.intro.section.what_is_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('Packgrid can serve your private GitHub repositories as an <strong>npm registry</strong>, allowing you to install them with npm, yarn, or pnpm just like any public package.'),
-                        TextContent::make('The npm protocol uses a different format than Composer. Instead of <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">packages.json</code> and zip files, npm uses package metadata endpoints and <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">.tgz</code> tarballs.'),
+                        TextContent::make(__('docs.npm.intro.what_is.p1')),
+                        TextContent::make(__('docs.npm.intro.what_is.p2')),
                     ]),
 
-                Section::make('Key Differences from Composer')
+                Section::make(__('docs.npm.intro.section.differences'))
                     ->icon('heroicon-o-scale')
                     ->iconColor('primary')
-                    ->description('Understanding npm vs Composer')
+                    ->description(__('docs.npm.intro.section.differences_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
                         BulletList::make([
-                            '<strong>Scoped packages</strong> — npm packages must use scopes like <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">@myorg/package-name</code>',
-                            '<strong>Bearer authentication</strong> — npm uses <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">//registry:_authToken=TOKEN</code> in .npmrc instead of auth.json',
-                            '<strong>Tarball format</strong> — npm downloads <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">.tgz</code> files instead of zip archives',
-                            '<strong>Metadata format</strong> — npm uses a different JSON structure for package metadata',
+                            __('docs.npm.intro.differences.item1'),
+                            __('docs.npm.intro.differences.item2'),
+                            __('docs.npm.intro.differences.item3'),
+                            __('docs.npm.intro.differences.item4'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                     ]),
 
-                Section::make('Supported Features')
+                Section::make(__('docs.npm.intro.section.features'))
                     ->icon('heroicon-o-sparkles')
                     ->iconColor('primary')
-                    ->description('What works with npm support')
+                    ->description(__('docs.npm.intro.section.features_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
                         BulletList::make([
-                            '<strong>Scoped package installation</strong> — Install packages like <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">npm install @myorg/package</code>',
-                            '<strong>Version resolution</strong> — Supports semantic versioning and version ranges',
-                            '<strong>Bearer token auth</strong> — Standard npm authentication via .npmrc',
-                            '<strong>Works with npm, yarn, pnpm</strong> — Compatible with all major package managers',
+                            __('docs.npm.intro.features.item1'),
+                            __('docs.npm.intro.features.item2'),
+                            __('docs.npm.intro.features.item3'),
+                            __('docs.npm.intro.features.item4'),
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
                     ]),
 
-                Section::make('How Packgrid Compares')
+                Section::make(__('docs.npm.intro.section.compare'))
                     ->icon('heroicon-o-scale')
                     ->iconColor('primary')
-                    ->description('Comparison with npm private registry alternatives')
+                    ->description(__('docs.npm.intro.section.compare_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('There are several solutions for hosting private npm packages. Here\'s how Packgrid compares:'),
+                        TextContent::make(__('docs.npm.intro.compare.intro')),
                         ComparisonTable::make()
                             ->products([
-                                'packgrid' => ['name' => 'Packgrid', 'highlight' => true],
-                                'verdaccio' => ['name' => 'Verdaccio'],
-                                'github' => ['name' => 'GitHub Packages'],
-                                'artifactory' => ['name' => 'JFrog Artifactory'],
+                                'packgrid' => ['name' => __('docs.npm.compare.product.packgrid'), 'highlight' => true],
+                                'verdaccio' => ['name' => __('docs.npm.compare.product.verdaccio')],
+                                'github' => ['name' => __('docs.npm.compare.product.github')],
+                                'artifactory' => ['name' => __('docs.npm.compare.product.artifactory')],
                             ])
                             ->features([
                                 [
-                                    'name' => 'Multi-Protocol',
-                                    'description' => 'Composer (PHP) + npm (JS)',
+                                    'name' => __('docs.npm.compare.feature.multi_protocol'),
+                                    'description' => __('docs.npm.compare.feature.multi_protocol_desc'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => false,
@@ -131,25 +131,25 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Hosting',
+                                    'name' => __('docs.npm.compare.feature.hosting'),
                                     'values' => [
-                                        'packgrid' => 'Self-hosted',
-                                        'verdaccio' => 'Self-hosted',
-                                        'github' => 'Cloud',
-                                        'artifactory' => 'Both',
+                                        'packgrid' => __('docs.npm.compare.value.self_hosted'),
+                                        'verdaccio' => __('docs.npm.compare.value.self_hosted'),
+                                        'github' => __('docs.npm.compare.value.cloud'),
+                                        'artifactory' => __('docs.npm.compare.value.both'),
                                     ],
                                 ],
                                 [
-                                    'name' => 'Cost',
+                                    'name' => __('docs.npm.compare.feature.cost'),
                                     'values' => [
-                                        'packgrid' => 'Free',
-                                        'verdaccio' => 'Free',
-                                        'github' => 'Free tier + Paid',
-                                        'artifactory' => 'Paid',
+                                        'packgrid' => __('docs.npm.compare.value.free'),
+                                        'verdaccio' => __('docs.npm.compare.value.free'),
+                                        'github' => __('docs.npm.compare.value.free_tier_paid'),
+                                        'artifactory' => __('docs.npm.compare.value.paid'),
                                     ],
                                 ],
                                 [
-                                    'name' => 'Open Source',
+                                    'name' => __('docs.npm.compare.feature.open_source'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => true,
@@ -158,7 +158,7 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Web Admin Panel',
+                                    'name' => __('docs.npm.compare.feature.admin_panel'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => true,
@@ -167,17 +167,17 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'GitHub Integration',
+                                    'name' => __('docs.npm.compare.feature.github_integration'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => false,
                                         'github' => true,
-                                        'artifactory' => 'partial',
+                                        'artifactory' => __('docs.npm.compare.value.partial'),
                                     ],
                                 ],
                                 [
-                                    'name' => 'Public Mirroring',
-                                    'description' => 'Mirror npmjs.com',
+                                    'name' => __('docs.npm.compare.feature.mirroring'),
+                                    'description' => __('docs.npm.compare.feature.mirroring_desc'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => true,
@@ -186,17 +186,17 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Token Management',
-                                    'description' => 'Advanced token controls',
+                                    'name' => __('docs.npm.compare.feature.token_management'),
+                                    'description' => __('docs.npm.compare.feature.token_management_desc'),
                                     'values' => [
                                         'packgrid' => true,
-                                        'verdaccio' => 'partial',
+                                        'verdaccio' => __('docs.npm.compare.value.partial'),
                                         'github' => true,
                                         'artifactory' => true,
                                     ],
                                 ],
                                 [
-                                    'name' => 'IP Restrictions',
+                                    'name' => __('docs.npm.compare.feature.ip_restrictions'),
                                     'values' => [
                                         'packgrid' => true,
                                         'verdaccio' => false,
@@ -205,31 +205,31 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Setup Complexity',
+                                    'name' => __('docs.npm.compare.feature.setup'),
                                     'values' => [
-                                        'packgrid' => 'Simple',
-                                        'verdaccio' => 'Simple',
-                                        'github' => 'Managed',
-                                        'artifactory' => 'Complex',
+                                        'packgrid' => __('docs.npm.compare.value.simple'),
+                                        'verdaccio' => __('docs.npm.compare.value.simple'),
+                                        'github' => __('docs.npm.compare.value.managed'),
+                                        'artifactory' => __('docs.npm.compare.value.complex'),
                                     ],
                                 ],
                             ]),
-                        TextContent::make('<strong>Packgrid\'s advantage:</strong> If you already use Packgrid for Composer packages, adding npm support requires zero additional setup. You get a unified registry for both PHP and JavaScript packages with the same token management and GitHub integration.'),
+                        TextContent::make(__('docs.npm.intro.compare.summary')),
                     ]),
 
-                Section::make('Getting Started')
+                Section::make(__('docs.npm.intro.section.getting_started'))
                     ->icon('heroicon-o-play')
                     ->iconColor('primary')
-                    ->description('Ready to use npm support?')
+                    ->description(__('docs.npm.intro.section.getting_started_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('Head over to the <strong>Setup Guide</strong> tab for step-by-step instructions on configuring npm to use your Packgrid server. If you run into any issues, check the <strong>Troubleshooting</strong> tab for common error solutions.'),
+                        TextContent::make(__('docs.npm.intro.getting_started.intro')),
                         BulletList::make([
-                            'Add a GitHub credential for private repository access',
-                            'Register your repositories with npm format',
-                            'Create access tokens for authentication',
-                            'Configure .npmrc in your projects',
+                            __('docs.npm.intro.getting_started.item1'),
+                            __('docs.npm.intro.getting_started.item2'),
+                            __('docs.npm.intro.getting_started.item3'),
+                            __('docs.npm.intro.getting_started.item4'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                     ]),
             ]);

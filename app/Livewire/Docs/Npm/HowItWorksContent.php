@@ -25,9 +25,9 @@ class HowItWorksContent extends Component implements HasSchemas
             ->schema([
                 HeroSection::make()
                     ->badgeIcon('heroicon-s-arrows-right-left')
-                    ->badgeLabel('Data Flow')
-                    ->title('How npm Packages Flow Through Packgrid')
-                    ->description('Understand how your private packages travel from GitHub to your project using the npm protocol.')
+                    ->badgeLabel(__('docs.npm.how.badge'))
+                    ->title(__('docs.npm.how.title'))
+                    ->description(__('docs.npm.how.description'))
                     ->heroIcon('heroicon-o-server-stack')
                     ->heroIconGradient('red', 'orange'),
 
@@ -36,43 +36,43 @@ class HowItWorksContent extends Component implements HasSchemas
                         StatCard::make()
                             ->icon('heroicon-s-document-text')
                             ->color('blue')
-                            ->title('Metadata Endpoint')
-                            ->description('/@scope/package format'),
+                            ->title(__('docs.npm.how.stat.metadata'))
+                            ->description(__('docs.npm.how.stat.metadata_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-archive-box')
                             ->color('purple')
-                            ->title('Tarball Downloads')
-                            ->description('.tgz files proxied'),
+                            ->title(__('docs.npm.how.stat.tarball'))
+                            ->description(__('docs.npm.how.stat.tarball_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-shield-check')
                             ->color('emerald')
-                            ->title('Bearer Auth')
-                            ->description('Token in .npmrc'),
+                            ->title(__('docs.npm.how.stat.bearer'))
+                            ->description(__('docs.npm.how.stat.bearer_desc')),
                     ])
                     ->gridColumns(3),
 
-                Section::make('The Three Players')
+                Section::make(__('docs.npm.how.section.players'))
                     ->icon('heroicon-o-user-group')
                     ->iconColor('primary')
-                    ->description('Understanding the actors involved')
+                    ->description(__('docs.npm.how.section.players_desc'))
                     ->schema([
                         FlowDiagram::make()
                             ->actors([
                                 [
-                                    'name' => 'Your Project',
-                                    'description' => 'Runs npm install',
+                                    'name' => __('docs.npm.how.actor.project'),
+                                    'description' => __('docs.npm.how.actor.project_desc'),
                                     'icon' => 'heroicon-o-code-bracket',
                                     'color' => 'red',
                                 ],
                                 [
-                                    'name' => 'Packgrid',
-                                    'description' => 'npm Registry Proxy',
+                                    'name' => __('docs.npm.how.actor.packgrid'),
+                                    'description' => __('docs.npm.how.actor.packgrid_desc'),
                                     'icon' => 'heroicon-o-server-stack',
                                     'color' => 'amber',
                                 ],
                                 [
-                                    'name' => 'GitHub',
-                                    'description' => 'Source of truth',
+                                    'name' => __('docs.npm.how.actor.github'),
+                                    'description' => __('docs.npm.how.actor.github_desc'),
                                     'icon' => 'heroicon-o-cloud',
                                     'color' => 'gray',
                                 ],
@@ -80,13 +80,13 @@ class HowItWorksContent extends Component implements HasSchemas
                             ->steps([]),
                     ]),
 
-                Section::make('Phase 1: Repository Sync')
+                Section::make(__('docs.npm.how.section.phase1'))
                     ->icon('heroicon-o-arrow-path')
                     ->iconColor('primary')
-                    ->description('How Packgrid learns about your npm packages')
+                    ->description(__('docs.npm.how.section.phase1_desc'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('Before your project can install packages, Packgrid needs to sync the repository. During sync, Packgrid reads the <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">package.json</code> from each tag/branch.'),
+                        TextContent::make(__('docs.npm.how.phase1.intro')),
 
                         FlowDiagram::make()
                             ->actors([])
@@ -96,10 +96,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'GitHub',
                                     'fromColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                     'toColor' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-                                    'title' => 'Fetch Repository Tags',
-                                    'description' => 'Packgrid uses your stored GitHub credential to list all tags and branches.',
-                                    'data' => 'GET /repos/{owner}/{repo}/tags',
-                                    'dataLabel' => 'API Request',
+                                    'title' => __('docs.npm.how.phase1.step1_title'),
+                                    'description' => __('docs.npm.how.phase1.step1_desc'),
+                                    'data' => __('docs.npm.how.phase1.step1_data'),
+                                    'dataLabel' => __('docs.npm.how.phase1.step1_label'),
                                     'icon' => 'heroicon-o-tag',
                                     'iconBg' => 'bg-gray-100 dark:bg-gray-700',
                                     'iconColor' => 'text-gray-600 dark:text-gray-400',
@@ -109,23 +109,23 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'GitHub',
                                     'fromColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                     'toColor' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-                                    'title' => 'Read package.json for Each Version',
-                                    'description' => 'For each tag/branch, Packgrid fetches the package.json to understand the package name and dependencies.',
-                                    'data' => 'GET /repos/{owner}/{repo}/contents/package.json?ref={tag}',
-                                    'dataLabel' => 'API Request',
+                                    'title' => __('docs.npm.how.phase1.step2_title'),
+                                    'description' => __('docs.npm.how.phase1.step2_desc'),
+                                    'data' => __('docs.npm.how.phase1.step2_data'),
+                                    'dataLabel' => __('docs.npm.how.phase1.step2_label'),
                                     'icon' => 'heroicon-o-document-text',
                                     'iconBg' => 'bg-red-100 dark:bg-red-900',
                                     'iconColor' => 'text-red-600 dark:text-red-400',
                                 ],
                                 [
                                     'from' => 'Packgrid',
-                                    'to' => 'Storage',
+                                    'to' => __('docs.npm.how.actor.storage'),
                                     'fromColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                     'toColor' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-                                    'title' => 'Store npm Metadata',
-                                    'description' => 'Packgrid builds npm-compatible package metadata with tarball URLs pointing back to Packgrid.',
+                                    'title' => __('docs.npm.how.phase1.step3_title'),
+                                    'description' => __('docs.npm.how.phase1.step3_desc'),
                                     'data' => '{"name": "@scope/pkg", "versions": {"1.0.0": {"dist": {"tarball": "..."}}}}',
-                                    'dataLabel' => 'Stored Data',
+                                    'dataLabel' => __('docs.npm.how.phase1.step3_label'),
                                     'icon' => 'heroicon-o-circle-stack',
                                     'iconBg' => 'bg-emerald-100 dark:bg-emerald-900',
                                     'iconColor' => 'text-emerald-600 dark:text-emerald-400',
@@ -135,17 +135,17 @@ class HowItWorksContent extends Component implements HasSchemas
                         AlertBox::make()
                             ->info()
                             ->icon('heroicon-o-light-bulb')
-                            ->title('Scoped Packages')
-                            ->description('npm packages from Packgrid must be scoped (e.g., @myorg/package). The scope is determined by the "name" field in package.json.'),
+                            ->title(__('docs.npm.how.alert.scoped'))
+                            ->description(__('docs.npm.how.alert.scoped_desc')),
                     ]),
 
-                Section::make('Phase 2: npm Install')
+                Section::make(__('docs.npm.how.section.phase2'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->iconColor('primary')
-                    ->description('What happens when you run npm install')
+                    ->description(__('docs.npm.how.section.phase2_desc'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('When you run <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">npm install @myorg/package</code> in your project:'),
+                        TextContent::make(__('docs.npm.how.phase2.intro')),
 
                         FlowDiagram::make()
                             ->actors([])
@@ -155,10 +155,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'Packgrid',
                                     'fromColor' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
                                     'toColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-                                    'title' => 'Request Package Metadata',
-                                    'description' => 'npm requests package info from Packgrid, authenticating with your Bearer token from .npmrc.',
-                                    'data' => 'GET /@myorg/package (Authorization: Bearer {token})',
-                                    'dataLabel' => 'HTTP Request',
+                                    'title' => __('docs.npm.how.phase2.step1_title'),
+                                    'description' => __('docs.npm.how.phase2.step1_desc'),
+                                    'data' => __('docs.npm.how.phase2.step1_data'),
+                                    'dataLabel' => __('docs.npm.how.phase2.step1_label'),
                                     'icon' => 'heroicon-o-key',
                                     'iconBg' => 'bg-amber-100 dark:bg-amber-900',
                                     'iconColor' => 'text-amber-600 dark:text-amber-400',
@@ -168,10 +168,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'Project',
                                     'fromColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                     'toColor' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                                    'title' => 'Return Package Metadata',
-                                    'description' => 'Packgrid returns npm-format metadata with version info and tarball URLs.',
+                                    'title' => __('docs.npm.how.phase2.step2_title'),
+                                    'description' => __('docs.npm.how.phase2.step2_desc'),
                                     'data' => '{"name": "@myorg/package", "versions": {"1.0.0": {"dist": {"tarball": "https://packgrid/..."}}}}',
-                                    'dataLabel' => 'JSON Response',
+                                    'dataLabel' => __('docs.npm.how.phase2.step2_label'),
                                     'icon' => 'heroicon-o-document-text',
                                     'iconBg' => 'bg-red-100 dark:bg-red-900',
                                     'iconColor' => 'text-red-600 dark:text-red-400',
@@ -181,10 +181,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'Packgrid',
                                     'fromColor' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
                                     'toColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-                                    'title' => 'Request Tarball Download',
-                                    'description' => 'npm requests the .tgz tarball from the URL in the metadata.',
-                                    'data' => 'GET /-/@myorg/package-1.0.0.tgz',
-                                    'dataLabel' => 'HTTP Request',
+                                    'title' => __('docs.npm.how.phase2.step3_title'),
+                                    'description' => __('docs.npm.how.phase2.step3_desc'),
+                                    'data' => __('docs.npm.how.phase2.step3_data'),
+                                    'dataLabel' => __('docs.npm.how.phase2.step3_label'),
                                     'icon' => 'heroicon-o-archive-box-arrow-down',
                                     'iconBg' => 'bg-purple-100 dark:bg-purple-900',
                                     'iconColor' => 'text-purple-600 dark:text-purple-400',
@@ -194,10 +194,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'GitHub',
                                     'fromColor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                     'toColor' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-                                    'title' => 'Fetch from GitHub',
-                                    'description' => 'Packgrid downloads the zipball from GitHub and converts it to a tarball.',
-                                    'data' => 'GET /repos/{owner}/{repo}/zipball/{ref}',
-                                    'dataLabel' => 'GitHub API Request',
+                                    'title' => __('docs.npm.how.phase2.step4_title'),
+                                    'description' => __('docs.npm.how.phase2.step4_desc'),
+                                    'data' => __('docs.npm.how.phase2.step4_data'),
+                                    'dataLabel' => __('docs.npm.how.phase2.step4_label'),
                                     'icon' => 'heroicon-o-cloud-arrow-down',
                                     'iconBg' => 'bg-gray-100 dark:bg-gray-700',
                                     'iconColor' => 'text-gray-600 dark:text-gray-400',
@@ -207,10 +207,10 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'to' => 'Project',
                                     'fromColor' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
                                     'toColor' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                                    'title' => 'Stream Tarball to Project',
-                                    'description' => 'The .tgz file streams through Packgrid directly to your project.',
-                                    'data' => '.tgz tarball (gzipped tar archive)',
-                                    'dataLabel' => 'Streamed Data',
+                                    'title' => __('docs.npm.how.phase2.step5_title'),
+                                    'description' => __('docs.npm.how.phase2.step5_desc'),
+                                    'data' => __('docs.npm.how.phase2.step5_data'),
+                                    'dataLabel' => __('docs.npm.how.phase2.step5_label'),
                                     'icon' => 'heroicon-o-arrow-down-circle',
                                     'iconBg' => 'bg-emerald-100 dark:bg-emerald-900',
                                     'iconColor' => 'text-emerald-600 dark:text-emerald-400',
@@ -218,40 +218,40 @@ class HowItWorksContent extends Component implements HasSchemas
                             ]),
                     ]),
 
-                Section::make('Authentication Flow')
+                Section::make(__('docs.npm.how.section.auth_flow'))
                     ->icon('heroicon-o-shield-check')
                     ->iconColor('primary')
-                    ->description('How Bearer token authentication works')
+                    ->description(__('docs.npm.how.section.auth_flow_desc'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('npm uses Bearer token authentication configured in <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">.npmrc</code>:'),
+                        TextContent::make(__('docs.npm.how.auth.intro')),
 
                         BulletList::make([
-                            '<strong>Your Project</strong> sends the Bearer token from .npmrc with each request',
-                            '<strong>Packgrid</strong> validates the token and uses GitHub credentials internally',
-                            '<strong>GitHub</strong> only sees requests from Packgrid with its stored credentials',
+                            __('docs.npm.how.auth.point1'),
+                            __('docs.npm.how.auth.point2'),
+                            __('docs.npm.how.auth.point3'),
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
 
                         AlertBox::make()
                             ->success()
                             ->icon('heroicon-o-shield-check')
-                            ->title('Security Benefit')
-                            ->description('Your GitHub token stays on the Packgrid server. Team members only need revocable Packgrid tokens in their .npmrc files.'),
+                            ->title(__('docs.npm.how.alert.security'))
+                            ->description(__('docs.npm.how.alert.security_desc')),
                     ]),
 
-                Section::make('Summary')
+                Section::make(__('docs.npm.how.section.summary'))
                     ->icon('heroicon-o-clipboard-document-check')
                     ->iconColor('primary')
-                    ->description('The complete picture')
+                    ->description(__('docs.npm.how.section.summary_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
                         BulletList::make([
-                            '<strong>Sync Phase:</strong> Packgrid reads package.json from GitHub and builds npm metadata',
-                            '<strong>Install Phase:</strong> npm gets metadata from /@scope/package, then downloads .tgz tarballs',
-                            '<strong>Authentication:</strong> Bearer token in .npmrc authenticates with Packgrid',
-                            '<strong>Data Flow:</strong> Tarballs stream through Packgrid (converted from GitHub zipballs)',
-                            '<strong>Security:</strong> GitHub credentials stay on Packgrid; only revocable tokens are distributed',
+                            __('docs.npm.how.summary.point1'),
+                            __('docs.npm.how.summary.point2'),
+                            __('docs.npm.how.summary.point3'),
+                            __('docs.npm.how.summary.point4'),
+                            __('docs.npm.how.summary.point5'),
                         ])->bulletIcon('heroicon-s-check')->bulletColor('primary'),
                     ]),
             ]);

@@ -22,7 +22,7 @@ class SetupGuideContent extends Component implements HasSchemas
     public function showCopiedNotification(string $label = 'Content'): void
     {
         Notification::make()
-            ->title("{$label} copied to clipboard")
+            ->title(__('docs.npm.setup.copied_notification', ['label' => $label]))
             ->success()
             ->send();
     }
@@ -58,99 +58,99 @@ class SetupGuideContent extends Component implements HasSchemas
             ->schema([
                 HeroSection::make()
                     ->badgeIcon('heroicon-s-rocket-launch')
-                    ->badgeLabel('Quick Start')
-                    ->title('Configure npm for Private Packages')
-                    ->description('Follow these steps to configure your project to install private npm packages from Packgrid.')
+                    ->badgeLabel(__('docs.npm.setup.badge'))
+                    ->title(__('docs.npm.setup.title'))
+                    ->description(__('docs.npm.setup.description'))
                     ->heroIcon('heroicon-o-cog-6-tooth')
                     ->heroIconGradient('red', 'orange'),
 
-                Section::make('Step 1: Create a GitHub Credential')
+                Section::make(__('docs.npm.setup.step1.title'))
                     ->icon('heroicon-o-key')
                     ->iconColor('primary')
-                    ->description('Required for private repositories')
+                    ->description(__('docs.npm.setup.step1.description'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('If your npm packages are in private GitHub repositories, you need to add a GitHub credential in Packgrid:'),
+                        TextContent::make(__('docs.npm.setup.step1.intro')),
                         BulletList::make([
-                            'Go to <strong>Credentials</strong> in the sidebar',
-                            'Click <strong>Add Credential</strong>',
-                            'Enter your GitHub Personal Access Token with <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">repo</code> scope',
+                            __('docs.npm.setup.step1.item1'),
+                            __('docs.npm.setup.step1.item2'),
+                            __('docs.npm.setup.step1.item3'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                     ]),
 
-                Section::make('Step 2: Register Your Repository')
+                Section::make(__('docs.npm.setup.step2.title'))
                     ->icon('heroicon-o-cube')
                     ->iconColor('primary')
-                    ->description('Add your npm package repository')
+                    ->description(__('docs.npm.setup.step2.description'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('Register your GitHub repository as an npm package:'),
+                        TextContent::make(__('docs.npm.setup.step2.intro')),
                         BulletList::make([
-                            'Go to <strong>Repositories</strong> in the sidebar',
-                            'Click <strong>Add Repository</strong>',
-                            'Enter the GitHub repository URL',
-                            'Select <strong>npm</strong> as the format',
-                            'Click <strong>Sync</strong> to fetch package metadata',
+                            __('docs.npm.setup.step2.item1'),
+                            __('docs.npm.setup.step2.item2'),
+                            __('docs.npm.setup.step2.item3'),
+                            __('docs.npm.setup.step2.item4'),
+                            __('docs.npm.setup.step2.item5'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                         AlertBox::make()
                             ->info()
                             ->icon('heroicon-o-information-circle')
-                            ->title('package.json Required')
-                            ->description('Your repository must have a package.json with a scoped name like "@myorg/package-name".'),
+                            ->title(__('docs.npm.setup.step2.alert.title'))
+                            ->description(__('docs.npm.setup.step2.alert.description')),
                     ]),
 
-                Section::make('Step 3: Create a Packgrid Token')
+                Section::make(__('docs.npm.setup.step3.title'))
                     ->icon('heroicon-o-ticket')
                     ->iconColor('primary')
-                    ->description('For npm authentication')
+                    ->description(__('docs.npm.setup.step3.description'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('Create an access token to authenticate npm requests:'),
+                        TextContent::make(__('docs.npm.setup.step3.intro')),
                         BulletList::make([
-                            'Go to <strong>Tokens</strong> in the sidebar',
-                            'Click <strong>Create Token</strong>',
-                            'Copy the generated token (you\'ll need it for .npmrc)',
+                            __('docs.npm.setup.step3.item1'),
+                            __('docs.npm.setup.step3.item2'),
+                            __('docs.npm.setup.step3.item3'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                     ]),
 
-                Section::make('Step 4: Configure .npmrc')
+                Section::make(__('docs.npm.setup.step4.title'))
                     ->icon('heroicon-o-document-text')
                     ->iconColor('primary')
-                    ->description('Point npm to Packgrid')
+                    ->description(__('docs.npm.setup.step4.description'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('Create or edit <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">.npmrc</code> in your project root (or globally in your home directory):'),
+                        TextContent::make(__('docs.npm.setup.step4.intro')),
                         CodeBlock::make($this->npmrcSnippet)
                             ->copyLabel('.npmrc'),
                         AlertBox::make()
                             ->warning()
                             ->icon('heroicon-o-exclamation-triangle')
-                            ->title('Replace Values')
-                            ->description('Replace @myorg with your actual scope and YOUR_PACKGRID_TOKEN with the token from Step 3.'),
+                            ->title(__('docs.npm.setup.step4.alert.title'))
+                            ->description(__('docs.npm.setup.step4.alert.description')),
                     ]),
 
-                Section::make('Step 5: Install Your Package')
+                Section::make(__('docs.npm.setup.step5.title'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->iconColor('primary')
-                    ->description('Test the installation')
+                    ->description(__('docs.npm.setup.step5.description'))
                     ->collapsible()
                     ->schema([
-                        TextContent::make('Now you can install your private package:'),
+                        TextContent::make(__('docs.npm.setup.step5.intro')),
                         CodeBlock::make('npm install @myorg/your-package')
                             ->copyLabel('Command'),
-                        TextContent::make('Or with yarn:'),
+                        TextContent::make(__('docs.npm.setup.step5.or_yarn')),
                         CodeBlock::make('yarn add @myorg/your-package')
                             ->copyLabel('Command'),
                     ]),
 
                 QuickTips::make()
                     ->icon('heroicon-o-light-bulb')
-                    ->title('Quick Tips')
+                    ->title(__('docs.npm.setup.tips_title'))
                     ->items([
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Package names must be scoped (e.g., @myorg/package)'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'The scope in .npmrc must match your package scope'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Run sync after adding new repositories'],
-                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => 'Works with npm, yarn, and pnpm'],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.npm.setup.tip1')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.npm.setup.tip2')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.npm.setup.tip3')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.npm.setup.tip4')],
                     ]),
             ]);
     }

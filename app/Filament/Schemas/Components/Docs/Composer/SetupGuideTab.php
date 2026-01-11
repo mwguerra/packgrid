@@ -11,7 +11,7 @@ class SetupGuideTab extends Tab
     {
         parent::setUp();
 
-        $this->label('Setup Guide');
+        $this->label(__('docs.tab.setup_guide'));
         $this->icon('heroicon-o-book-open');
 
         $this->schema([

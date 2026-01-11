@@ -25,9 +25,9 @@ class IntroductionContent extends Component implements HasSchemas
             ->schema([
                 HeroSection::make()
                     ->badgeIcon('heroicon-s-server')
-                    ->badgeLabel('Self-Hosted')
-                    ->title('One GitHub token. Unlimited team access.')
-                    ->description('Configure GitHub credentials once here. Distribute simple Packgrid tokens to your team and CI/CD.')
+                    ->badgeLabel(__('docs.intro.badge'))
+                    ->title(__('docs.intro.title'))
+                    ->description(__('docs.intro.description'))
                     ->heroIcon('heroicon-o-cube')
                     ->heroIconGradient('amber', 'orange'),
 
@@ -36,84 +36,84 @@ class IntroductionContent extends Component implements HasSchemas
                         StatCard::make()
                             ->icon('heroicon-s-key')
                             ->color('amber')
-                            ->title('One Credential')
-                            ->description('GitHub token stays here'),
+                            ->title(__('docs.intro.stat.one_credential'))
+                            ->description(__('docs.intro.stat.one_credential_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-users')
                             ->color('blue')
-                            ->title('Team Tokens')
-                            ->description('Simple access for everyone'),
+                            ->title(__('docs.intro.stat.team_tokens'))
+                            ->description(__('docs.intro.stat.team_tokens_desc')),
                         StatCard::make()
                             ->icon('heroicon-s-cube')
                             ->color('emerald')
-                            ->title('Standard Composer')
-                            ->description('No plugins required'),
+                            ->title(__('docs.intro.stat.standard_composer'))
+                            ->description(__('docs.intro.stat.standard_composer_desc')),
                     ])
                     ->gridColumns(3),
 
                 AlertBox::make()
                     ->warning()
                     ->icon('heroicon-o-exclamation-triangle')
-                    ->title('Important Notice')
-                    ->description('Please read before using Packgrid in production.')
+                    ->title(__('docs.intro.warning.title'))
+                    ->description(__('docs.intro.warning.description'))
                     ->items([
-                        '<strong>Use at your own risk</strong> — Packgrid is provided as-is, without warranty of any kind',
-                        '<strong>Security is your responsibility</strong> — Ensure your server is properly secured with HTTPS and firewall rules',
-                        '<strong>Backup your data</strong> — Regularly backup your database and configuration',
-                        '<strong>Token management</strong> — Treat Packgrid tokens like passwords. Rotate them regularly and revoke unused ones',
-                        '<strong>Not a replacement for proper access control</strong> — Packgrid simplifies distribution, but you should still follow security best practices',
+                        __('docs.intro.warning.item1'),
+                        __('docs.intro.warning.item2'),
+                        __('docs.intro.warning.item3'),
+                        __('docs.intro.warning.item4'),
+                        __('docs.intro.warning.item5'),
                     ]),
 
-                Section::make('What is Packgrid?')
+                Section::make(__('docs.intro.section.what_is'))
                     ->icon('heroicon-o-question-mark-circle')
                     ->iconColor('primary')
-                    ->description('A simple solution for a common problem')
+                    ->description(__('docs.intro.section.what_is_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('Packgrid is a lightweight, self-hosted <strong>private Composer repository server</strong> designed for developers and teams who need to manage and distribute private PHP packages without relying on third-party services like Private Packagist.'),
-                        TextContent::make('Built with <strong>Laravel</strong> and <strong>Filament</strong>, Packgrid follows the philosophy of keeping things simple. It does one thing well: serving your private packages to Composer with proper authentication.'),
+                        TextContent::make(__('docs.intro.what_is.p1')),
+                        TextContent::make(__('docs.intro.what_is.p2')),
                     ]),
 
-                Section::make('The Problem It Solves')
+                Section::make(__('docs.intro.section.problem'))
                     ->icon('heroicon-o-light-bulb')
                     ->iconColor('primary')
-                    ->description('Why you might need Packgrid')
+                    ->description(__('docs.intro.section.problem_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('When working with private GitHub repositories as Composer packages, you typically have two options:'),
+                        TextContent::make(__('docs.intro.problem.intro')),
                         BulletList::make([
-                            '<strong>Use GitHub directly</strong> — Works, but requires SSH keys or OAuth tokens on every machine and CI/CD pipeline that needs access',
-                            '<strong>Pay for Private Packagist</strong> — Great service, but can be expensive for small teams or personal projects',
+                            __('docs.intro.problem.option1'),
+                            __('docs.intro.problem.option2'),
                         ])->bulletIcon('heroicon-s-x-mark')->bulletColor('red'),
-                        TextContent::make('Packgrid offers a third option:'),
+                        TextContent::make(__('docs.intro.problem.packgrid_intro')),
                         BulletList::make([
-                            '<strong>Self-host your own Composer server</strong> — Full control over your packages with simple token-based authentication',
-                            '<strong>One GitHub token, multiple users</strong> — Configure GitHub access once in Packgrid, then distribute simple Packgrid tokens to your team',
-                            '<strong>Works with any Composer project</strong> — Standard Composer repository, no special plugins required',
+                            __('docs.intro.problem.packgrid1'),
+                            __('docs.intro.problem.packgrid2'),
+                            __('docs.intro.problem.packgrid3'),
                         ])->bulletIcon('heroicon-s-check')->bulletColor('emerald'),
                     ]),
 
-                Section::make('How Packgrid Compares')
+                Section::make(__('docs.intro.section.compare'))
                     ->icon('heroicon-o-scale')
                     ->iconColor('primary')
-                    ->description('An honest comparison with alternatives')
+                    ->description(__('docs.intro.section.compare_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('There are several solutions for hosting private Composer packages. Here\'s how Packgrid compares:'),
+                        TextContent::make(__('docs.intro.compare.intro')),
                         ComparisonTable::make()
                             ->products([
-                                'packgrid' => ['name' => 'Packgrid', 'highlight' => true],
-                                'packagist' => ['name' => 'Private Packagist'],
-                                'satis' => ['name' => 'Satis'],
-                                'repman' => ['name' => 'Repman'],
+                                'packgrid' => ['name' => __('docs.compare.product.packgrid'), 'highlight' => true],
+                                'packagist' => ['name' => __('docs.compare.product.packagist')],
+                                'satis' => ['name' => __('docs.compare.product.satis')],
+                                'repman' => ['name' => __('docs.compare.product.repman')],
                             ])
                             ->features([
                                 [
-                                    'name' => 'Multi-Protocol',
-                                    'description' => 'Composer (PHP) + npm (JS)',
+                                    'name' => __('docs.compare.feature.multi_protocol'),
+                                    'description' => __('docs.compare.feature.multi_protocol_desc'),
                                     'values' => [
                                         'packgrid' => true,
                                         'packagist' => false,
@@ -122,25 +122,25 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Hosting',
+                                    'name' => __('docs.compare.feature.hosting'),
                                     'values' => [
-                                        'packgrid' => 'Self-hosted',
-                                        'packagist' => 'Cloud or Self-hosted',
-                                        'satis' => 'Self-hosted',
-                                        'repman' => 'Self-hosted',
+                                        'packgrid' => __('docs.compare.value.self_hosted'),
+                                        'packagist' => __('docs.compare.value.cloud_or_self'),
+                                        'satis' => __('docs.compare.value.self_hosted'),
+                                        'repman' => __('docs.compare.value.self_hosted'),
                                     ],
                                 ],
                                 [
-                                    'name' => 'Cost',
+                                    'name' => __('docs.compare.feature.cost'),
                                     'values' => [
-                                        'packgrid' => 'Free',
-                                        'packagist' => '€59/mo + €17/user',
-                                        'satis' => 'Free',
-                                        'repman' => 'Free',
+                                        'packgrid' => __('docs.compare.value.free'),
+                                        'packagist' => __('docs.compare.value.packagist_price'),
+                                        'satis' => __('docs.compare.value.free'),
+                                        'repman' => __('docs.compare.value.free'),
                                     ],
                                 ],
                                 [
-                                    'name' => 'Web Admin Panel',
+                                    'name' => __('docs.compare.feature.admin_panel'),
                                     'values' => [
                                         'packgrid' => true,
                                         'packagist' => true,
@@ -149,7 +149,7 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'GitHub Integration',
+                                    'name' => __('docs.compare.feature.github'),
                                     'values' => [
                                         'packgrid' => true,
                                         'packagist' => true,
@@ -158,46 +158,46 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'GitLab Integration',
+                                    'name' => __('docs.compare.feature.gitlab'),
                                     'values' => [
-                                        'packgrid' => 'planned',
+                                        'packgrid' => __('docs.compare.value.planned'),
                                         'packagist' => true,
                                         'satis' => true,
                                         'repman' => true,
                                     ],
                                 ],
                                 [
-                                    'name' => 'Bitbucket Integration',
+                                    'name' => __('docs.compare.feature.bitbucket'),
                                     'values' => [
-                                        'packgrid' => 'planned',
+                                        'packgrid' => __('docs.compare.value.planned'),
                                         'packagist' => true,
                                         'satis' => true,
                                         'repman' => true,
                                     ],
                                 ],
                                 [
-                                    'name' => 'Webhooks',
-                                    'description' => 'Auto-sync on push',
+                                    'name' => __('docs.compare.feature.webhooks'),
+                                    'description' => __('docs.compare.feature.webhooks_desc'),
                                     'values' => [
-                                        'packgrid' => 'planned',
+                                        'packgrid' => __('docs.compare.value.planned'),
                                         'packagist' => true,
-                                        'satis' => 'partial',
+                                        'satis' => __('docs.compare.value.partial'),
                                         'repman' => true,
                                     ],
                                 ],
                                 [
-                                    'name' => 'Security Scanning',
-                                    'description' => 'Vulnerability alerts',
+                                    'name' => __('docs.compare.feature.security'),
+                                    'description' => __('docs.compare.feature.security_desc'),
                                     'values' => [
-                                        'packgrid' => 'planned',
+                                        'packgrid' => __('docs.compare.value.planned'),
                                         'packagist' => true,
                                         'satis' => false,
                                         'repman' => true,
                                     ],
                                 ],
                                 [
-                                    'name' => 'Package Mirroring',
-                                    'description' => 'Mirror packagist.org',
+                                    'name' => __('docs.compare.feature.mirroring'),
+                                    'description' => __('docs.compare.feature.mirroring_desc'),
                                     'values' => [
                                         'packgrid' => false,
                                         'packagist' => true,
@@ -206,8 +206,8 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Team Permissions',
-                                    'description' => 'Per-package access control',
+                                    'name' => __('docs.compare.feature.permissions'),
+                                    'description' => __('docs.compare.feature.permissions_desc'),
                                     'values' => [
                                         'packgrid' => false,
                                         'packagist' => true,
@@ -216,7 +216,7 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'License Review',
+                                    'name' => __('docs.compare.feature.license'),
                                     'values' => [
                                         'packgrid' => false,
                                         'packagist' => true,
@@ -225,65 +225,65 @@ class IntroductionContent extends Component implements HasSchemas
                                     ],
                                 ],
                                 [
-                                    'name' => 'Setup Complexity',
+                                    'name' => __('docs.compare.feature.setup'),
                                     'values' => [
-                                        'packgrid' => 'Simple',
-                                        'packagist' => 'Managed',
-                                        'satis' => 'Manual',
-                                        'repman' => 'Moderate',
+                                        'packgrid' => __('docs.compare.value.simple'),
+                                        'packagist' => __('docs.compare.value.managed'),
+                                        'satis' => __('docs.compare.value.manual'),
+                                        'repman' => __('docs.compare.value.moderate'),
                                     ],
                                 ],
                             ]),
-                        TextContent::make('<strong>Packgrid\'s niche:</strong> If you need a simple, free, self-hosted solution for distributing private GitHub packages to your team without the complexity of Satis or the cost of Private Packagist, Packgrid is a good fit. For enterprise features like security scanning, license review, or complex team permissions, consider Private Packagist or Repman.'),
+                        TextContent::make(__('docs.intro.compare.summary')),
                     ]),
 
-                Section::make('Current Features')
+                Section::make(__('docs.intro.section.features'))
                     ->icon('heroicon-o-sparkles')
                     ->iconColor('primary')
-                    ->description('What Packgrid can do today')
+                    ->description(__('docs.intro.section.features_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
                         BulletList::make([
-                            '<strong>GitHub Integration</strong> — Connect your GitHub repositories (public and private) using personal access tokens',
-                            '<strong>Token Authentication</strong> — Create and manage access tokens for your team members or CI/CD pipelines',
-                            '<strong>Automatic Sync</strong> — Packages are synced from GitHub and served through Composer\'s standard HTTP protocol',
-                            '<strong>Simple Admin Panel</strong> — Manage repositories, credentials, and tokens through a clean Filament interface',
+                            __('docs.intro.features.item1'),
+                            __('docs.intro.features.item2'),
+                            __('docs.intro.features.item3'),
+                            __('docs.intro.features.item4'),
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
                     ]),
 
-                Section::make('Future Plans')
+                Section::make(__('docs.intro.section.future'))
                     ->icon('heroicon-o-rocket-launch')
                     ->iconColor('primary')
-                    ->description('What might come next')
+                    ->description(__('docs.intro.section.future_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('Packgrid is intentionally kept simple, but there are some features that might be added in the future:'),
+                        TextContent::make(__('docs.intro.future.intro')),
                         BulletList::make([
-                            '<strong>GitLab Support</strong> — Connect to self-hosted or gitlab.com repositories',
-                            '<strong>Bitbucket Support</strong> — Integrate with Bitbucket Cloud and Server',
-                            '<strong>Gitea/Forgejo Support</strong> — Support for self-hosted Git platforms',
-                            '<strong>Webhooks</strong> — Automatic sync when you push to your repositories',
-                            '<strong>Security Scanning</strong> — Alert on known vulnerabilities in your packages',
-                            '<strong>Package Statistics</strong> — Track downloads and usage',
+                            __('docs.intro.future.item1'),
+                            __('docs.intro.future.item2'),
+                            __('docs.intro.future.item3'),
+                            __('docs.intro.future.item4'),
+                            __('docs.intro.future.item5'),
+                            __('docs.intro.future.item6'),
                         ])->bulletIcon('heroicon-o-clock')->bulletColor('blue'),
-                        TextContent::make('These features will only be added if they don\'t compromise the simplicity of the project.'),
+                        TextContent::make(__('docs.intro.future.outro')),
                     ]),
 
-                Section::make('Getting Started')
+                Section::make(__('docs.intro.section.getting_started'))
                     ->icon('heroicon-o-play')
                     ->iconColor('primary')
-                    ->description('Ready to use Packgrid?')
+                    ->description(__('docs.intro.section.getting_started_desc'))
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        TextContent::make('Head over to the <strong>Setup Guide</strong> tab for step-by-step instructions on configuring Composer to use your Packgrid server. If you run into any issues, check the <strong>Troubleshooting</strong> tab for common error solutions.'),
+                        TextContent::make(__('docs.intro.getting_started.intro')),
                         BulletList::make([
-                            'Add a GitHub credential for private repository access',
-                            'Register your repositories in Packgrid',
-                            'Create access tokens for your team',
-                            'Configure Composer in your projects',
+                            __('docs.intro.getting_started.item1'),
+                            __('docs.intro.getting_started.item2'),
+                            __('docs.intro.getting_started.item3'),
+                            __('docs.intro.getting_started.item4'),
                         ])->bulletIcon('heroicon-s-arrow-right')->bulletColor('amber'),
                     ]),
             ]);

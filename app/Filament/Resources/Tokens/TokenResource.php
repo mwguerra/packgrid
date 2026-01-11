@@ -21,7 +21,10 @@ class TokenResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Access Control';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.group.access_control');
+    }
 
     protected static ?int $navigationSort = 2;
 

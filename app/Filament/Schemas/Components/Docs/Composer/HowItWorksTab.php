@@ -11,7 +11,7 @@ class HowItWorksTab extends Tab
     {
         parent::setUp();
 
-        $this->label('How It Works');
+        $this->label(__('docs.tab.how_it_works'));
         $this->icon('heroicon-o-arrows-right-left');
 
         $this->schema([

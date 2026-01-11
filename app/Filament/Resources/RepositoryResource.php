@@ -36,7 +36,10 @@ class RepositoryResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Packages';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.group.packages');
+    }
 
     protected static ?int $navigationSort = 1;
 

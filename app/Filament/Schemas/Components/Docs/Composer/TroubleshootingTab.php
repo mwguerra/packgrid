@@ -11,7 +11,7 @@ class TroubleshootingTab extends Tab
     {
         parent::setUp();
 
-        $this->label('Troubleshooting');
+        $this->label(__('docs.tab.troubleshooting'));
         $this->icon('heroicon-o-wrench-screwdriver');
 
         $this->schema([

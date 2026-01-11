@@ -28,6 +28,11 @@
     "common.no_errors": "No errors recorded.",
     "common.copied_to_clipboard": ":label copied to clipboard",
 
+    "navigation.group.access_control": "Access Control",
+    "navigation.group.packages": "Packages",
+    "navigation.dashboard": "Dashboard",
+    "navigation.documentation": "Documentation",
+
     "repository.title": "Repositories",
     "repository.navigation_label": "Repositories",
     "repository.subheading": "Packages served through your private Composer repository",
@@ -158,6 +163,10 @@
     "token.notification.copied": "Token copied to clipboard",
     "token.tooltip.last_used": "Last used :time",
 
+    "docs.title": "Documentation",
+    "docs.action.composer": "Composer",
+    "docs.action.npm": "npm",
+
     "docs.tab.introduction": "Introduction",
     "docs.tab.how_it_works": "How It Works",
     "docs.tab.setup_guide": "Setup Guide",
@@ -224,6 +233,8 @@
     "docs.compare.product.packagist": "Private Packagist",
     "docs.compare.product.satis": "Satis",
     "docs.compare.product.repman": "Repman",
+    "docs.compare.feature.multi_protocol": "Multi-Protocol",
+    "docs.compare.feature.multi_protocol_desc": "Composer (PHP) + npm (JS)",
     "docs.compare.feature.hosting": "Hosting",
     "docs.compare.feature.cost": "Cost",
     "docs.compare.feature.admin_panel": "Web Admin Panel",

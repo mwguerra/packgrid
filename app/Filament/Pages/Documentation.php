@@ -28,6 +28,16 @@ class Documentation extends Page
 
     protected string $view = 'filament.pages.documentation';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.documentation');
+    }
+
+    public function getTitle(): string
+    {
+        return __('docs.title');
+    }
+
     public ?array $data = [];
 
     #[Url(as: 'type')]
@@ -43,17 +53,17 @@ class Documentation extends Page
         return [
             ActionGroup::make([
                 Action::make('composer')
-                    ->label('Composer')
+                    ->label(__('docs.action.composer'))
                     ->icon('heroicon-o-cube')
                     ->color($this->packageType === 'composer' ? 'primary' : 'gray')
                     ->action(fn () => $this->setPackageType('composer')),
                 Action::make('npm')
-                    ->label('npm')
+                    ->label(__('docs.action.npm'))
                     ->icon('heroicon-o-cube')
                     ->color($this->packageType === 'npm' ? 'primary' : 'gray')
                     ->action(fn () => $this->setPackageType('npm')),
             ])
-                ->label($this->packageType === 'composer' ? 'Composer' : 'npm')
+                ->label($this->packageType === 'composer' ? __('docs.action.composer') : __('docs.action.npm'))
                 ->icon('heroicon-o-cube')
                 ->button()
                 ->color('gray'),

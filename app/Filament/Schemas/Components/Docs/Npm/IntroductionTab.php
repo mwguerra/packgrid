@@ -11,7 +11,7 @@ class IntroductionTab extends Tab
     {
         parent::setUp();
 
-        $this->label('Introduction');
+        $this->label(__('docs.tab.introduction'));
         $this->icon('heroicon-o-home');
 
         $this->schema([

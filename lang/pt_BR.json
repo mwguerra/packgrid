@@ -28,6 +28,11 @@
     "common.no_errors": "Nenhum erro registrado.",
     "common.copied_to_clipboard": ":label copiado para a área de transferência",
 
+    "navigation.group.access_control": "Controle de Acesso",
+    "navigation.group.packages": "Pacotes",
+    "navigation.dashboard": "Painel",
+    "navigation.documentation": "Documentação",
+
     "repository.title": "Repositórios",
     "repository.navigation_label": "Repositórios",
     "repository.subheading": "Pacotes servidos através do seu repositório privado Composer",
@@ -158,6 +163,10 @@
     "token.notification.copied": "Token copiado para a área de transferência",
     "token.tooltip.last_used": "Último uso :time",
 
+    "docs.title": "Documentação",
+    "docs.action.composer": "Composer",
+    "docs.action.npm": "npm",
+
     "docs.tab.introduction": "Introdução",
     "docs.tab.how_it_works": "Como Funciona",
     "docs.tab.setup_guide": "Guia de Configuração",
@@ -224,6 +233,8 @@
     "docs.compare.product.packagist": "Private Packagist",
     "docs.compare.product.satis": "Satis",
     "docs.compare.product.repman": "Repman",
+    "docs.compare.feature.multi_protocol": "Multi-Protocolo",
+    "docs.compare.feature.multi_protocol_desc": "Composer (PHP) + npm (JS)",
     "docs.compare.feature.hosting": "Hospedagem",
     "docs.compare.feature.cost": "Custo",
     "docs.compare.feature.admin_panel": "Painel Web Admin",

@@ -161,6 +161,9 @@
     "token.notification.created": "Token Created Successfully",
     "token.notification.created_body": "This token will not be shown again. Copy it now and store it securely.",
     "token.notification.copied": "Token copied to clipboard",
+    "token.notification.auth_item_copied": "Auth item copied to clipboard",
+    "token.action.copy_auth_item": "Copy Auth Item",
+    "token.action.download_auth_json": "Download auth.json",
     "token.tooltip.last_used": "Last used :time",
 
     "docs.title": "Documentation",

@@ -16,6 +16,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TokensTable
 {
@@ -153,12 +154,48 @@ class TokensTable
                     ->extraAttributes(fn (Token $record): array => [
                         'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
                     ]),
+                Action::make('copyAuthItem')
+                    ->label(__('token.action.copy_auth_item'))
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->action(function (Token $record): void {
+                        Notification::make()
+                            ->title(__('token.notification.auth_item_copied'))
+                            ->success()
+                            ->send();
+                    })
+                    ->extraAttributes(fn (Token $record): array => [
+                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(json_encode([
+                            'packgrid.mwguerra.com' => [
+                                'username' => 'composer',
+                                'password' => $record->token,
+                            ],
+                        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)).')',
+                    ]),
+                Action::make('downloadAuthJson')
+                    ->label(__('token.action.download_auth_json'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Token $record): StreamedResponse {
+                        $authJson = json_encode([
+                            'http-basic' => [
+                                'packgrid.mwguerra.com' => [
+                                    'username' => 'composer',
+                                    'password' => $record->token,
+                                ],
+                            ],
+                        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+                        return response()->streamDownload(function () use ($authJson): void {
+                            echo $authJson;
+                        }, 'auth.json', [
+                            'Content-Type' => 'application/json',
+                        ]);
+                    }),
                 ActionGroup::make([
                     ActionGroup::make([
                         ViewAction::make(),
-                        EditAction::make()
+                        EditAction::make(),
                     ])->dropdown(false),
-                    DeleteAction::make()
+                    DeleteAction::make(),
                 ]),
             ])
             ->toolbarActions([

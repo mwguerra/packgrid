@@ -161,6 +161,9 @@
     "token.notification.created": "Token Criado com Sucesso",
     "token.notification.created_body": "Este token não será mostrado novamente. Copie-o agora e armazene-o com segurança.",
     "token.notification.copied": "Token copiado para a área de transferência",
+    "token.notification.auth_item_copied": "Item de autenticação copiado para a área de transferência",
+    "token.action.copy_auth_item": "Copiar Item de Auth",
+    "token.action.download_auth_json": "Baixar auth.json",
     "token.tooltip.last_used": "Último uso :time",
 
     "docs.title": "Documentação",

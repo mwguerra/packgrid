@@ -1,8 +1,15 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Sync all enabled repositories every 4 hours
+Schedule::command('packgrid:sync-repositories')
+    ->everyFourHours()
+    ->withoutOverlapping()
+    ->runInBackground();
+
+// Test all GitHub credentials once a day at 6 AM
+Schedule::command('packgrid:test-credentials')
+    ->dailyAt('06:00')
+    ->withoutOverlapping()
+    ->runInBackground();

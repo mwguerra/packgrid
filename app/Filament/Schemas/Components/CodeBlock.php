@@ -71,6 +71,11 @@ class CodeBlock extends Component
         return $this;
     }
 
+    public function copyable(bool|Closure $condition = true): static
+    {
+        return $this->copyButton($condition);
+    }
+
     public function hasCopyButton(): bool
     {
         return $this->evaluate($this->hasCopyButton);

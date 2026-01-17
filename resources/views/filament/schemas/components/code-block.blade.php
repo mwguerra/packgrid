@@ -10,7 +10,18 @@
         @if($hasCopyButton)
             <button
                 type="button"
-                x-on:click="navigator.clipboard.writeText(@js($code)); copied = true; $wire.showCopiedNotification(@js($copyLabel)); setTimeout(() => copied = false, 2000)"
+                x-on:click="
+                    navigator.clipboard.writeText(@js($code));
+                    copied = true;
+                    $dispatch('open-modal', { id: 'filament-notifications' });
+                    new FilamentNotification()
+                        .title('{{ __('Copied to clipboard') }}')
+                        .icon('heroicon-o-clipboard-document-check')
+                        .iconColor('success')
+                        .duration(3000)
+                        .send();
+                    setTimeout(() => copied = false, 2000)
+                "
                 class="absolute right-3 top-3 rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-700 hover:text-white"
                 title="Copy to clipboard"
             >

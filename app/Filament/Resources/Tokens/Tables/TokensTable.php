@@ -154,10 +154,11 @@ class TokensTable
                         'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
                     ]),
                 ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
+                    ActionGroup::make([
+                        ViewAction::make(),
+                        EditAction::make()
+                    ])->dropdown(false),
                     DeleteAction::make()
-                        ->separator(),
                 ]),
             ])
             ->toolbarActions([

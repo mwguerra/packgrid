@@ -6,6 +6,10 @@ use App\Filament\Schemas\Components\Docs\Composer\HowItWorksTab as ComposerHowIt
 use App\Filament\Schemas\Components\Docs\Composer\IntroductionTab as ComposerIntroductionTab;
 use App\Filament\Schemas\Components\Docs\Composer\SetupGuideTab as ComposerSetupGuideTab;
 use App\Filament\Schemas\Components\Docs\Composer\TroubleshootingTab as ComposerTroubleshootingTab;
+use App\Filament\Schemas\Components\Docs\Docker\HowItWorksTab as DockerHowItWorksTab;
+use App\Filament\Schemas\Components\Docs\Docker\IntroductionTab as DockerIntroductionTab;
+use App\Filament\Schemas\Components\Docs\Docker\SetupGuideTab as DockerSetupGuideTab;
+use App\Filament\Schemas\Components\Docs\Docker\TroubleshootingTab as DockerTroubleshootingTab;
 use App\Filament\Schemas\Components\Docs\Npm\HowItWorksTab as NpmHowItWorksTab;
 use App\Filament\Schemas\Components\Docs\Npm\IntroductionTab as NpmIntroductionTab;
 use App\Filament\Schemas\Components\Docs\Npm\SetupGuideTab as NpmSetupGuideTab;
@@ -62,12 +66,26 @@ class Documentation extends Page
                     ->icon('heroicon-o-cube')
                     ->color($this->packageType === 'npm' ? 'primary' : 'gray')
                     ->action(fn () => $this->setPackageType('npm')),
+                Action::make('docker')
+                    ->label(__('docs.action.docker'))
+                    ->icon('heroicon-o-cube-transparent')
+                    ->color($this->packageType === 'docker' ? 'primary' : 'gray')
+                    ->action(fn () => $this->setPackageType('docker')),
             ])
-                ->label($this->packageType === 'composer' ? __('docs.action.composer') : __('docs.action.npm'))
-                ->icon('heroicon-o-cube')
+                ->label($this->getPackageTypeLabel())
+                ->icon($this->packageType === 'docker' ? 'heroicon-o-cube-transparent' : 'heroicon-o-cube')
                 ->button()
                 ->color('gray'),
         ];
+    }
+
+    protected function getPackageTypeLabel(): string
+    {
+        return match ($this->packageType) {
+            'npm' => __('docs.action.npm'),
+            'docker' => __('docs.action.docker'),
+            default => __('docs.action.composer'),
+        };
     }
 
     public function setPackageType(string $type): void
@@ -103,12 +121,28 @@ class Documentation extends Page
         ];
     }
 
+    protected function getDockerTabsSchema(): array
+    {
+        return [
+            Tabs::make('DockerDocumentation')
+                ->tabs([
+                    DockerIntroductionTab::make('introduction'),
+                    DockerHowItWorksTab::make('how-it-works'),
+                    DockerSetupGuideTab::make('setup-guide'),
+                    DockerTroubleshootingTab::make('troubleshooting'),
+                ])
+                ->contained(false),
+        ];
+    }
+
     public function form(Schema $form): Schema
     {
         return $form
-            ->schema($this->packageType === 'npm'
-                ? $this->getNpmTabsSchema()
-                : $this->getComposerTabsSchema())
+            ->schema(match ($this->packageType) {
+                'npm' => $this->getNpmTabsSchema(),
+                'docker' => $this->getDockerTabsSchema(),
+                default => $this->getComposerTabsSchema(),
+            })
             ->statePath('data');
     }
 

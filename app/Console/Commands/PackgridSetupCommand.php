@@ -175,16 +175,28 @@ HELP;
             note("Production mode - access at: {$newEnv['APP_URL']}");
         }
 
+        // Create storage link for Docker blob access
+        $this->newLine();
+        note('Creating storage symbolic link...');
+        $this->callSilently('storage:link');
+        info('Storage link created successfully!');
+
         $this->newLine();
         note('Scheduled Tasks (defined in routes/console.php):');
         $this->line('  - Repository sync: Every 4 hours (0 */4 * * *)');
         $this->line('  - Credential testing: Daily at 6 AM (0 6 * * *)');
+        $this->line('  - Docker garbage collection: Weekly on Sundays at 3 AM');
         $this->newLine();
         note('To activate the scheduler on production, add this cron entry:');
         $this->line('  * * * * * cd '.base_path().' && php artisan schedule:run >> /dev/null 2>&1');
         $this->newLine();
         note('Verify the schedule with:');
         $this->line('  php artisan schedule:list');
+        $this->newLine();
+        note('Docker Registry Configuration:');
+        $this->line('  Storage disk: '.config('packgrid.docker.disk', 'local'));
+        $this->line('  Manual garbage collection: php artisan packgrid:docker-gc');
+        $this->line('  Preview cleanup: php artisan packgrid:docker-gc --dry-run');
 
         return Command::SUCCESS;
     }

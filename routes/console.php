@@ -13,3 +13,11 @@ Schedule::command('packgrid:test-credentials')
     ->dailyAt('06:00')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Garbage collect unreferenced Docker blobs weekly on Sundays at 3 AM
+Schedule::command('packgrid:docker-gc')
+    ->weekly()
+    ->sundays()
+    ->at('03:00')
+    ->withoutOverlapping()
+    ->runInBackground();

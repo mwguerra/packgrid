@@ -4,6 +4,8 @@ namespace App\Filament\Widgets;
 
 use App\Enums\CredentialStatus;
 use App\Models\Credential;
+use App\Models\DockerBlob;
+use App\Models\DockerRepository;
 use App\Models\Repository;
 use App\Models\Token;
 use Filament\Widgets\StatsOverviewWidget;
@@ -20,6 +22,12 @@ class PackgridStats extends StatsOverviewWidget
         $repoCount = Repository::count();
         $repoHealthy = Repository::whereNull('last_error')->count();
         $repoFailed = max($repoCount - $repoHealthy, 0);
+
+        // Docker repositories stat
+        $dockerRepoCount = DockerRepository::count();
+        $dockerTagCount = DockerRepository::sum('tag_count');
+        $dockerStorageSize = DockerBlob::sum('size');
+        $dockerStorageFormatted = $this->formatSize($dockerStorageSize);
 
         // Tokens stat
         $tokenCount = Token::count();
@@ -46,6 +54,11 @@ class PackgridStats extends StatsOverviewWidget
                 ->color($repoFailed > 0 ? 'danger' : 'success')
                 ->icon('heroicon-o-archive-box'),
 
+            Stat::make(__('widget.stats.docker_repos'), $dockerRepoCount)
+                ->description(__('widget.stats.docker_repos_desc', ['tags' => $dockerTagCount, 'storage' => $dockerStorageFormatted]))
+                ->color('info')
+                ->icon('heroicon-o-cube-transparent'),
+
             Stat::make(__('widget.stats.tokens'), $tokenCount)
                 ->description(__('widget.stats.tokens_desc', ['active' => $tokenActive]))
                 ->color($tokenActive > 0 ? 'success' : 'warning')
@@ -56,5 +69,18 @@ class PackgridStats extends StatsOverviewWidget
                 ->color($credFailed > 0 ? 'warning' : 'success')
                 ->icon('heroicon-o-key'),
         ];
+    }
+
+    protected function formatSize(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $unitIndex = 0;
+
+        while ($bytes >= 1024 && $unitIndex < count($units) - 1) {
+            $bytes /= 1024;
+            $unitIndex++;
+        }
+
+        return round($bytes, 2) . ' ' . $units[$unitIndex];
     }
 }

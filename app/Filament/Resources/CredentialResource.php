@@ -37,6 +37,21 @@ class CredentialResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getModelLabel(): string
+    {
+        return __('credential.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('credential.model_label_plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('credential.navigation_label');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         $count = Credential::count();

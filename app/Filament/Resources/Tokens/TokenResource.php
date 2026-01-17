@@ -30,6 +30,21 @@ class TokenResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getModelLabel(): string
+    {
+        return __('token.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('token.model_label_plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('token.navigation_label');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         $count = Token::where('enabled', true)->count();

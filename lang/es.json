@@ -35,6 +35,8 @@
 
     "repository.title": "Repositorios",
     "repository.navigation_label": "Repositorios",
+    "repository.model_label": "Repositorio",
+    "repository.model_label_plural": "Repositorios",
     "repository.subheading": "Paquetes servidos a través de tu repositorio privado de Composer",
     "repository.section.repository": "Repositorio",
     "repository.section.repository_description": "Ingresa la URL del repositorio de GitHub o el formato owner/repo.",
@@ -73,8 +75,9 @@
     "repository.action.sync_all_tooltip": "Sincronizar todos los repositorios habilitados de GitHub",
     "repository.action.add": "Agregar repositorio",
     "repository.action.add_title": "Agregar Repositorio",
-    "repository.modal.delete_heading": "Eliminar repositorio",
-    "repository.modal.delete_description": "¿Estás seguro de que deseas eliminar este repositorio? Esta acción no se puede deshacer.",
+    "repository.action.remove": "Quitar",
+    "repository.modal.remove_heading": "Quitar repositorio",
+    "repository.modal.remove_description": "¿Estás seguro de que deseas quitar este repositorio de Packgrid? Esto solo lo quitará de tu lista de paquetes privados — el repositorio no será eliminado de GitHub.",
     "repository.modal.sync_all_heading": "Sincronizar todos los repositorios",
     "repository.modal.sync_all_description": "Esto obtendrá las últimas versiones de todos los repositorios habilitados de GitHub. Puede tardar un momento.",
     "repository.notification.synced": "Repositorio sincronizado",
@@ -104,6 +107,8 @@
 
     "credential.title": "Credenciales",
     "credential.navigation_label": "Credenciales",
+    "credential.model_label": "Credencial",
+    "credential.model_label_plural": "Credenciales",
     "credential.subheading": "Tokens de API para acceder a tus repositorios privados en GitHub",
     "credential.section.credential": "Credencial",
     "credential.field.provider": "Proveedor",
@@ -131,6 +136,8 @@
 
     "token.title": "Tokens",
     "token.navigation_label": "Tokens",
+    "token.model_label": "Token",
+    "token.model_label_plural": "Tokens",
     "token.subheading": "Distribúyelos a tu equipo y pipelines CI/CD para autenticación en Composer",
     "token.section.token": "Token",
     "token.section.token_description": "Token de acceso para autenticación en Composer.",

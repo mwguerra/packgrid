@@ -45,6 +45,21 @@ class RepositoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getModelLabel(): string
+    {
+        return __('repository.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('repository.model_label_plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('repository.navigation_label');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         $count = Repository::where('enabled', true)->count();
@@ -271,10 +286,11 @@ class RepositoryResource extends Resource
                 EditAction::make(),
                 ActionGroup::make([
                     DeleteAction::make()
+                        ->label(__('repository.action.remove'))
                         ->requiresConfirmation()
-                        ->modalHeading(__('repository.modal.delete_heading'))
-                        ->modalDescription(__('repository.modal.delete_description'))
-                        ->modalSubmitActionLabel(__('common.delete')),
+                        ->modalHeading(__('repository.modal.remove_heading'))
+                        ->modalDescription(__('repository.modal.remove_description'))
+                        ->modalSubmitActionLabel(__('repository.action.remove')),
                 ]),
             ])
             ->defaultSort('name');

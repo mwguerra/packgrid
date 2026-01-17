@@ -35,6 +35,8 @@
 
     "repository.title": "Dépôts",
     "repository.navigation_label": "Dépôts",
+    "repository.model_label": "Dépôt",
+    "repository.model_label_plural": "Dépôts",
     "repository.subheading": "Packages servis via votre dépôt Composer privé",
     "repository.section.repository": "Dépôt",
     "repository.section.repository_description": "Entrez l'URL du dépôt GitHub ou le format owner/repo.",
@@ -73,8 +75,9 @@
     "repository.action.sync_all_tooltip": "Synchroniser tous les dépôts activés depuis GitHub",
     "repository.action.add": "Ajouter un dépôt",
     "repository.action.add_title": "Ajouter un Dépôt",
-    "repository.modal.delete_heading": "Supprimer le dépôt",
-    "repository.modal.delete_description": "Êtes-vous sûr de vouloir supprimer ce dépôt ? Cette action est irréversible.",
+    "repository.action.remove": "Retirer",
+    "repository.modal.remove_heading": "Retirer le dépôt",
+    "repository.modal.remove_description": "Êtes-vous sûr de vouloir retirer ce dépôt de Packgrid ? Cela le retirera uniquement de votre liste de packages privés — le dépôt ne sera pas supprimé de GitHub.",
     "repository.modal.sync_all_heading": "Synchroniser tous les dépôts",
     "repository.modal.sync_all_description": "Cela récupérera les dernières versions de tous les dépôts activés depuis GitHub. Cela peut prendre un moment.",
     "repository.notification.synced": "Dépôt synchronisé",
@@ -104,6 +107,8 @@
 
     "credential.title": "Identifiants",
     "credential.navigation_label": "Identifiants",
+    "credential.model_label": "Identifiant",
+    "credential.model_label_plural": "Identifiants",
     "credential.subheading": "Jetons API pour accéder à vos dépôts privés sur GitHub",
     "credential.section.credential": "Identifiant",
     "credential.field.provider": "Fournisseur",
@@ -131,6 +136,8 @@
 
     "token.title": "Jetons",
     "token.navigation_label": "Jetons",
+    "token.model_label": "Jeton",
+    "token.model_label_plural": "Jetons",
     "token.subheading": "Distribuez-les à votre équipe et aux pipelines CI/CD pour l'authentification Composer",
     "token.section.token": "Jeton",
     "token.section.token_description": "Jeton d'accès pour l'authentification Composer.",

@@ -166,6 +166,9 @@
     "token.action.download_auth_json": "Baixar auth.json",
     "token.action.copy_composer_setup": "Copiar Setup do Composer",
     "token.notification.composer_setup_copied": "Configuração do repositório Composer copiada para a área de transferência",
+    "token.action.copy_npmrc": "Copiar .npmrc",
+    "token.action.download_npmrc": "Baixar .npmrc",
+    "token.notification.npmrc_copied": ".npmrc copiado para a área de transferência",
     "token.tooltip.last_used": "Último uso :time",
 
     "docs.title": "Documentação",

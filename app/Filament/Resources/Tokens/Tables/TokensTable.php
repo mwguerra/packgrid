@@ -20,6 +20,28 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TokensTable
 {
+    private static function getHost(): string
+    {
+        $url = config('app.url');
+        $host = parse_url($url, PHP_URL_HOST) ?: 'packgrid.mwguerra.com';
+        $port = parse_url($url, PHP_URL_PORT);
+
+        return $host.($port ? ':'.$port : '');
+    }
+
+    private static function getNpmrcContent(string $token): string
+    {
+        $url = config('app.url');
+        $host = parse_url($url, PHP_URL_HOST) ?: 'packgrid.mwguerra.com';
+        $port = parse_url($url, PHP_URL_PORT);
+        $scheme = parse_url($url, PHP_URL_SCHEME) ?: 'https';
+
+        $hostWithPort = $host.($port ? ':'.$port : '');
+        $registryUrl = $scheme.'://'.$hostWithPort.'/npm/';
+
+        return "@myorg:registry={$registryUrl}\n//{$hostWithPort}/npm/:_authToken={$token}";
+    }
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -165,7 +187,7 @@ class TokensTable
                     })
                     ->extraAttributes(fn (Token $record): array => [
                         'x-on:click' => 'navigator.clipboard.writeText('.json_encode(json_encode([
-                            'packgrid.mwguerra.com' => [
+                            self::getHost() => [
                                 'username' => 'composer',
                                 'password' => $record->token,
                             ],
@@ -177,7 +199,7 @@ class TokensTable
                     ->action(function (Token $record): StreamedResponse {
                         $authJson = json_encode([
                             'http-basic' => [
-                                'packgrid.mwguerra.com' => [
+                                self::getHost() => [
                                     'username' => 'composer',
                                     'password' => $record->token,
                                 ],
@@ -188,6 +210,30 @@ class TokensTable
                             echo $authJson;
                         }, 'auth.json', [
                             'Content-Type' => 'application/json',
+                        ]);
+                    }),
+                Action::make('copyNpmrc')
+                    ->label(__('token.action.copy_npmrc'))
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->action(function (Token $record): void {
+                        Notification::make()
+                            ->title(__('token.notification.npmrc_copied'))
+                            ->success()
+                            ->send();
+                    })
+                    ->extraAttributes(fn (Token $record): array => [
+                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).')',
+                    ]),
+                Action::make('downloadNpmrc')
+                    ->label(__('token.action.download_npmrc'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Token $record): StreamedResponse {
+                        $npmrc = self::getNpmrcContent($record->token);
+
+                        return response()->streamDownload(function () use ($npmrc): void {
+                            echo $npmrc;
+                        }, '.npmrc', [
+                            'Content-Type' => 'text/plain',
                         ]);
                     }),
                 ActionGroup::make([

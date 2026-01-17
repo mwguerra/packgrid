@@ -166,6 +166,9 @@
     "token.action.download_auth_json": "Télécharger auth.json",
     "token.action.copy_composer_setup": "Copier Config Composer",
     "token.notification.composer_setup_copied": "Configuration du dépôt Composer copiée dans le presse-papiers",
+    "token.action.copy_npmrc": "Copier .npmrc",
+    "token.action.download_npmrc": "Télécharger .npmrc",
+    "token.notification.npmrc_copied": ".npmrc copié dans le presse-papiers",
     "token.tooltip.last_used": "Dernière utilisation :time",
 
     "docs.title": "Documentation",

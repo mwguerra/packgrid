@@ -353,6 +353,6 @@ class BlobStorageService
     {
         $tempDir = storage_path('app/docker-uploads');
 
-        return "{$tempDir}/" . Str::uuid()->toString();
+        return "{$tempDir}/".Str::uuid()->toString();
     }
 }

@@ -7,7 +7,6 @@ use App\Models\DockerTag;
 use App\Models\Token;
 use App\Models\User;
 use App\Services\Docker\BlobStorageService;
-use App\Services\Docker\ManifestService;
 use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\withBasicAuth;
@@ -31,7 +30,7 @@ function dockerAuth()
 function dockerAuthHeaders(): array
 {
     return [
-        'HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('token:test-docker-token-12345'),
+        'HTTP_AUTHORIZATION' => 'Basic '.base64_encode('token:test-docker-token-12345'),
     ];
 }
 
@@ -42,13 +41,13 @@ function createTestManifestContent(): string
         'mediaType' => DockerMediaType::ManifestV2->value,
         'config' => [
             'mediaType' => DockerMediaType::ContainerConfig->value,
-            'digest' => 'sha256:' . fake()->sha256(),
+            'digest' => 'sha256:'.fake()->sha256(),
             'size' => 1024,
         ],
         'layers' => [
             [
                 'mediaType' => DockerMediaType::LayerTarGzip->value,
-                'digest' => 'sha256:' . fake()->sha256(),
+                'digest' => 'sha256:'.fake()->sha256(),
                 'size' => 10240,
             ],
         ],
@@ -150,7 +149,7 @@ describe('Docker Manifest GET', function () {
     it('gets manifest by tag', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = createTestManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $manifest = DockerManifest::factory()->forRepository($repository)->create([
             'digest' => $digest,
@@ -169,7 +168,7 @@ describe('Docker Manifest GET', function () {
     it('gets manifest by digest', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = createTestManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         DockerManifest::factory()->forRepository($repository)->create([
             'digest' => $digest,
@@ -204,7 +203,7 @@ describe('Docker Manifest HEAD', function () {
     it('checks manifest exists by tag', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = createTestManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $manifest = DockerManifest::factory()->forRepository($repository)->create([
             'digest' => $digest,
@@ -277,7 +276,7 @@ describe('Docker Manifest DELETE', function () {
     it('deletes manifest by digest', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = createTestManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $manifest = DockerManifest::factory()->forRepository($repository)->create([
             'digest' => $digest,
@@ -294,7 +293,7 @@ describe('Docker Manifest DELETE', function () {
 
     it('returns 404 for non-existent manifest', function () {
         DockerRepository::factory()->create(['name' => 'myorg/myapp']);
-        $nonExistentDigest = 'sha256:' . str_repeat('a', 64);
+        $nonExistentDigest = 'sha256:'.str_repeat('a', 64);
 
         dockerAuth()
             ->delete("/v2/myorg/myapp/manifests/{$nonExistentDigest}")
@@ -310,7 +309,7 @@ describe('Docker Blob GET', function () {
     it('downloads blob by digest', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = 'Blob content for download';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $blobService = app(BlobStorageService::class);
         $blob = $blobService->storeBlob($digest, $content);
@@ -324,7 +323,7 @@ describe('Docker Blob GET', function () {
 
     it('returns 404 for non-existent blob', function () {
         DockerRepository::factory()->create(['name' => 'myorg/myapp']);
-        $nonExistentDigest = 'sha256:' . str_repeat('a', 64);
+        $nonExistentDigest = 'sha256:'.str_repeat('a', 64);
 
         dockerAuth()
             ->get("/v2/myorg/myapp/blobs/{$nonExistentDigest}")
@@ -336,7 +335,7 @@ describe('Docker Blob HEAD', function () {
     it('checks blob exists', function () {
         $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = 'Blob content to check';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $blobService = app(BlobStorageService::class);
         $blob = $blobService->storeBlob($digest, $content);
@@ -376,7 +375,7 @@ describe('Docker Blob Upload', function () {
     it('supports cross-repository mount', function () {
         $sourceRepo = DockerRepository::factory()->create(['name' => 'source/repo']);
         $content = 'Mountable blob content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $blobService = app(BlobStorageService::class);
         $blob = $blobService->storeBlob($digest, $content);
@@ -391,7 +390,7 @@ describe('Docker Blob Upload', function () {
     });
 
     it('falls back to upload when mount source not found', function () {
-        $nonExistentDigest = 'sha256:' . str_repeat('a', 64);
+        $nonExistentDigest = 'sha256:'.str_repeat('a', 64);
 
         dockerAuth()
             ->post("/v2/myorg/myapp/blobs/uploads?mount={$nonExistentDigest}&from=other/repo")
@@ -404,7 +403,7 @@ describe('Docker Blob Upload Completion', function () {
     it('completes single-request upload', function () {
         DockerRepository::factory()->create(['name' => 'myorg/myapp']);
         $content = 'Single upload content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         // Start upload
         $startResponse = dockerAuth()

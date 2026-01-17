@@ -26,7 +26,7 @@ class ManifestsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('digest')
                     ->label(__('docker_repository.table.digest'))
-                    ->formatStateUsing(fn (string $state): string => 'sha256:' . substr(explode(':', $state)[1] ?? '', 0, 12))
+                    ->formatStateUsing(fn (string $state): string => 'sha256:'.substr(explode(':', $state)[1] ?? '', 0, 12))
                     ->copyable()
                     ->tooltip(fn (DockerManifest $record): string => $record->digest),
                 TextColumn::make('media_type')

@@ -44,14 +44,14 @@ class DockerBlob extends Model
             $unitIndex++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$unitIndex];
+        return round($bytes, 2).' '.$units[$unitIndex];
     }
 
     public function getShortDigestAttribute(): string
     {
         $parts = explode(':', $this->digest);
 
-        return $parts[0] . ':' . substr($parts[1] ?? '', 0, 12);
+        return $parts[0].':'.substr($parts[1] ?? '', 0, 12);
     }
 
     public function incrementReferenceCount(): void

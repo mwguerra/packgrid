@@ -41,7 +41,7 @@ class SyncRepositoriesCommand extends Command
 
             try {
                 $syncService->sync($repository);
-                $this->info("    ✓ Synced successfully");
+                $this->info('    ✓ Synced successfully');
                 $success++;
             } catch (Throwable $e) {
                 $this->error("    ✗ Failed: {$e->getMessage()}");

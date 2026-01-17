@@ -19,7 +19,7 @@ class DockerTagFactory extends Factory
         return [
             'docker_repository_id' => DockerRepository::factory(),
             'docker_manifest_id' => DockerManifest::factory(),
-            'name' => 'v' . fake()->unique()->numerify('#.#.#'),
+            'name' => 'v'.fake()->unique()->numerify('#.#.#'),
         ];
     }
 

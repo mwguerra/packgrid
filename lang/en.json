@@ -885,5 +885,18 @@
     "api.error.invalid_token": "Invalid token.",
     "api.error.token_disabled": "Token is disabled or expired.",
     "api.error.ip_denied": "Access denied from this IP address.",
-    "api.error.domain_denied": "Access denied from this domain."
+    "api.error.domain_denied": "Access denied from this domain.",
+
+    "settings.title": "Settings",
+    "settings.section.features": "Feature Toggles",
+    "settings.section.features_description": "Enable or disable package repository features. At least one feature must be enabled.",
+    "settings.field.composer_enabled": "Composer (PHP)",
+    "settings.field.composer_enabled_helper": "Enable Composer package registry for PHP packages.",
+    "settings.field.npm_enabled": "NPM (Node.js)",
+    "settings.field.npm_enabled_helper": "Enable NPM package registry for Node.js packages.",
+    "settings.field.docker_enabled": "Docker (OCI)",
+    "settings.field.docker_enabled_helper": "Enable Docker container registry for OCI images.",
+    "settings.action.save": "Save Settings",
+    "settings.notification.saved": "Settings saved successfully",
+    "settings.notification.at_least_one_required": "At least one feature must be enabled"
 }

@@ -35,7 +35,7 @@ class TestCredentialsCommand extends Command
             $result = $healthService->test($credential);
 
             if ($result->status === CredentialStatus::Ok) {
-                $this->info("    ✓ Valid");
+                $this->info('    ✓ Valid');
                 $valid++;
             } else {
                 $this->error("    ✗ Invalid: {$result->last_error}");

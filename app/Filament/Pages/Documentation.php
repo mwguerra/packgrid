@@ -14,6 +14,7 @@ use App\Filament\Schemas\Components\Docs\Npm\HowItWorksTab as NpmHowItWorksTab;
 use App\Filament\Schemas\Components\Docs\Npm\IntroductionTab as NpmIntroductionTab;
 use App\Filament\Schemas\Components\Docs\Npm\SetupGuideTab as NpmSetupGuideTab;
 use App\Filament\Schemas\Components\Docs\Npm\TroubleshootingTab as NpmTroubleshootingTab;
+use App\Support\PackgridSettings;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -49,29 +50,58 @@ class Documentation extends Page
 
     public function mount(): void
     {
+        // If current package type is disabled, redirect to first enabled type
+        $enabledTypes = PackgridSettings::getEnabledPackageTypes();
+
+        if (! in_array($this->packageType, $enabledTypes)) {
+            $defaultType = PackgridSettings::getDefaultPackageType();
+            if ($defaultType && $defaultType !== $this->packageType) {
+                $this->redirect(static::getUrl(['type' => $defaultType]));
+
+                return;
+            }
+        }
+
         $this->form->fill();
     }
 
     protected function getHeaderActions(): array
     {
+        $enabledTypes = PackgridSettings::getEnabledPackageTypes();
+
+        // If only one type is enabled, don't show the selector
+        if (count($enabledTypes) <= 1) {
+            return [];
+        }
+
+        $actions = [];
+
+        if (PackgridSettings::composerEnabled()) {
+            $actions[] = Action::make('composer')
+                ->label(__('docs.action.composer'))
+                ->icon('heroicon-o-cube')
+                ->color($this->packageType === 'composer' ? 'primary' : 'gray')
+                ->action(fn () => $this->setPackageType('composer'));
+        }
+
+        if (PackgridSettings::npmEnabled()) {
+            $actions[] = Action::make('npm')
+                ->label(__('docs.action.npm'))
+                ->icon('heroicon-o-cube')
+                ->color($this->packageType === 'npm' ? 'primary' : 'gray')
+                ->action(fn () => $this->setPackageType('npm'));
+        }
+
+        if (PackgridSettings::dockerEnabled()) {
+            $actions[] = Action::make('docker')
+                ->label(__('docs.action.docker'))
+                ->icon('heroicon-o-cube-transparent')
+                ->color($this->packageType === 'docker' ? 'primary' : 'gray')
+                ->action(fn () => $this->setPackageType('docker'));
+        }
+
         return [
-            ActionGroup::make([
-                Action::make('composer')
-                    ->label(__('docs.action.composer'))
-                    ->icon('heroicon-o-cube')
-                    ->color($this->packageType === 'composer' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setPackageType('composer')),
-                Action::make('npm')
-                    ->label(__('docs.action.npm'))
-                    ->icon('heroicon-o-cube')
-                    ->color($this->packageType === 'npm' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setPackageType('npm')),
-                Action::make('docker')
-                    ->label(__('docs.action.docker'))
-                    ->icon('heroicon-o-cube-transparent')
-                    ->color($this->packageType === 'docker' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setPackageType('docker')),
-            ])
+            ActionGroup::make($actions)
                 ->label($this->getPackageTypeLabel())
                 ->icon($this->packageType === 'docker' ? 'heroicon-o-cube-transparent' : 'heroicon-o-cube')
                 ->button()

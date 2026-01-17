@@ -3,7 +3,6 @@
 namespace App\Livewire\Docs\Docker;
 
 use App\Filament\Schemas\Components\BulletList;
-use App\Filament\Schemas\Components\CodeBlock;
 use App\Filament\Schemas\Components\TextContent;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;

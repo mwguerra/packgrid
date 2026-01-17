@@ -8,6 +8,7 @@ use App\Models\DockerBlob;
 use App\Models\DockerRepository;
 use App\Models\Repository;
 use App\Models\Token;
+use App\Support\PackgridSettings;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -15,21 +16,43 @@ class PackgridStats extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        // Packages stat
-        $totalPackages = Repository::sum('package_count');
+        $stats = [];
 
-        // Repositories stat
-        $repoCount = Repository::count();
-        $repoHealthy = Repository::whereNull('last_error')->count();
-        $repoFailed = max($repoCount - $repoHealthy, 0);
+        // Show packages and repositories stats only if composer or npm is enabled
+        if (PackgridSettings::repositoriesEnabled()) {
+            // Packages stat
+            $totalPackages = Repository::sum('package_count');
 
-        // Docker repositories stat
-        $dockerRepoCount = DockerRepository::count();
-        $dockerTagCount = DockerRepository::sum('tag_count');
-        $dockerStorageSize = DockerBlob::sum('size');
-        $dockerStorageFormatted = $this->formatSize($dockerStorageSize);
+            // Repositories stat
+            $repoCount = Repository::count();
+            $repoHealthy = Repository::whereNull('last_error')->count();
+            $repoFailed = max($repoCount - $repoHealthy, 0);
 
-        // Tokens stat
+            $stats[] = Stat::make(__('widget.stats.packages'), $totalPackages)
+                ->description(__('widget.stats.packages_desc'))
+                ->color('primary')
+                ->icon('heroicon-o-cube');
+
+            $stats[] = Stat::make(__('widget.stats.repositories'), $repoCount)
+                ->description(__('widget.stats.repositories_desc', ['healthy' => $repoHealthy, 'failed' => $repoFailed]))
+                ->color($repoFailed > 0 ? 'danger' : 'success')
+                ->icon('heroicon-o-archive-box');
+        }
+
+        // Show Docker stats only if Docker is enabled
+        if (PackgridSettings::dockerEnabled()) {
+            $dockerRepoCount = DockerRepository::count();
+            $dockerTagCount = DockerRepository::sum('tag_count');
+            $dockerStorageSize = DockerBlob::sum('size');
+            $dockerStorageFormatted = $this->formatSize($dockerStorageSize);
+
+            $stats[] = Stat::make(__('widget.stats.docker_repos'), $dockerRepoCount)
+                ->description(__('widget.stats.docker_repos_desc', ['tags' => $dockerTagCount, 'storage' => $dockerStorageFormatted]))
+                ->color('info')
+                ->icon('heroicon-o-cube-transparent');
+        }
+
+        // Tokens stat - always shown
         $tokenCount = Token::count();
         $tokenActive = Token::where('enabled', true)
             ->where(function ($query) {
@@ -38,37 +61,22 @@ class PackgridStats extends StatsOverviewWidget
             })
             ->count();
 
-        // Credentials stat
+        $stats[] = Stat::make(__('widget.stats.tokens'), $tokenCount)
+            ->description(__('widget.stats.tokens_desc', ['active' => $tokenActive]))
+            ->color($tokenActive > 0 ? 'success' : 'warning')
+            ->icon('heroicon-o-ticket');
+
+        // Credentials stat - always shown
         $credCount = Credential::count();
         $credHealthy = Credential::where('status', CredentialStatus::Ok)->count();
         $credFailed = max($credCount - $credHealthy, 0);
 
-        return [
-            Stat::make(__('widget.stats.packages'), $totalPackages)
-                ->description(__('widget.stats.packages_desc'))
-                ->color('primary')
-                ->icon('heroicon-o-cube'),
+        $stats[] = Stat::make(__('widget.stats.credentials'), $credCount)
+            ->description(__('widget.stats.credentials_desc', ['healthy' => $credHealthy, 'failed' => $credFailed]))
+            ->color($credFailed > 0 ? 'warning' : 'success')
+            ->icon('heroicon-o-key');
 
-            Stat::make(__('widget.stats.repositories'), $repoCount)
-                ->description(__('widget.stats.repositories_desc', ['healthy' => $repoHealthy, 'failed' => $repoFailed]))
-                ->color($repoFailed > 0 ? 'danger' : 'success')
-                ->icon('heroicon-o-archive-box'),
-
-            Stat::make(__('widget.stats.docker_repos'), $dockerRepoCount)
-                ->description(__('widget.stats.docker_repos_desc', ['tags' => $dockerTagCount, 'storage' => $dockerStorageFormatted]))
-                ->color('info')
-                ->icon('heroicon-o-cube-transparent'),
-
-            Stat::make(__('widget.stats.tokens'), $tokenCount)
-                ->description(__('widget.stats.tokens_desc', ['active' => $tokenActive]))
-                ->color($tokenActive > 0 ? 'success' : 'warning')
-                ->icon('heroicon-o-ticket'),
-
-            Stat::make(__('widget.stats.credentials'), $credCount)
-                ->description(__('widget.stats.credentials_desc', ['healthy' => $credHealthy, 'failed' => $credFailed]))
-                ->color($credFailed > 0 ? 'warning' : 'success')
-                ->icon('heroicon-o-key'),
-        ];
+        return $stats;
     }
 
     protected function formatSize(int $bytes): string
@@ -81,6 +89,6 @@ class PackgridStats extends StatsOverviewWidget
             $unitIndex++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$unitIndex];
+        return round($bytes, 2).' '.$units[$unitIndex];
     }
 }

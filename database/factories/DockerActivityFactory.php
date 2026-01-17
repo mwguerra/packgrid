@@ -20,10 +20,10 @@ class DockerActivityFactory extends Factory
             'docker_repository_id' => DockerRepository::factory(),
             'type' => DockerActivityType::Pull,
             'tag' => fake()->randomElement(['latest', 'v1.0.0', 'v2.0.0', null]),
-            'digest' => 'sha256:' . fake()->sha256(),
+            'digest' => 'sha256:'.fake()->sha256(),
             'size' => fake()->numberBetween(1024, 1024 * 1024 * 100),
             'client_ip' => fake()->ipv4(),
-            'user_agent' => 'docker/' . fake()->semver(),
+            'user_agent' => 'docker/'.fake()->semver(),
         ];
     }
 

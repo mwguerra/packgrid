@@ -112,7 +112,7 @@ class UploadController extends Controller
         return response('', 202, [
             'Location' => url("/v2/{$name}/blobs/uploads/{$upload->id}"),
             'Docker-Upload-UUID' => $upload->id,
-            'Range' => "0-" . ($upload->uploaded_bytes - 1),
+            'Range' => '0-'.($upload->uploaded_bytes - 1),
             'Docker-Distribution-Api-Version' => 'registry/2.0',
         ]);
     }
@@ -156,7 +156,7 @@ class UploadController extends Controller
         // Get digest from query string
         $digest = $request->query('digest');
         if (! $digest) {
-            return $this->errorResponse('DIGEST_INVALID', "digest is required to complete upload", 400);
+            return $this->errorResponse('DIGEST_INVALID', 'digest is required to complete upload', 400);
         }
 
         if (! $this->digestService->validate($digest)) {
@@ -222,7 +222,7 @@ class UploadController extends Controller
         return response('', 204, [
             'Location' => url("/v2/{$name}/blobs/uploads/{$upload->id}"),
             'Docker-Upload-UUID' => $upload->id,
-            'Range' => "0-" . ($upload->uploaded_bytes > 0 ? $upload->uploaded_bytes - 1 : 0),
+            'Range' => '0-'.($upload->uploaded_bytes > 0 ? $upload->uploaded_bytes - 1 : 0),
             'Docker-Distribution-Api-Version' => 'registry/2.0',
         ]);
     }
@@ -276,7 +276,7 @@ class UploadController extends Controller
         $content = $request->getContent();
 
         if (! $this->digestService->verify($content, $digest)) {
-            return $this->errorResponse('DIGEST_INVALID', "content digest does not match provided digest", 400);
+            return $this->errorResponse('DIGEST_INVALID', 'content digest does not match provided digest', 400);
         }
 
         $contentType = $request->header('Content-Type', 'application/octet-stream');

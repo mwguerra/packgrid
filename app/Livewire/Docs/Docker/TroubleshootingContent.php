@@ -31,7 +31,7 @@ class TroubleshootingContent extends Component implements HasSchemas
                             __('docs.docker.trouble.auth.check2'),
                             __('docs.docker.trouble.auth.check3'),
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('amber'),
-                        CodeBlock::make("# Re-login to refresh credentials\ndocker logout " . str_replace(['http://', 'https://'], '', config('app.url')) . "\ndocker login " . str_replace(['http://', 'https://'], '', config('app.url')) . ' -u token -p YOUR_TOKEN')
+                        CodeBlock::make("# Re-login to refresh credentials\ndocker logout ".str_replace(['http://', 'https://'], '', config('app.url'))."\ndocker login ".str_replace(['http://', 'https://'], '', config('app.url')).' -u token -p YOUR_TOKEN')
                             ->language('bash')
                             ->copyable(),
                     ]),

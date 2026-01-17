@@ -12,7 +12,7 @@ class DigestService
     {
         $hash = hash(self::ALGORITHM, $content);
 
-        return self::ALGORITHM . ':' . $hash;
+        return self::ALGORITHM.':'.$hash;
     }
 
     public function calculateFromStream($stream): string
@@ -28,7 +28,7 @@ class DigestService
 
         $hash = hash_final($context);
 
-        return self::ALGORITHM . ':' . $hash;
+        return self::ALGORITHM.':'.$hash;
     }
 
     public function calculateFromFile(string $path): string
@@ -43,7 +43,7 @@ class DigestService
             throw new RuntimeException("Failed to calculate digest for file: {$path}");
         }
 
-        return self::ALGORITHM . ':' . $hash;
+        return self::ALGORITHM.':'.$hash;
     }
 
     public function validate(string $digest): bool
@@ -96,7 +96,7 @@ class DigestService
     {
         // If digest doesn't have algorithm prefix, add it
         if (! str_contains($digest, ':')) {
-            return self::ALGORITHM . ':' . $digest;
+            return self::ALGORITHM.':'.$digest;
         }
 
         return $digest;

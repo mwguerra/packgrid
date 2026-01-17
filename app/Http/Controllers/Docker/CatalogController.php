@@ -33,7 +33,7 @@ class CatalogController extends Controller
         // Add Link header for pagination if there are more results
         if (count($repositories) === $n) {
             $lastRepo = end($repositories);
-            $linkUrl = url("/v2/_catalog?n={$n}&last=" . urlencode($lastRepo));
+            $linkUrl = url("/v2/_catalog?n={$n}&last=".urlencode($lastRepo));
             $headers['Link'] = "<{$linkUrl}>; rel=\"next\"";
         }
 

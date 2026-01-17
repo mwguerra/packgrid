@@ -22,7 +22,7 @@ Route::get('/', function () {
 | Composer Registry Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('packgrid.token')->group(function () {
+Route::middleware(['packgrid.token', 'feature:composer'])->group(function () {
     Route::get('/packages.json', [PackageMetadataController::class, 'index']);
     Route::get('/p/{vendor}/{package}.json', [PackageMetadataController::class, 'show']);
     Route::get('/dist/{owner}/{repo}/{ref}.zip', [PackageProxyController::class, 'download'])
@@ -34,7 +34,7 @@ Route::middleware('packgrid.token')->group(function () {
 | NPM Registry Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('npm')->middleware('packgrid.token')->group(function () {
+Route::prefix('npm')->middleware(['packgrid.token', 'feature:npm'])->group(function () {
     // Scoped packages: @scope/package (two path segments)
     Route::get('/@{scope}/{package}', [NpmMetadataController::class, 'showScoped']);
 
@@ -62,7 +62,7 @@ Route::prefix('npm')->middleware('packgrid.token')->group(function () {
 Route::get('/v2/', VersionController::class);
 
 // Authenticated Docker Registry routes
-Route::prefix('v2')->middleware('docker.auth')->group(function () {
+Route::prefix('v2')->middleware(['docker.auth', 'feature:docker'])->group(function () {
     // Catalog (list all repositories)
     Route::get('/_catalog', CatalogController::class);
 

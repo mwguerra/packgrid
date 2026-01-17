@@ -30,7 +30,7 @@ class TagsRelationManager extends RelationManager
                     ->copyable(),
                 TextColumn::make('manifest.digest')
                     ->label(__('docker_repository.table.digest'))
-                    ->formatStateUsing(fn (?string $state): string => $state ? 'sha256:' . substr(explode(':', $state)[1] ?? '', 0, 12) : '-')
+                    ->formatStateUsing(fn (?string $state): string => $state ? 'sha256:'.substr(explode(':', $state)[1] ?? '', 0, 12) : '-')
                     ->copyable()
                     ->copyableState(fn (DockerTag $record): ?string => $record->manifest?->digest),
                 TextColumn::make('manifest.platform')

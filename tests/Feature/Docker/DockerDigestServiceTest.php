@@ -30,7 +30,7 @@ describe('DigestService Calculation', function () {
 
         fclose($stream);
 
-        expect($digest)->toBe('sha256:' . hash('sha256', $content));
+        expect($digest)->toBe('sha256:'.hash('sha256', $content));
     });
 
     it('calculates correct digest from file', function () {
@@ -42,7 +42,7 @@ describe('DigestService Calculation', function () {
 
         unlink($tempFile);
 
-        expect($digest)->toBe('sha256:' . hash('sha256', $content));
+        expect($digest)->toBe('sha256:'.hash('sha256', $content));
     });
 
     it('throws exception for non-existent file', function () {
@@ -57,31 +57,31 @@ describe('DigestService Calculation', function () {
 
 describe('DigestService Validation', function () {
     it('validates correct sha256 digest format', function () {
-        $validDigest = 'sha256:' . str_repeat('a', 64);
+        $validDigest = 'sha256:'.str_repeat('a', 64);
 
         expect($this->digestService->validate($validDigest))->toBeTrue();
     });
 
     it('rejects digest without colon separator', function () {
-        $invalidDigest = 'sha256' . str_repeat('a', 64);
+        $invalidDigest = 'sha256'.str_repeat('a', 64);
 
         expect($this->digestService->validate($invalidDigest))->toBeFalse();
     });
 
     it('rejects digest with wrong algorithm', function () {
-        $invalidDigest = 'md5:' . str_repeat('a', 32);
+        $invalidDigest = 'md5:'.str_repeat('a', 32);
 
         expect($this->digestService->validate($invalidDigest))->toBeFalse();
     });
 
     it('rejects digest with invalid hash length', function () {
-        $invalidDigest = 'sha256:' . str_repeat('a', 32);
+        $invalidDigest = 'sha256:'.str_repeat('a', 32);
 
         expect($this->digestService->validate($invalidDigest))->toBeFalse();
     });
 
     it('rejects digest with invalid characters', function () {
-        $invalidDigest = 'sha256:' . str_repeat('g', 64);
+        $invalidDigest = 'sha256:'.str_repeat('g', 64);
 
         expect($this->digestService->validate($invalidDigest))->toBeFalse();
     });
@@ -94,14 +94,14 @@ describe('DigestService Validation', function () {
 describe('DigestService Verification', function () {
     it('verifies content matches digest', function () {
         $content = 'Verify this content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         expect($this->digestService->verify($content, $digest))->toBeTrue();
     });
 
     it('fails verification for mismatched content', function () {
         $content = 'Original content';
-        $digest = 'sha256:' . hash('sha256', 'Different content');
+        $digest = 'sha256:'.hash('sha256', 'Different content');
 
         expect($this->digestService->verify($content, $digest))->toBeFalse();
     });
@@ -110,7 +110,7 @@ describe('DigestService Verification', function () {
         $content = 'File verification content';
         $tempFile = tempnam(sys_get_temp_dir(), 'test_');
         file_put_contents($tempFile, $content);
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $result = $this->digestService->verifyFile($tempFile, $digest);
 
@@ -123,7 +123,7 @@ describe('DigestService Verification', function () {
         $content = 'File content';
         $tempFile = tempnam(sys_get_temp_dir(), 'test_');
         file_put_contents($tempFile, $content);
-        $wrongDigest = 'sha256:' . hash('sha256', 'Different content');
+        $wrongDigest = 'sha256:'.hash('sha256', 'Different content');
 
         $result = $this->digestService->verifyFile($tempFile, $wrongDigest);
 
@@ -162,7 +162,7 @@ describe('DigestService Utilities', function () {
     });
 
     it('keeps already normalized digest unchanged', function () {
-        $digest = 'sha256:' . str_repeat('a', 64);
+        $digest = 'sha256:'.str_repeat('a', 64);
 
         expect($this->digestService->normalizeDigest($digest))->toBe($digest);
     });

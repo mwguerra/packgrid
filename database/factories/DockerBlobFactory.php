@@ -18,10 +18,10 @@ class DockerBlobFactory extends Factory
         $content = fake()->sha256();
 
         return [
-            'digest' => 'sha256:' . hash('sha256', $content),
+            'digest' => 'sha256:'.hash('sha256', $content),
             'size' => fake()->numberBetween(1024, 1024 * 1024 * 100),
             'media_type' => DockerMediaType::LayerTarGzip,
-            'storage_path' => 'docker/blobs/' . substr(hash('sha256', $content), 0, 2) . '/' . hash('sha256', $content),
+            'storage_path' => 'docker/blobs/'.substr(hash('sha256', $content), 0, 2).'/'.hash('sha256', $content),
             'reference_count' => 0,
         ];
     }
@@ -31,8 +31,8 @@ class DockerBlobFactory extends Factory
         $hash = str_contains($digest, ':') ? explode(':', $digest)[1] : $digest;
 
         return $this->state([
-            'digest' => 'sha256:' . $hash,
-            'storage_path' => 'docker/blobs/' . substr($hash, 0, 2) . '/' . $hash,
+            'digest' => 'sha256:'.$hash,
+            'storage_path' => 'docker/blobs/'.substr($hash, 0, 2).'/'.$hash,
         ]);
     }
 

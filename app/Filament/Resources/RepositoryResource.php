@@ -8,6 +8,7 @@ use App\Enums\SyncStatus;
 use App\Filament\Resources\RepositoryResource\Pages;
 use App\Models\Repository;
 use App\Services\RepositorySyncService;
+use App\Support\PackgridSettings;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -44,6 +45,11 @@ class RepositoryResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return PackgridSettings::repositoriesEnabled();
+    }
 
     public static function getModelLabel(): string
     {
@@ -92,14 +98,12 @@ class RepositoryResource extends Resource
                             ->columnSpanFull(),
                         Select::make('format')
                             ->label(__('repository.field.format'))
-                            ->options([
-                                PackageFormat::Composer->value => PackageFormat::Composer->label(),
-                                PackageFormat::Npm->value => PackageFormat::Npm->label(),
-                            ])
+                            ->options(PackgridSettings::getEnabledFormats())
                             ->required()
-                            ->default(PackageFormat::Composer->value)
+                            ->default(PackgridSettings::getDefaultFormat())
                             ->helperText(__('repository.field.format_helper'))
-                            ->hiddenOn('create'),
+                            ->hiddenOn('create')
+                            ->visible(fn (): bool => PackgridSettings::hasMultipleFormats()),
                     ])
                     ->columnSpanFull(),
 
@@ -245,10 +249,8 @@ class RepositoryResource extends Resource
             ->filters([
                 SelectFilter::make('format')
                     ->label(__('repository.field.format'))
-                    ->options([
-                        PackageFormat::Composer->value => PackageFormat::Composer->label(),
-                        PackageFormat::Npm->value => PackageFormat::Npm->label(),
-                    ]),
+                    ->options(PackgridSettings::getEnabledFormats())
+                    ->visible(fn (): bool => PackgridSettings::hasMultipleFormats()),
                 SelectFilter::make('visibility')
                     ->label(__('repository.field.visibility'))
                     ->options([

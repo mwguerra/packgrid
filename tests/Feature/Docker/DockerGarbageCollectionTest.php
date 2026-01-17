@@ -21,11 +21,11 @@ beforeEach(function () {
 describe('GarbageCollectionService Orphan Detection', function () {
     it('finds blobs with no repository associations', function () {
         $content = 'Orphan blob content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $orphanBlob = $this->blobService->storeBlob($digest, $content);
 
         $content2 = 'Referenced blob content';
-        $digest2 = 'sha256:' . hash('sha256', $content2);
+        $digest2 = 'sha256:'.hash('sha256', $content2);
         $referencedBlob = $this->blobService->storeBlob($digest2, $content2);
         $repository = DockerRepository::factory()->create();
         $this->blobService->linkBlobToRepository($referencedBlob, $repository);
@@ -117,7 +117,7 @@ describe('GarbageCollectionService Stale Uploads', function () {
 describe('GarbageCollectionService Execute', function () {
     it('collects orphaned blobs', function () {
         $content = 'Orphan to collect';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $storagePath = $blob->storage_path;
 
@@ -147,7 +147,7 @@ describe('GarbageCollectionService Execute', function () {
 
     it('dry run does not delete orphaned blobs', function () {
         $content = 'Orphan to keep in dry run';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $blobId = $blob->id;
 
@@ -174,7 +174,7 @@ describe('GarbageCollectionService Execute', function () {
 
     it('returns detailed results', function () {
         $content = 'Orphan with details';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
 
         $results = $this->gcService->collectGarbage();
@@ -186,7 +186,7 @@ describe('GarbageCollectionService Execute', function () {
 
     it('preserves referenced blobs', function () {
         $content = 'Referenced blob';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
         $this->blobService->linkBlobToRepository($blob, $repository);
@@ -205,7 +205,7 @@ describe('GarbageCollectionService Execute', function () {
 describe('GarbageCollectionService Recalculate References', function () {
     it('recalculates blob reference counts', function () {
         $content = 'Blob with wrong count';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
 
@@ -242,8 +242,8 @@ describe('GarbageCollectionService Statistics', function () {
         // Create some blobs
         $content1 = str_repeat('a', 1000);
         $content2 = str_repeat('b', 2000);
-        $digest1 = 'sha256:' . hash('sha256', $content1);
-        $digest2 = 'sha256:' . hash('sha256', $content2);
+        $digest1 = 'sha256:'.hash('sha256', $content1);
+        $digest2 = 'sha256:'.hash('sha256', $content2);
 
         $orphanBlob = $this->blobService->storeBlob($digest1, $content1);
         $referencedBlob = $this->blobService->storeBlob($digest2, $content2);

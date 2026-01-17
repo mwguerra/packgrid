@@ -21,13 +21,13 @@ class DockerManifestFactory extends Factory
             'mediaType' => DockerMediaType::ManifestV2->value,
             'config' => [
                 'mediaType' => DockerMediaType::ContainerConfig->value,
-                'digest' => 'sha256:' . fake()->sha256(),
+                'digest' => 'sha256:'.fake()->sha256(),
                 'size' => 1024,
             ],
             'layers' => [
                 [
                     'mediaType' => DockerMediaType::LayerTarGzip->value,
-                    'digest' => 'sha256:' . fake()->sha256(),
+                    'digest' => 'sha256:'.fake()->sha256(),
                     'size' => 10240,
                 ],
             ],
@@ -35,12 +35,12 @@ class DockerManifestFactory extends Factory
 
         return [
             'docker_repository_id' => DockerRepository::factory(),
-            'digest' => 'sha256:' . hash('sha256', $content),
+            'digest' => 'sha256:'.hash('sha256', $content),
             'media_type' => DockerMediaType::ManifestV2,
             'content' => $content,
             'size' => strlen($content),
-            'layer_digests' => ['sha256:' . fake()->sha256()],
-            'config_digest' => 'sha256:' . fake()->sha256(),
+            'layer_digests' => ['sha256:'.fake()->sha256()],
+            'config_digest' => 'sha256:'.fake()->sha256(),
             'architecture' => 'amd64',
             'os' => 'linux',
         ];

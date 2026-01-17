@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'packgrid.token' => \App\Http\Middleware\ValidatePackgridToken::class,
             'docker.auth' => \App\Http\Middleware\DockerRegistryAuth::class,
+            'feature' => \App\Http\Middleware\CheckFeatureEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

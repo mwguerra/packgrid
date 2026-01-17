@@ -885,5 +885,18 @@
     "api.error.invalid_token": "Token inválido.",
     "api.error.token_disabled": "El token está deshabilitado o expirado.",
     "api.error.ip_denied": "Acceso denegado desde esta dirección IP.",
-    "api.error.domain_denied": "Acceso denegado desde este dominio."
+    "api.error.domain_denied": "Acceso denegado desde este dominio.",
+
+    "settings.title": "Configuración",
+    "settings.section.features": "Funcionalidades",
+    "settings.section.features_description": "Activa o desactiva las funcionalidades del repositorio de paquetes. Al menos una funcionalidad debe estar activa.",
+    "settings.field.composer_enabled": "Composer (PHP)",
+    "settings.field.composer_enabled_helper": "Activar registro de paquetes Composer para paquetes PHP.",
+    "settings.field.npm_enabled": "NPM (Node.js)",
+    "settings.field.npm_enabled_helper": "Activar registro de paquetes NPM para paquetes Node.js.",
+    "settings.field.docker_enabled": "Docker (OCI)",
+    "settings.field.docker_enabled_helper": "Activar registro de contenedores Docker para imágenes OCI.",
+    "settings.action.save": "Guardar Configuración",
+    "settings.notification.saved": "Configuración guardada correctamente",
+    "settings.notification.at_least_one_required": "Al menos una funcionalidad debe estar activa"
 }

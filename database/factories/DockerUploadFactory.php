@@ -20,7 +20,7 @@ class DockerUploadFactory extends Factory
         return [
             'docker_repository_id' => DockerRepository::factory(),
             'status' => DockerUploadStatus::Pending,
-            'temp_path' => storage_path('app/docker-uploads/' . Str::uuid()->toString()),
+            'temp_path' => storage_path('app/docker-uploads/'.Str::uuid()->toString()),
             'uploaded_bytes' => 0,
             'expected_size' => null,
             'expected_digest' => null,

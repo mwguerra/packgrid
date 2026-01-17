@@ -61,7 +61,7 @@ class DockerGarbageCollectionCommand extends Command
             // Summary
             $this->newLine();
             $action = $dryRun ? 'Would delete' : 'Deleted';
-            $this->info("Summary:");
+            $this->info('Summary:');
             $this->line("  {$action} {$results['orphaned_blobs']['count']} orphaned blobs ({$this->formatSize($results['orphaned_blobs']['size'])})");
             $this->line("  {$action} {$results['stale_uploads']['count']} stale uploads");
 
@@ -150,6 +150,6 @@ class DockerGarbageCollectionCommand extends Command
             $unitIndex++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$unitIndex];
+        return round($bytes, 2).' '.$units[$unitIndex];
     }
 }

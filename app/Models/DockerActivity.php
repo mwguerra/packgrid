@@ -41,7 +41,7 @@ class DockerActivity extends Model
 
         $parts = explode(':', $this->digest);
 
-        return $parts[0] . ':' . substr($parts[1] ?? '', 0, 12);
+        return $parts[0].':'.substr($parts[1] ?? '', 0, 12);
     }
 
     public function getFormattedSizeAttribute(): ?string
@@ -59,7 +59,7 @@ class DockerActivity extends Model
             $unitIndex++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$unitIndex];
+        return round($bytes, 2).' '.$units[$unitIndex];
     }
 
     public static function logPush(DockerRepository $repository, ?string $tag, ?string $digest, ?int $size): self

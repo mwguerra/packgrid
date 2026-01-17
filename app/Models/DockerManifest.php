@@ -63,7 +63,7 @@ class DockerManifest extends Model
             $unitIndex++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$unitIndex];
+        return round($bytes, 2).' '.$units[$unitIndex];
     }
 
     public function isMultiArch(): bool

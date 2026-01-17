@@ -20,8 +20,8 @@ beforeEach(function () {
 
 function createManifestContent(array $layers = [], ?string $configDigest = null): string
 {
-    $configDigest = $configDigest ?? 'sha256:' . fake()->sha256();
-    $layerDigests = $layers ?: ['sha256:' . fake()->sha256()];
+    $configDigest = $configDigest ?? 'sha256:'.fake()->sha256();
+    $layerDigests = $layers ?: ['sha256:'.fake()->sha256()];
 
     return json_encode([
         'schemaVersion' => 2,
@@ -47,7 +47,7 @@ function createManifestListContent(): string
         'manifests' => [
             [
                 'mediaType' => DockerMediaType::ManifestV2->value,
-                'digest' => 'sha256:' . fake()->sha256(),
+                'digest' => 'sha256:'.fake()->sha256(),
                 'size' => 1024,
                 'platform' => [
                     'architecture' => 'amd64',
@@ -56,7 +56,7 @@ function createManifestListContent(): string
             ],
             [
                 'mediaType' => DockerMediaType::ManifestV2->value,
-                'digest' => 'sha256:' . fake()->sha256(),
+                'digest' => 'sha256:'.fake()->sha256(),
                 'size' => 1024,
                 'platform' => [
                     'architecture' => 'arm64',
@@ -74,7 +74,7 @@ function createManifestListContent(): string
 describe('ManifestService Store', function () {
     it('stores a manifest with tag reference', function () {
         $content = createManifestContent();
-        $expectedDigest = 'sha256:' . hash('sha256', $content);
+        $expectedDigest = 'sha256:'.hash('sha256', $content);
 
         $manifest = $this->manifestService->storeManifest(
             $this->repository,
@@ -94,7 +94,7 @@ describe('ManifestService Store', function () {
 
     it('stores a manifest with digest reference', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $manifest = $this->manifestService->storeManifest(
             $this->repository,
@@ -110,8 +110,8 @@ describe('ManifestService Store', function () {
     });
 
     it('updates existing tag to point to new manifest', function () {
-        $content1 = createManifestContent(['sha256:' . fake()->sha256()]);
-        $content2 = createManifestContent(['sha256:' . fake()->sha256()]);
+        $content1 = createManifestContent(['sha256:'.fake()->sha256()]);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
 
         $manifest1 = $this->manifestService->storeManifest(
             $this->repository,
@@ -143,7 +143,7 @@ describe('ManifestService Store', function () {
     });
 
     it('parses layer digests from manifest', function () {
-        $layerDigest = 'sha256:' . fake()->sha256();
+        $layerDigest = 'sha256:'.fake()->sha256();
         $content = createManifestContent([$layerDigest]);
 
         $manifest = $this->manifestService->storeManifest(
@@ -157,7 +157,7 @@ describe('ManifestService Store', function () {
     });
 
     it('parses config digest from manifest', function () {
-        $configDigest = 'sha256:' . fake()->sha256();
+        $configDigest = 'sha256:'.fake()->sha256();
         $content = createManifestContent([], $configDigest);
 
         $manifest = $this->manifestService->storeManifest(
@@ -220,7 +220,7 @@ describe('ManifestService Retrieve', function () {
 
     it('gets manifest by digest reference', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $storedManifest = $this->manifestService->storeManifest(
             $this->repository,
             'latest',
@@ -243,7 +243,7 @@ describe('ManifestService Retrieve', function () {
     it('returns null for non-existent digest', function () {
         $manifest = $this->manifestService->getManifest(
             $this->repository,
-            'sha256:' . str_repeat('a', 64)
+            'sha256:'.str_repeat('a', 64)
         );
 
         expect($manifest)->toBeNull();
@@ -251,7 +251,7 @@ describe('ManifestService Retrieve', function () {
 
     it('gets manifest by digest globally', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $storedManifest = $this->manifestService->storeManifest(
             $this->repository,
             'latest',
@@ -273,7 +273,7 @@ describe('ManifestService Retrieve', function () {
 describe('ManifestService Delete', function () {
     it('deletes manifest by digest', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $this->manifestService->storeManifest(
             $this->repository,
             'latest',
@@ -291,7 +291,7 @@ describe('ManifestService Delete', function () {
     it('returns false for non-existent manifest', function () {
         $result = $this->manifestService->deleteManifest(
             $this->repository,
-            'sha256:' . str_repeat('a', 64)
+            'sha256:'.str_repeat('a', 64)
         );
 
         expect($result)->toBeFalse();
@@ -306,7 +306,7 @@ describe('ManifestService Delete', function () {
             DockerMediaType::ManifestV2->value
         );
 
-        $this->manifestService->deleteManifest($this->repository, 'sha256:' . hash('sha256', $content));
+        $this->manifestService->deleteManifest($this->repository, 'sha256:'.hash('sha256', $content));
 
         expect(DockerActivity::where('type', 'delete')->count())->toBe(1);
     });
@@ -318,8 +318,8 @@ describe('ManifestService Delete', function () {
 
 describe('ManifestService Tags', function () {
     it('lists tags for repository', function () {
-        $content1 = createManifestContent(['sha256:' . fake()->sha256()]);
-        $content2 = createManifestContent(['sha256:' . fake()->sha256()]);
+        $content1 = createManifestContent(['sha256:'.fake()->sha256()]);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
 
         $this->manifestService->storeManifest(
             $this->repository,
@@ -342,7 +342,7 @@ describe('ManifestService Tags', function () {
 
     it('paginates tags with limit', function () {
         for ($i = 1; $i <= 5; $i++) {
-            $content = createManifestContent(['sha256:' . fake()->sha256()]);
+            $content = createManifestContent(['sha256:'.fake()->sha256()]);
             $this->manifestService->storeManifest(
                 $this->repository,
                 "v{$i}.0.0",
@@ -358,7 +358,7 @@ describe('ManifestService Tags', function () {
 
     it('paginates tags with last marker', function () {
         for ($i = 1; $i <= 5; $i++) {
-            $content = createManifestContent(['sha256:' . fake()->sha256()]);
+            $content = createManifestContent(['sha256:'.fake()->sha256()]);
             $this->manifestService->storeManifest(
                 $this->repository,
                 "v{$i}.0.0",
@@ -402,7 +402,7 @@ describe('ManifestService Tags', function () {
             DockerMediaType::ManifestV2->value
         );
 
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $this->manifestService->deleteTag($this->repository, 'latest');
 
@@ -413,7 +413,7 @@ describe('ManifestService Tags', function () {
 
     it('deletes manifest when last tag is deleted', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $this->manifestService->storeManifest(
             $this->repository,
@@ -449,7 +449,7 @@ describe('ManifestService Exists', function () {
 
     it('checks manifest exists by digest', function () {
         $content = createManifestContent();
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $this->manifestService->storeManifest(
             $this->repository,
             'latest',
@@ -458,7 +458,7 @@ describe('ManifestService Exists', function () {
         );
 
         expect($this->manifestService->manifestExists($this->repository, $digest))->toBeTrue()
-            ->and($this->manifestService->manifestExists($this->repository, 'sha256:' . str_repeat('a', 64)))->toBeFalse();
+            ->and($this->manifestService->manifestExists($this->repository, 'sha256:'.str_repeat('a', 64)))->toBeFalse();
     });
 });
 

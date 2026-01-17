@@ -30,6 +30,6 @@ class DockerTag extends Model
 
     public function getFullNameAttribute(): string
     {
-        return $this->repository->name . ':' . $this->name;
+        return $this->repository->name.':'.$this->name;
     }
 }

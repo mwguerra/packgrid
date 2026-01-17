@@ -39,7 +39,7 @@ class TagsController extends Controller
         // Add Link header for pagination if there are more results
         if (count($tags) === $n) {
             $lastTag = end($tags);
-            $linkUrl = url("/v2/{$name}/tags/list?n={$n}&last=" . urlencode($lastTag));
+            $linkUrl = url("/v2/{$name}/tags/list?n={$n}&last=".urlencode($lastTag));
             $headers['Link'] = "<{$linkUrl}>; rel=\"next\"";
         }
 

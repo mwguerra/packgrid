@@ -885,5 +885,18 @@
     "api.error.invalid_token": "Jeton invalide.",
     "api.error.token_disabled": "Le jeton est désactivé ou expiré.",
     "api.error.ip_denied": "Accès refusé depuis cette adresse IP.",
-    "api.error.domain_denied": "Accès refusé depuis ce domaine."
+    "api.error.domain_denied": "Accès refusé depuis ce domaine.",
+
+    "settings.title": "Paramètres",
+    "settings.section.features": "Fonctionnalités",
+    "settings.section.features_description": "Activez ou désactivez les fonctionnalités du dépôt de paquets. Au moins une fonctionnalité doit être activée.",
+    "settings.field.composer_enabled": "Composer (PHP)",
+    "settings.field.composer_enabled_helper": "Activer le registre de paquets Composer pour les paquets PHP.",
+    "settings.field.npm_enabled": "NPM (Node.js)",
+    "settings.field.npm_enabled_helper": "Activer le registre de paquets NPM pour les paquets Node.js.",
+    "settings.field.docker_enabled": "Docker (OCI)",
+    "settings.field.docker_enabled_helper": "Activer le registre de conteneurs Docker pour les images OCI.",
+    "settings.action.save": "Enregistrer les Paramètres",
+    "settings.notification.saved": "Paramètres enregistrés avec succès",
+    "settings.notification.at_least_one_required": "Au moins une fonctionnalité doit être activée"
 }

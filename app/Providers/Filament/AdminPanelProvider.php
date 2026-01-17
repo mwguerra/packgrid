@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
+use App\Filament\Pages\Settings;
 use App\Filament\Widgets\AttentionRequired;
 use App\Filament\Widgets\PackgridStats;
 use App\Filament\Widgets\SyncActivity;
@@ -13,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -41,6 +43,12 @@ class AdminPanelProvider extends PanelProvider
                     ->recoveryCodeCount(8),
             ])
             ->globalSearch(false)
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label(fn () => __('settings.title'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->url(fn () => Settings::getUrl()),
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])

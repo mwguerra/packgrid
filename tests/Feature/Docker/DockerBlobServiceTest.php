@@ -19,7 +19,7 @@ beforeEach(function () {
 describe('BlobStorageService Store', function () {
     it('stores a blob and creates database record', function () {
         $content = 'Test blob content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $blob = $this->blobService->storeBlob($digest, $content);
 
@@ -33,7 +33,7 @@ describe('BlobStorageService Store', function () {
 
     it('returns existing blob if digest already exists', function () {
         $content = 'Duplicate content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         $blob1 = $this->blobService->storeBlob($digest, $content);
         $blob2 = $this->blobService->storeBlob($digest, $content);
@@ -44,7 +44,7 @@ describe('BlobStorageService Store', function () {
 
     it('throws exception when digest does not match content', function () {
         $content = 'Test content';
-        $wrongDigest = 'sha256:' . hash('sha256', 'Different content');
+        $wrongDigest = 'sha256:'.hash('sha256', 'Different content');
 
         expect(fn () => $this->blobService->storeBlob($wrongDigest, $content))
             ->toThrow(RuntimeException::class, 'Content digest does not match');
@@ -52,7 +52,7 @@ describe('BlobStorageService Store', function () {
 
     it('stores blob from file', function () {
         $content = 'File blob content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $tempFile = tempnam(sys_get_temp_dir(), 'blob_');
         file_put_contents($tempFile, $content);
 
@@ -74,7 +74,7 @@ describe('BlobStorageService Store', function () {
 describe('BlobStorageService Retrieve', function () {
     it('checks if blob exists by digest', function () {
         $content = 'Test content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
 
         expect($this->blobService->blobExists($digest))->toBeFalse();
 
@@ -85,7 +85,7 @@ describe('BlobStorageService Retrieve', function () {
 
     it('gets blob by digest', function () {
         $content = 'Retrievable content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $storedBlob = $this->blobService->storeBlob($digest, $content);
 
         $retrievedBlob = $this->blobService->getBlob($digest);
@@ -95,14 +95,14 @@ describe('BlobStorageService Retrieve', function () {
     });
 
     it('returns null for non-existent blob', function () {
-        $digest = 'sha256:' . str_repeat('a', 64);
+        $digest = 'sha256:'.str_repeat('a', 64);
 
         expect($this->blobService->getBlob($digest))->toBeNull();
     });
 
     it('gets blob content', function () {
         $content = 'Content to retrieve';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
 
         $retrievedContent = $this->blobService->getBlobContent($blob);
@@ -118,7 +118,7 @@ describe('BlobStorageService Retrieve', function () {
 describe('BlobStorageService Linking', function () {
     it('links blob to repository', function () {
         $content = 'Linkable content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
 
@@ -131,7 +131,7 @@ describe('BlobStorageService Linking', function () {
 
     it('does not duplicate links', function () {
         $content = 'Link once content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
 
@@ -145,7 +145,7 @@ describe('BlobStorageService Linking', function () {
 
     it('unlinks blob from repository', function () {
         $content = 'Unlinkable content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
 
@@ -165,7 +165,7 @@ describe('BlobStorageService Linking', function () {
 describe('BlobStorageService Mount', function () {
     it('mounts blob from one repository to another', function () {
         $content = 'Mountable content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $sourceRepo = DockerRepository::factory()->create();
         $targetRepo = DockerRepository::factory()->create();
@@ -182,7 +182,7 @@ describe('BlobStorageService Mount', function () {
     it('fails to mount non-existent blob', function () {
         $sourceRepo = DockerRepository::factory()->create();
         $targetRepo = DockerRepository::factory()->create();
-        $nonExistentDigest = 'sha256:' . str_repeat('a', 64);
+        $nonExistentDigest = 'sha256:'.str_repeat('a', 64);
 
         $result = $this->blobService->mountBlob($nonExistentDigest, $sourceRepo, $targetRepo);
 
@@ -191,7 +191,7 @@ describe('BlobStorageService Mount', function () {
 
     it('fails to mount blob not linked to source repository', function () {
         $content = 'Unmounted content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $this->blobService->storeBlob($digest, $content);
         $sourceRepo = DockerRepository::factory()->create();
         $targetRepo = DockerRepository::factory()->create();
@@ -243,14 +243,14 @@ describe('BlobStorageService Chunked Upload', function () {
         $upload->refresh();
         expect($upload->status->value)->toBe('complete')
             ->and($blob)->toBeInstanceOf(DockerBlob::class)
-            ->and($blob->digest)->toBe('sha256:' . hash('sha256', $content));
+            ->and($blob->digest)->toBe('sha256:'.hash('sha256', $content));
     });
 
     it('verifies digest on upload completion', function () {
         $repository = DockerRepository::factory()->create();
         $upload = $this->blobService->initChunkedUpload($repository);
         $content = 'Content to verify';
-        $expectedDigest = 'sha256:' . hash('sha256', $content);
+        $expectedDigest = 'sha256:'.hash('sha256', $content);
 
         $this->blobService->appendChunk($upload, $content, 0, strlen($content) - 1);
         $blob = $this->blobService->completeChunkedUpload($upload, $expectedDigest);
@@ -262,7 +262,7 @@ describe('BlobStorageService Chunked Upload', function () {
         $repository = DockerRepository::factory()->create();
         $upload = $this->blobService->initChunkedUpload($repository);
         $content = 'Mismatched content';
-        $wrongDigest = 'sha256:' . str_repeat('a', 64);
+        $wrongDigest = 'sha256:'.str_repeat('a', 64);
 
         $this->blobService->appendChunk($upload, $content, 0, strlen($content) - 1);
 
@@ -290,7 +290,7 @@ describe('BlobStorageService Chunked Upload', function () {
 describe('BlobStorageService Delete', function () {
     it('deletes orphaned blob', function () {
         $content = 'Deletable content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $storagePath = $blob->storage_path;
 
@@ -302,7 +302,7 @@ describe('BlobStorageService Delete', function () {
 
     it('prevents deletion of referenced blob', function () {
         $content = 'Referenced content';
-        $digest = 'sha256:' . hash('sha256', $content);
+        $digest = 'sha256:'.hash('sha256', $content);
         $blob = $this->blobService->storeBlob($digest, $content);
         $repository = DockerRepository::factory()->create();
         $this->blobService->linkBlobToRepository($blob, $repository);
@@ -320,8 +320,8 @@ describe('BlobStorageService Statistics', function () {
     it('gets orphaned blobs', function () {
         $content1 = 'Orphan content 1';
         $content2 = 'Referenced content';
-        $digest1 = 'sha256:' . hash('sha256', $content1);
-        $digest2 = 'sha256:' . hash('sha256', $content2);
+        $digest1 = 'sha256:'.hash('sha256', $content1);
+        $digest2 = 'sha256:'.hash('sha256', $content2);
 
         $orphanBlob = $this->blobService->storeBlob($digest1, $content1);
         $referencedBlob = $this->blobService->storeBlob($digest2, $content2);
@@ -338,8 +338,8 @@ describe('BlobStorageService Statistics', function () {
     it('gets total storage size', function () {
         $content1 = str_repeat('a', 1000);
         $content2 = str_repeat('b', 2000);
-        $digest1 = 'sha256:' . hash('sha256', $content1);
-        $digest2 = 'sha256:' . hash('sha256', $content2);
+        $digest1 = 'sha256:'.hash('sha256', $content1);
+        $digest2 = 'sha256:'.hash('sha256', $content2);
 
         $this->blobService->storeBlob($digest1, $content1);
         $this->blobService->storeBlob($digest2, $content2);

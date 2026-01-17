@@ -7,6 +7,7 @@ use App\Enums\RepositoryVisibility;
 use App\Filament\Resources\DockerRepositoryResource\Pages;
 use App\Filament\Resources\DockerRepositoryResource\RelationManagers;
 use App\Models\DockerRepository;
+use App\Support\PackgridSettings;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -40,6 +41,11 @@ class DockerRepositoryResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return PackgridSettings::dockerEnabled();
+    }
 
     public static function getModelLabel(): string
     {
@@ -147,7 +153,7 @@ class DockerRepositoryResource extends Resource
                             $parts[] = "<span title=\"{$pushTooltip}\" style=\"display:inline-flex;align-items:center;cursor:help\">{$record->last_push_at->diffForHumans()}</span>";
                         }
 
-                        return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">' . implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts) . '</span>');
+                        return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">'.implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts).'</span>');
                     }),
                 TextColumn::make('tag_count')
                     ->label(__('docker_repository.table.tags'))

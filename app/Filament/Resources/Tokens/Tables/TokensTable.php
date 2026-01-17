@@ -153,10 +153,11 @@ class TokensTable
                     ->extraAttributes(fn (Token $record): array => [
                         'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
                     ]),
-                ViewAction::make(),
-                EditAction::make(),
                 ActionGroup::make([
-                    DeleteAction::make(),
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->separator(),
                 ]),
             ])
             ->toolbarActions([

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\CredentialStatus;
 use App\Filament\Resources\CredentialResource\Pages;
+use App\Filament\Resources\CredentialResource\RelationManagers;
 use App\Models\Credential;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -188,6 +189,13 @@ class CredentialResource extends Resource
                 ]),
             ])
             ->defaultSort('name');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\RepositoriesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

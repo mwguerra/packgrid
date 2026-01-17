@@ -10,12 +10,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TokensTable
 {
@@ -28,17 +28,16 @@ class TokensTable
         return $host.($port ? ':'.$port : '');
     }
 
-    private static function getNpmrcContent(string $token): string
+    private static function getAuthJsonContent(string $token): string
     {
-        $url = config('app.url');
-        $host = parse_url($url, PHP_URL_HOST) ?: 'packgrid.mwguerra.com';
-        $port = parse_url($url, PHP_URL_PORT);
-        $scheme = parse_url($url, PHP_URL_SCHEME) ?: 'https';
-
-        $hostWithPort = $host.($port ? ':'.$port : '');
-        $registryUrl = $scheme.'://'.$hostWithPort.'/npm/';
-
-        return "@myorg:registry={$registryUrl}\n//{$hostWithPort}/npm/:_authToken={$token}";
+        return json_encode([
+            'http-basic' => [
+                self::getHost() => [
+                    'username' => 'composer',
+                    'password' => $token,
+                ],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     public static function configure(Table $table): Table
@@ -166,51 +165,33 @@ class TokensTable
                 Action::make('copyToken')
                     ->label(__('token.action.copy'))
                     ->icon('heroicon-o-clipboard-document')
-                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode($record->token).'); $tooltip('.json_encode(__('token.notification.copied')).', { timeout: 1500 })'),
-                Action::make('copyAuthItem')
-                    ->label(__('token.action.copy_auth_item'))
-                    ->icon('heroicon-o-clipboard-document-list')
-                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode(json_encode([
-                        self::getHost() => [
-                            'username' => 'composer',
-                            'password' => $record->token,
-                        ],
-                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)).'); $tooltip('.json_encode(__('token.notification.auth_item_copied')).', { timeout: 1500 })'),
-                Action::make('downloadAuthJson')
-                    ->label(__('token.action.download_auth_json'))
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (Token $record): StreamedResponse {
-                        $authJson = json_encode([
-                            'http-basic' => [
-                                self::getHost() => [
-                                    'username' => 'composer',
-                                    'password' => $record->token,
-                                ],
-                            ],
-                        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                    ->action(function (Token $record): void {
+                        $token = $record->token;
 
-                        return response()->streamDownload(function () use ($authJson): void {
-                            echo $authJson;
-                        }, 'auth.json', [
-                            'Content-Type' => 'application/json',
-                        ]);
-                    }),
-                Action::make('copyNpmrc')
-                    ->label(__('token.action.copy_npmrc'))
+                        Notification::make()
+                            ->title(__('token.notification.copied'))
+                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($token).'</code></pre>'))
+                            ->success()
+                            ->send();
+                    })
+                    ->extraAttributes(fn (Token $record): array => [
+                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
+                    ]),
+                Action::make('copyAuthJson')
+                    ->label(__('token.action.copy_auth_json'))
                     ->icon('heroicon-o-clipboard-document-list')
-                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).'); $tooltip('.json_encode(__('token.notification.npmrc_copied')).', { timeout: 1500 })'),
-                Action::make('downloadNpmrc')
-                    ->label(__('token.action.download_npmrc'))
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (Token $record): StreamedResponse {
-                        $npmrc = self::getNpmrcContent($record->token);
+                    ->action(function (Token $record): void {
+                        $authJson = self::getAuthJsonContent($record->token);
 
-                        return response()->streamDownload(function () use ($npmrc): void {
-                            echo $npmrc;
-                        }, '.npmrc', [
-                            'Content-Type' => 'text/plain',
-                        ]);
-                    }),
+                        Notification::make()
+                            ->title(__('token.notification.auth_json_copied'))
+                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($authJson).'</code></pre>'))
+                            ->success()
+                            ->send();
+                    })
+                    ->extraAttributes(fn (Token $record): array => [
+                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getAuthJsonContent($record->token)).')',
+                    ]),
                 ActionGroup::make([
                     ActionGroup::make([
                         ViewAction::make(),

@@ -175,6 +175,17 @@ HELP;
             note("Production mode - access at: {$newEnv['APP_URL']}");
         }
 
+        $this->newLine();
+        note('Scheduled Tasks (defined in routes/console.php):');
+        $this->line('  - Repository sync: Every 4 hours (0 */4 * * *)');
+        $this->line('  - Credential testing: Daily at 6 AM (0 6 * * *)');
+        $this->newLine();
+        note('To activate the scheduler on production, add this cron entry:');
+        $this->line('  * * * * * cd '.base_path().' && php artisan schedule:run >> /dev/null 2>&1');
+        $this->newLine();
+        note('Verify the schedule with:');
+        $this->line('  php artisan schedule:list');
+
         return Command::SUCCESS;
     }
 

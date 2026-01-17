@@ -40,6 +40,11 @@ class TokensTable
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
+    private static function getNpmrcContent(string $token): string
+    {
+        return '//'.self::getHost().'/:_authToken='.$token;
+    }
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -191,6 +196,21 @@ class TokensTable
                     })
                     ->extraAttributes(fn (Token $record): array => [
                         'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getAuthJsonContent($record->token)).')',
+                    ]),
+                Action::make('copyNpmrc')
+                    ->label(__('token.action.copy_npmrc'))
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->action(function (Token $record): void {
+                        $npmrc = self::getNpmrcContent($record->token);
+
+                        Notification::make()
+                            ->title(__('token.notification.npmrc_copied'))
+                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($npmrc).'</code></pre>'))
+                            ->success()
+                            ->send();
+                    })
+                    ->extraAttributes(fn (Token $record): array => [
+                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).')',
                     ]),
                 ActionGroup::make([
                     ActionGroup::make([

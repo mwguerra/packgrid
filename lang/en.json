@@ -165,6 +165,8 @@
     "token.notification.auth_item_copied": "Auth item copied to clipboard",
     "token.action.copy_auth_json": "Copy auth.json",
     "token.notification.auth_json_copied": "auth.json copied to clipboard",
+    "token.action.copy_npmrc": "Copy .npmrc",
+    "token.notification.npmrc_copied": ".npmrc copied to clipboard",
     "token.action.copy_composer_setup": "Copy Composer Setup",
     "token.notification.composer_setup_copied": "Composer repository setup copied to clipboard",
     "token.tooltip.last_used": "Last used :time",

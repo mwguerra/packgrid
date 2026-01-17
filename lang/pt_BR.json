@@ -127,6 +127,7 @@
     "credential.infolist.repository_plural": "{0} repositórios|{1} repositório|[2,*] repositórios",
     "credential.infolist.last_checked": "Última Verificação",
     "credential.infolist.last_error": "Último Erro",
+    "credential.relation.repositories": "Repositórios usando esta credencial",
 
     "token.title": "Tokens",
     "token.navigation_label": "Tokens",

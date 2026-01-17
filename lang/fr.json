@@ -127,6 +127,7 @@
     "credential.infolist.repository_plural": "{0} dépôts|{1} dépôt|[2,*] dépôts",
     "credential.infolist.last_checked": "Dernière Vérification",
     "credential.infolist.last_error": "Dernière Erreur",
+    "credential.relation.repositories": "Dépôts utilisant cette identification",
 
     "token.title": "Jetons",
     "token.navigation_label": "Jetons",

@@ -164,6 +164,8 @@
     "token.notification.auth_item_copied": "Auth item copied to clipboard",
     "token.action.copy_auth_item": "Copy Auth Item",
     "token.action.download_auth_json": "Download auth.json",
+    "token.action.copy_composer_setup": "Copy Composer Setup",
+    "token.notification.composer_setup_copied": "Composer repository setup copied to clipboard",
     "token.tooltip.last_used": "Last used :time",
 
     "docs.title": "Documentation",

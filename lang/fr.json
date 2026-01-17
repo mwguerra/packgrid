@@ -164,6 +164,8 @@
     "token.notification.auth_item_copied": "Élément d'authentification copié dans le presse-papiers",
     "token.action.copy_auth_item": "Copier Item Auth",
     "token.action.download_auth_json": "Télécharger auth.json",
+    "token.action.copy_composer_setup": "Copier Config Composer",
+    "token.notification.composer_setup_copied": "Configuration du dépôt Composer copiée dans le presse-papiers",
     "token.tooltip.last_used": "Dernière utilisation :time",
 
     "docs.title": "Documentation",

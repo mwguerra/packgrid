@@ -164,6 +164,8 @@
     "token.notification.auth_item_copied": "Elemento de autenticación copiado al portapapeles",
     "token.action.copy_auth_item": "Copiar Item de Auth",
     "token.action.download_auth_json": "Descargar auth.json",
+    "token.action.copy_composer_setup": "Copiar Setup de Composer",
+    "token.notification.composer_setup_copied": "Configuración del repositorio Composer copiada al portapapeles",
     "token.tooltip.last_used": "Último uso :time",
 
     "docs.title": "Documentación",

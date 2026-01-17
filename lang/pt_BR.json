@@ -164,6 +164,8 @@
     "token.notification.auth_item_copied": "Item de autenticação copiado para a área de transferência",
     "token.action.copy_auth_item": "Copiar Item de Auth",
     "token.action.download_auth_json": "Baixar auth.json",
+    "token.action.copy_composer_setup": "Copiar Setup do Composer",
+    "token.notification.composer_setup_copied": "Configuração do repositório Composer copiada para a área de transferência",
     "token.tooltip.last_used": "Último uso :time",
 
     "docs.title": "Documentação",

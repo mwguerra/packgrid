@@ -10,7 +10,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -167,32 +166,16 @@ class TokensTable
                 Action::make('copyToken')
                     ->label(__('token.action.copy'))
                     ->icon('heroicon-o-clipboard-document')
-                    ->action(function (Token $record): void {
-                        Notification::make()
-                            ->title(__('token.notification.copied'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
-                    ]),
+                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode($record->token).'); $tooltip('.json_encode(__('token.notification.copied')).', { timeout: 1500 })'),
                 Action::make('copyAuthItem')
                     ->label(__('token.action.copy_auth_item'))
                     ->icon('heroicon-o-clipboard-document-list')
-                    ->action(function (Token $record): void {
-                        Notification::make()
-                            ->title(__('token.notification.auth_item_copied'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(json_encode([
-                            self::getHost() => [
-                                'username' => 'composer',
-                                'password' => $record->token,
-                            ],
-                        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)).')',
-                    ]),
+                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode(json_encode([
+                        self::getHost() => [
+                            'username' => 'composer',
+                            'password' => $record->token,
+                        ],
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)).'); $tooltip('.json_encode(__('token.notification.auth_item_copied')).', { timeout: 1500 })'),
                 Action::make('downloadAuthJson')
                     ->label(__('token.action.download_auth_json'))
                     ->icon('heroicon-o-arrow-down-tray')
@@ -215,15 +198,7 @@ class TokensTable
                 Action::make('copyNpmrc')
                     ->label(__('token.action.copy_npmrc'))
                     ->icon('heroicon-o-clipboard-document-list')
-                    ->action(function (Token $record): void {
-                        Notification::make()
-                            ->title(__('token.notification.npmrc_copied'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).')',
-                    ]),
+                    ->alpineClickHandler(fn (Token $record): string => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).'); $tooltip('.json_encode(__('token.notification.npmrc_copied')).', { timeout: 1500 })'),
                 Action::make('downloadNpmrc')
                     ->label(__('token.action.download_npmrc'))
                     ->icon('heroicon-o-arrow-down-tray')

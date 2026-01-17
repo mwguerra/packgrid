@@ -185,6 +185,7 @@
     "docker_repository.model_label": "Docker Repository",
     "docker_repository.model_label_plural": "Docker Repositories",
     "docker_repository.navigation_label": "Docker Repositories",
+    "docker_repository.subheading": "Container images pushed to your private Docker registry",
     "docker_repository.section.repository": "Repository",
     "docker_repository.section.repository_description": "Configure the Docker repository name and description.",
     "docker_repository.section.access": "Access",

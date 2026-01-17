@@ -185,6 +185,7 @@
     "docker_repository.model_label": "Repositorio Docker",
     "docker_repository.model_label_plural": "Repositorios Docker",
     "docker_repository.navigation_label": "Repositorios Docker",
+    "docker_repository.subheading": "Imágenes de contenedor enviadas a tu registro Docker privado",
     "docker_repository.section.repository": "Repositorio",
     "docker_repository.section.repository_description": "Configura el nombre y descripción del repositorio Docker.",
     "docker_repository.section.access": "Acceso",

@@ -216,7 +216,6 @@ class DockerRepositoryResource extends Resource
     {
         return [
             'index' => Pages\ListDockerRepositories::route('/'),
-            'create' => Pages\CreateDockerRepository::route('/create'),
             'view' => Pages\ViewDockerRepository::route('/{record}'),
             'edit' => Pages\EditDockerRepository::route('/{record}/edit'),
         ];

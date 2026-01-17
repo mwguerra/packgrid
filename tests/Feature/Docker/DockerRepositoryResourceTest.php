@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\RepositoryVisibility;
-use App\Filament\Resources\DockerRepositoryResource\Pages\CreateDockerRepository;
 use App\Filament\Resources\DockerRepositoryResource\Pages\EditDockerRepository;
 use App\Filament\Resources\DockerRepositoryResource\Pages\ListDockerRepositories;
 use App\Filament\Resources\DockerRepositoryResource\Pages\ViewDockerRepository;
@@ -66,102 +65,6 @@ describe('ListDockerRepositories Page', function () {
 
         livewire(ListDockerRepositories::class)
             ->assertSee('3');
-    });
-});
-
-// =============================================================================
-// CREATE DOCKER REPOSITORY PAGE TESTS
-// =============================================================================
-
-describe('CreateDockerRepository Page', function () {
-    it('can load the create page', function () {
-        livewire(CreateDockerRepository::class)
-            ->assertOk();
-    });
-
-    it('has name and visibility fields on create', function () {
-        livewire(CreateDockerRepository::class)
-            ->assertFormFieldExists('name')
-            ->assertFormFieldExists('visibility')
-            ->assertFormFieldExists('description')
-            ->assertFormFieldExists('enabled');
-    });
-
-    it('can create a docker repository', function () {
-        livewire(CreateDockerRepository::class)
-            ->fillForm([
-                'name' => 'myorg/myapp',
-                'visibility' => RepositoryVisibility::PrivateRepo->value,
-                'description' => 'My test Docker repository',
-                'enabled' => true,
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors()
-            ->assertRedirect();
-
-        expect(DockerRepository::where('name', 'myorg/myapp')->exists())->toBeTrue();
-    });
-
-    it('validates name is required', function () {
-        livewire(CreateDockerRepository::class)
-            ->fillForm([
-                'name' => '',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['name' => 'required']);
-    });
-
-    it('validates name format', function () {
-        livewire(CreateDockerRepository::class)
-            ->fillForm([
-                'name' => 'Invalid Name With Spaces',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['name']);
-    });
-
-    it('validates unique name', function () {
-        DockerRepository::factory()->create(['name' => 'myorg/existing']);
-
-        livewire(CreateDockerRepository::class)
-            ->fillForm([
-                'name' => 'myorg/existing',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['name']);
-    });
-
-    it('accepts valid name formats', function (string $name) {
-        livewire(CreateDockerRepository::class)
-            ->fillForm([
-                'name' => $name,
-                'visibility' => RepositoryVisibility::PrivateRepo->value,
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors();
-
-        expect(DockerRepository::where('name', $name)->exists())->toBeTrue();
-    })->with([
-        'simple' => ['myapp'],
-        'with-org' => ['myorg/myapp'],
-        'with-dots' => ['myorg.io/myapp'],
-        'with-hyphens' => ['my-org/my-app'],
-        'with-underscores' => ['my_org/my_app'],
-        'multi-level' => ['myorg/sub/app'],
-    ]);
-
-    it('defaults to private visibility', function () {
-        livewire(CreateDockerRepository::class)
-            ->assertFormSet([
-                'visibility' => RepositoryVisibility::PrivateRepo->value,
-            ]);
-    });
-
-    it('defaults to enabled', function () {
-        livewire(CreateDockerRepository::class)
-            ->assertFormSet([
-                'enabled' => true,
-            ]);
     });
 });
 

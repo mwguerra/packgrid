@@ -1,6 +1,6 @@
 # Packgrid
 
-A lightweight, self-hosted private package repository server for distributing private Composer (PHP) and NPM (Node.js) packages.
+A lightweight, self-hosted private package repository server for distributing private Composer (PHP), NPM (Node.js), and Docker (OCI) packages.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)](https://php.net)
@@ -8,13 +8,14 @@ A lightweight, self-hosted private package repository server for distributing pr
 
 ## Overview
 
-Packgrid is a self-hosted solution for teams who need to manage and distribute private packages without relying on third-party services. It supports both **Composer** (PHP) and **NPM** (Node.js) packages from GitHub repositories. Configure your GitHub credentials once, then distribute simple Packgrid tokens to your team and CI/CD pipelines.
+Packgrid is a self-hosted solution for teams who need to manage and distribute private packages without relying on third-party services. It supports **Composer** (PHP), **NPM** (Node.js), and **Docker** (OCI) packages. Configure your GitHub credentials once, then distribute simple Packgrid tokens to your team and CI/CD pipelines.
 
-**One GitHub token. Unlimited team access. Two package managers.**
+**One GitHub token. Unlimited team access. Three package managers.**
 
 ### Key Features
 
-- **Multi-Format Support** — Serve both Composer (PHP) and NPM (Node.js) packages from a single server
+- **Multi-Format Support** — Serve Composer (PHP), NPM (Node.js), and Docker (OCI) packages from a single server
+- **Docker Registry** — Full OCI Distribution Spec v2 compliant private Docker registry with local blob storage
 - **GitHub Integration** — Connect your GitHub repositories (public and private) using personal access tokens
 - **Token Authentication** — Create and manage access tokens for team members or CI/CD pipelines
 - **Automatic Sync** — Packages are synced from GitHub and served through standard registry protocols
@@ -210,6 +211,7 @@ Packgrid includes automated background tasks that keep your packages in sync and
 |------|----------|-------------|
 | Repository Sync | Every 4 hours | Syncs all enabled repositories from GitHub |
 | Credential Testing | Daily at 6 AM | Validates all GitHub credentials are still working |
+| Docker Garbage Collection | Sundays at 3 AM | Removes orphaned blobs and stale uploads |
 
 **Manual commands:**
 
@@ -222,6 +224,9 @@ php artisan packgrid:sync-repositories --force
 
 # Test all credentials now
 php artisan packgrid:test-credentials
+
+# Run Docker garbage collection
+php artisan packgrid:docker-gc
 
 # Verify scheduler is configured correctly
 php artisan schedule:list
@@ -319,6 +324,98 @@ npm install @myorg/package-name
 | `GET /npm/{package}` | Package metadata (non-scoped) |
 | `GET /npm/@{scope}/{package}` | Package metadata (scoped) |
 | `GET /npm/-/{owner}/{repo}/{ref}.tgz` | Download tarball |
+
+## Docker Registry Setup
+
+Packgrid includes a full OCI Distribution Spec v2 compliant private Docker registry. Unlike Composer and NPM packages which proxy from GitHub, Docker images are stored locally on your server.
+
+### Authenticating with Docker
+
+Use your Packgrid token to authenticate:
+
+```bash
+docker login your-packgrid-server.com -u token -p YOUR_PACKGRID_TOKEN
+```
+
+The username must be `token` and the password is your Packgrid token.
+
+### Pushing Images
+
+```bash
+# Tag your image for Packgrid
+docker tag myimage:latest your-packgrid-server.com/myorg/myimage:v1.0
+
+# Push to Packgrid
+docker push your-packgrid-server.com/myorg/myimage:v1.0
+```
+
+Repositories are created automatically on first push.
+
+### Pulling Images
+
+```bash
+docker pull your-packgrid-server.com/myorg/myimage:v1.0
+```
+
+### Using in Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  app:
+    image: your-packgrid-server.com/myorg/myapp:latest
+    # ...
+```
+
+To authenticate in CI/CD:
+
+```bash
+echo $PACKGRID_TOKEN | docker login your-packgrid-server.com -u token --password-stdin
+```
+
+### Docker Storage Configuration
+
+Docker blobs are stored using Laravel's filesystem. By default, they're stored locally, but you can use S3 or any Laravel-supported disk:
+
+```env
+# Default: local storage
+PACKGRID_DOCKER_DISK=local
+
+# Or use S3
+PACKGRID_DOCKER_DISK=s3
+
+# Custom storage path within the disk
+PACKGRID_DOCKER_STORAGE_PATH=docker/blobs
+```
+
+### Docker API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/v2/` | API version check (no auth required) |
+| `GET` | `/v2/_catalog` | List all repositories |
+| `GET` | `/v2/{name}/tags/list` | List tags for a repository |
+| `GET/HEAD` | `/v2/{name}/manifests/{ref}` | Get/check manifest by tag or digest |
+| `PUT` | `/v2/{name}/manifests/{ref}` | Upload manifest |
+| `DELETE` | `/v2/{name}/manifests/{digest}` | Delete manifest |
+| `GET/HEAD` | `/v2/{name}/blobs/{digest}` | Download/check blob |
+| `POST` | `/v2/{name}/blobs/uploads/` | Start blob upload or cross-mount |
+| `PATCH` | `/v2/{name}/blobs/uploads/{uuid}` | Upload chunk |
+| `PUT` | `/v2/{name}/blobs/uploads/{uuid}` | Complete upload |
+
+### Docker Garbage Collection
+
+Unreferenced blobs and stale uploads are cleaned up automatically. Run manually:
+
+```bash
+# Preview what would be deleted
+php artisan packgrid:docker-gc --dry-run
+
+# Actually delete orphaned blobs
+php artisan packgrid:docker-gc
+```
+
+The garbage collector runs automatically every Sunday at 3 AM when the scheduler is configured.
 
 ## How It Works
 
@@ -463,6 +560,46 @@ Or via CLI flags:
 - Ensure the token is active in Packgrid (not expired or disabled)
 - Check that your scope matches: `@yourscope:registry=https://your-packgrid-server.com/npm`
 
+### Docker Login Failed (HTTP 401)
+
+**Error:** `Error response from daemon: Get "https://your-server.com/v2/": unauthorized`
+
+**Solution:**
+- Ensure username is exactly `token` (not your email or username)
+- Verify your Packgrid token is at least 20 characters
+- Check the token is enabled and not expired in Packgrid admin
+- Example correct login:
+  ```bash
+  docker login your-packgrid-server.com -u token -p YOUR_PACKGRID_TOKEN
+  ```
+
+### Docker Push Fails with DENIED
+
+**Error:** `denied: requested access to the resource is denied`
+
+**Solution:**
+- Check if the repository is disabled in Packgrid admin
+- Verify your token has not expired
+- Ensure you're pushing to the correct server URL
+
+### Docker Push Fails with MANIFEST_INVALID
+
+**Error:** `manifest invalid: manifest verification failed`
+
+**Solution:**
+- Ensure the image was built correctly
+- Try rebuilding the image: `docker build --no-cache -t your-image:tag .`
+- Verify all layers were pushed successfully
+
+### Docker Pull Fails with NOT_FOUND
+
+**Error:** `manifest for your-server.com/repo/image:tag not found`
+
+**Solution:**
+- Verify the image and tag exist in Packgrid admin
+- Check the exact repository name matches (case-sensitive)
+- Ensure you're authenticated: `docker login your-packgrid-server.com`
+
 ## Comparison with Alternatives
 
 ### Composer (PHP) Private Package Managers
@@ -509,6 +646,7 @@ Or via CLI flags:
 Future features that may be added (without compromising simplicity):
 
 - [x] NPM Support (completed)
+- [x] Docker Registry (completed) — Full OCI Distribution Spec v2 compliant
 - [ ] GitLab Support
 - [ ] Bitbucket Support
 - [ ] Gitea/Forgejo Support
@@ -597,6 +735,7 @@ Translations are organized using JSON files in the `lang/` directory with dot-no
 | `repository.*` | Repository management |
 | `credential.*` | Credential management |
 | `token.*` | Token management |
+| `docker_repository.*` | Docker repository management |
 | `widget.*` | Dashboard widgets |
 | `docs.*` | Documentation pages |
 | `api.*` | API error messages |

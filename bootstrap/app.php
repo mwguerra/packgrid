@@ -18,6 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'docker.auth' => \App\Http\Middleware\DockerRegistryAuth::class,
             'feature' => \App\Http\Middleware\CheckFeatureEnabled::class,
         ]);
+
+        // Exclude API routes from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'packages.json',
+            'p/*',
+            'dist/*',
+            'npm/*',
+            'v2/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

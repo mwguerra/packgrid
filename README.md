@@ -196,6 +196,37 @@ After creating your admin user, enable Two-Factor Authentication:
 3. Scan the QR code with your authenticator app
 4. Save your recovery codes securely
 
+### Scheduled Tasks (Production)
+
+Packgrid includes automated background tasks that keep your packages in sync and validate your credentials. To enable these, add this single cron entry on your server:
+
+```bash
+* * * * * cd /path/to/packgrid && php artisan schedule:run >> /dev/null 2>&1
+```
+
+**What runs automatically:**
+
+| Task | Schedule | Description |
+|------|----------|-------------|
+| Repository Sync | Every 4 hours | Syncs all enabled repositories from GitHub |
+| Credential Testing | Daily at 6 AM | Validates all GitHub credentials are still working |
+
+**Manual commands:**
+
+```bash
+# Sync all enabled repositories now
+php artisan packgrid:sync-repositories
+
+# Sync all repositories including disabled ones
+php artisan packgrid:sync-repositories --force
+
+# Test all credentials now
+php artisan packgrid:test-credentials
+
+# Verify scheduler is configured correctly
+php artisan schedule:list
+```
+
 ## Quick Start Guide
 
 ### Step 1: Add a GitHub Credential

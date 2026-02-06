@@ -102,6 +102,14 @@ class TokensTable
                             $parts[] = "<span title=\"{$domainLabel}\" style=\"display:inline-flex;align-items:center;color:#f59e0b;cursor:help\">{$domainIcon}</span>";
                         }
 
+                        $hasRepositories = $record->repositories()->count() > 0;
+                        if ($hasRepositories) {
+                            $repoCount = $record->repositories()->count();
+                            $repoLabel = __('token.table.restrictions_repos', ['count' => $repoCount]);
+                            $repoIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>';
+                            $parts[] = "<span title=\"{$repoLabel}\" style=\"display:inline-flex;align-items:center;color:#3b82f6;cursor:help\">{$repoIcon}</span>";
+                        }
+
                         // Last used time
                         if ($record->last_used_at) {
                             $lastUsedTooltip = __('token.tooltip.last_used', ['time' => $record->last_used_at->diffForHumans()]);
@@ -139,6 +147,9 @@ class TokensTable
                         }
                         if (! empty($record->allowed_domains)) {
                             $restrictions[] = __('token.table.restrictions_domains', ['count' => count($record->allowed_domains)]);
+                        }
+                        if ($record->repositories()->count() > 0) {
+                            $restrictions[] = __('token.table.restrictions_repos', ['count' => $record->repositories()->count()]);
                         }
 
                         return $restrictions ? implode(', ', $restrictions) : __('common.none');

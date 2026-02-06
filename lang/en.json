@@ -888,6 +888,12 @@
     "api.error.ip_denied": "Access denied from this IP address.",
     "api.error.domain_denied": "Access denied from this domain.",
 
+    "token.field.allowed_repositories": "Allowed Repositories",
+    "token.field.allowed_repositories_helper": "Leave empty to allow access to all repositories. Select specific repositories to restrict access.",
+    "token.field.allowed_repositories_empty": "All repositories allowed",
+    "token.table.restrictions_repos": ":count repo(s)",
+    "token.error.repository_access_denied": "Token is not authorized for this repository.",
+
     "repository.table.downloads": "Downloads",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Download Logs",

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Token extends Model
@@ -82,6 +83,20 @@ class Token extends Model
         }
 
         return false;
+    }
+
+    public function repositories(): BelongsToMany
+    {
+        return $this->belongsToMany(Repository::class);
+    }
+
+    public function isAllowedForRepository(Repository $repository): bool
+    {
+        if ($this->repositories()->count() === 0) {
+            return true;
+        }
+
+        return $this->repositories()->where('repositories.id', $repository->id)->exists();
     }
 
     public function recordUsage(): void

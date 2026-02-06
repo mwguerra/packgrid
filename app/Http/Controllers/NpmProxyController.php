@@ -28,6 +28,11 @@ class NpmProxyController extends Controller
             abort(404, 'NPM package repository not found or not enabled.');
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForRepository($repository)) {
+            abort(403, __('token.error.repository_access_denied'));
+        }
+
         // Remove .tgz extension if present
         $ref = preg_replace('/\.tgz$/', '', $ref);
 
@@ -41,7 +46,6 @@ class NpmProxyController extends Controller
 
         $response = $this->client->downloadTarball($fullName, $ref, $repository->credential);
 
-        $token = $request->attributes->get('packgrid_token');
         DownloadLog::logDownload($repository, $ref, PackageFormat::Npm, $token);
 
         $filename = $owner.'-'.$repo.'-'.$ref.'.tgz';

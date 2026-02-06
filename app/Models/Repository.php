@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Repository extends Model
@@ -52,6 +53,11 @@ class Repository extends Model
     public function downloadLogs(): HasMany
     {
         return $this->hasMany(DownloadLog::class);
+    }
+
+    public function tokens(): BelongsToMany
+    {
+        return $this->belongsToMany(Token::class);
     }
 
     public function needsSync(): bool

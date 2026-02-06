@@ -888,6 +888,12 @@
     "api.error.ip_denied": "Acceso denegado desde esta dirección IP.",
     "api.error.domain_denied": "Acceso denegado desde este dominio.",
 
+    "token.field.allowed_repositories": "Repositorios Permitidos",
+    "token.field.allowed_repositories_helper": "Dejar vacío para permitir acceso a todos los repositorios. Seleccione repositorios específicos para restringir el acceso.",
+    "token.field.allowed_repositories_empty": "Todos los repositorios permitidos",
+    "token.table.restrictions_repos": ":count repo(s)",
+    "token.error.repository_access_denied": "Token no autorizado para este repositorio.",
+
     "repository.table.downloads": "Descargas",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Logs de Descarga",

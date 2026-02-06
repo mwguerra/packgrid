@@ -27,6 +27,11 @@ class PackageProxyController extends Controller
             abort(404, 'Repository not found or not enabled.');
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForRepository($repository)) {
+            abort(403, __('token.error.repository_access_denied'));
+        }
+
         if ($repository->needsSync()) {
             try {
                 app(RepositorySyncService::class)->sync($repository);
@@ -37,7 +42,6 @@ class PackageProxyController extends Controller
 
         $response = $this->client->downloadZipball($fullName, $ref, $repository->credential);
 
-        $token = $request->attributes->get('packgrid_token');
         DownloadLog::logDownload($repository, $ref, PackageFormat::Composer, $token);
 
         $filename = $owner.'-'.$repo.'-'.$ref.'.zip';

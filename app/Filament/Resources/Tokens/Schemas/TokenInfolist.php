@@ -90,6 +90,12 @@ class TokenInfolist
                             ->separator(',')
                             ->color('warning')
                             ->placeholder(__('token.field.allowed_domains_empty')),
+                        TextEntry::make('repositories.name')
+                            ->label(__('token.field.allowed_repositories'))
+                            ->icon('heroicon-o-rectangle-stack')
+                            ->badge()
+                            ->color('info')
+                            ->placeholder(__('token.field.allowed_repositories_empty')),
                     ])
                     ->columns(2)
                     ->collapsible()

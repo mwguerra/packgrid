@@ -888,6 +888,12 @@
     "api.error.ip_denied": "Accès refusé depuis cette adresse IP.",
     "api.error.domain_denied": "Accès refusé depuis ce domaine.",
 
+    "token.field.allowed_repositories": "Dépôts Autorisés",
+    "token.field.allowed_repositories_helper": "Laisser vide pour autoriser l'accès à tous les dépôts. Sélectionner des dépôts spécifiques pour restreindre l'accès.",
+    "token.field.allowed_repositories_empty": "Tous les dépôts autorisés",
+    "token.table.restrictions_repos": ":count dépôt(s)",
+    "token.error.repository_access_denied": "Le jeton n'est pas autorisé pour ce dépôt.",
+
     "repository.table.downloads": "Téléchargements",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Logs de Téléchargement",

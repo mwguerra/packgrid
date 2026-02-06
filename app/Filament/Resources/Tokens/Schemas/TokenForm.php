@@ -6,6 +6,7 @@ use App\Models\Token;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -71,6 +72,14 @@ class TokenForm
                             ->label(__('token.field.allowed_domains'))
                             ->placeholder(__('token.field.allowed_domains_placeholder'))
                             ->helperText(__('token.field.allowed_domains_helper'))
+                            ->columnSpanFull(),
+                        Select::make('repositories')
+                            ->label(__('token.field.allowed_repositories'))
+                            ->relationship('repositories', 'name')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->helperText(__('token.field.allowed_repositories_helper'))
                             ->columnSpanFull(),
                     ])
                     ->collapsed()

@@ -24,6 +24,7 @@ class Repository extends Model
         'credential_id',
         'enabled',
         'package_count',
+        'download_count',
         'last_sync_at',
         'last_error',
         'ref_filter',
@@ -34,6 +35,7 @@ class Repository extends Model
         'format' => PackageFormat::class,
         'enabled' => 'boolean',
         'package_count' => 'integer',
+        'download_count' => 'integer',
         'last_sync_at' => 'datetime',
     ];
 
@@ -45,5 +47,15 @@ class Repository extends Model
     public function syncLogs(): HasMany
     {
         return $this->hasMany(SyncLog::class);
+    }
+
+    public function downloadLogs(): HasMany
+    {
+        return $this->hasMany(DownloadLog::class);
+    }
+
+    public function needsSync(): bool
+    {
+        return $this->last_sync_at === null || $this->last_sync_at->lt(now()->subMinute());
     }
 }

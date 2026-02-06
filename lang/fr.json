@@ -888,6 +888,16 @@
     "api.error.ip_denied": "Accès refusé depuis cette adresse IP.",
     "api.error.domain_denied": "Accès refusé depuis ce domaine.",
 
+    "repository.table.downloads": "Téléchargements",
+    "repository.action.download_logs": "Logs",
+    "repository.modal.download_logs_heading": "Logs de Téléchargement",
+    "repository.download_log.version": "Version",
+    "repository.download_log.format": "Format",
+    "repository.download_log.token": "Token",
+    "repository.download_log.ip": "Adresse IP",
+    "repository.download_log.user_agent": "User Agent",
+    "repository.download_log.no_logs": "Aucun téléchargement enregistré pour le moment.",
+
     "settings.title": "Paramètres",
     "settings.section.features": "Fonctionnalités",
     "settings.section.features_description": "Activez ou désactivez les fonctionnalités du dépôt de paquets. Au moins une fonctionnalité doit être activée.",

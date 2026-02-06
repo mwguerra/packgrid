@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PackageFormat;
+use App\Models\DownloadLog;
 use App\Models\Repository;
 use App\Services\GitHubClient;
+use App\Services\RepositorySyncService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -29,7 +31,18 @@ class NpmProxyController extends Controller
         // Remove .tgz extension if present
         $ref = preg_replace('/\.tgz$/', '', $ref);
 
+        if ($repository->needsSync()) {
+            try {
+                app(RepositorySyncService::class)->sync($repository);
+            } catch (\Throwable) {
+                // Sync failure should not block the download
+            }
+        }
+
         $response = $this->client->downloadTarball($fullName, $ref, $repository->credential);
+
+        $token = $request->attributes->get('packgrid_token');
+        DownloadLog::logDownload($repository, $ref, PackageFormat::Npm, $token);
 
         $filename = $owner.'-'.$repo.'-'.$ref.'.tgz';
 

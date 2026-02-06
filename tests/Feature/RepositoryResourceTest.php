@@ -422,6 +422,14 @@ describe('ListRepositories Page', function () {
             ->assertCanNotSeeTableRecords([$publicRepo]);
     });
 
+    it('renders download count column', function () {
+        $repository = Repository::factory()->create(['download_count' => 42]);
+
+        livewire(ListRepositories::class)
+            ->assertCanSeeTableRecords([$repository])
+            ->assertTableColumnStateSet('download_count', 42, $repository);
+    });
+
     it('can filter by credential', function () {
         $credential = Credential::factory()->create();
         $repoWithCredential = Repository::factory()->create(['credential_id' => $credential->id]);

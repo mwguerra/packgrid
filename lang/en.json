@@ -888,6 +888,16 @@
     "api.error.ip_denied": "Access denied from this IP address.",
     "api.error.domain_denied": "Access denied from this domain.",
 
+    "repository.table.downloads": "Downloads",
+    "repository.action.download_logs": "Logs",
+    "repository.modal.download_logs_heading": "Download Logs",
+    "repository.download_log.version": "Version",
+    "repository.download_log.format": "Format",
+    "repository.download_log.token": "Token",
+    "repository.download_log.ip": "IP Address",
+    "repository.download_log.user_agent": "User Agent",
+    "repository.download_log.no_logs": "No downloads recorded yet.",
+
     "settings.title": "Settings",
     "settings.section.features": "Feature Toggles",
     "settings.section.features_description": "Enable or disable package repository features. At least one feature must be enabled.",

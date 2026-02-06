@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PackageFormat;
+use App\Models\DownloadLog;
 use App\Models\Repository;
 use App\Services\GitHubClient;
+use App\Services\RepositorySyncService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -24,7 +27,18 @@ class PackageProxyController extends Controller
             abort(404, 'Repository not found or not enabled.');
         }
 
+        if ($repository->needsSync()) {
+            try {
+                app(RepositorySyncService::class)->sync($repository);
+            } catch (\Throwable) {
+                // Sync failure should not block the download
+            }
+        }
+
         $response = $this->client->downloadZipball($fullName, $ref, $repository->credential);
+
+        $token = $request->attributes->get('packgrid_token');
+        DownloadLog::logDownload($repository, $ref, PackageFormat::Composer, $token);
 
         $filename = $owner.'-'.$repo.'-'.$ref.'.zip';
 

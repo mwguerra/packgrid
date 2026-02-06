@@ -210,6 +210,13 @@ class RepositoryResource extends Resource
 
                         return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">'.implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts).'</span>');
                     }),
+                TextColumn::make('download_count')
+                    ->label(__('repository.table.downloads'))
+                    ->sortable()
+                    ->numeric()
+                    ->badge()
+                    ->color('info')
+                    ->default(0),
                 TextColumn::make('sync_status')
                     ->label(__('repository.table.status'))
                     ->badge()
@@ -262,6 +269,49 @@ class RepositoryResource extends Resource
                     ->relationship('credential', 'name'),
             ])
             ->recordActions([
+                Action::make('download_logs')
+                    ->label(__('repository.action.download_logs'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->modalHeading(__('repository.modal.download_logs_heading'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'))
+                    ->infolist(function (Repository $record): array {
+                        $logs = $record->downloadLogs()->with('token')->latest()->limit(50)->get();
+
+                        if ($logs->isEmpty()) {
+                            return [
+                                TextEntry::make('no_logs')
+                                    ->label('')
+                                    ->state(__('repository.download_log.no_logs'))
+                                    ->columnSpanFull(),
+                            ];
+                        }
+
+                        return [
+                            RepeatableEntry::make('downloadLogs')
+                                ->label('')
+                                ->state($logs)
+                                ->schema([
+                                    TextEntry::make('package_version')
+                                        ->label(__('repository.download_log.version')),
+                                    TextEntry::make('format')
+                                        ->label(__('repository.download_log.format'))
+                                        ->badge()
+                                        ->formatStateUsing(fn (PackageFormat $state): string => $state->label())
+                                        ->color(fn (PackageFormat $state): string => $state === PackageFormat::Npm ? 'info' : 'success'),
+                                    TextEntry::make('token.name')
+                                        ->label(__('repository.download_log.token'))
+                                        ->placeholder(__('common.none')),
+                                    TextEntry::make('client_ip')
+                                        ->label(__('repository.download_log.ip')),
+                                    TextEntry::make('created_at')
+                                        ->label(__('common.date'))
+                                        ->dateTime(),
+                                ])
+                                ->columns(5),
+                        ];
+                    }),
                 Action::make('sync')
                     ->label(fn (Repository $record): string => $record->last_error
                         ? __('repository.action.retry_sync')

@@ -466,6 +466,38 @@ describe('Docker Authentication', function () {
             ->get('/v2/_catalog')
             ->assertUnauthorized();
     });
+
+    it('extracts token from password when username is "token"', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+
+        withBasicAuth('token', 'test-docker-token-12345')
+            ->get('/v2/_catalog')
+            ->assertOk();
+    });
+
+    it('extracts token from username when it is a valid token', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+
+        withBasicAuth('test-docker-token-12345', '')
+            ->get('/v2/_catalog')
+            ->assertOk();
+    });
+
+    it('rejects short unvalidated username as token', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+
+        withBasicAuth('token', 'wrong-password')
+            ->get('/v2/_catalog')
+            ->assertUnauthorized();
+    });
+
+    it('rejects request when username is not a valid token and password is empty', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+
+        withBasicAuth('short', '')
+            ->get('/v2/_catalog')
+            ->assertUnauthorized();
+    });
 });
 
 // =============================================================================

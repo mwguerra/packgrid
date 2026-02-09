@@ -66,11 +66,6 @@ class DockerRegistryAuth
             return $password;
         }
 
-        // Also check username if password failed
-        if ($username) {
-            return $username;
-        }
-
         return null;
     }
 

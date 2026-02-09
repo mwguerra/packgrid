@@ -167,7 +167,7 @@ class BlobStorageService
 
     public function initChunkedUpload(DockerRepository $repository): DockerUpload
     {
-        $uploadTimeout = config('packgrid.docker.upload_timeout', 86400);
+        $uploadTimeout = (int) config('packgrid.docker.upload_timeout', 86400);
         $tempPath = $this->generateTempPath();
 
         // Ensure temp directory exists

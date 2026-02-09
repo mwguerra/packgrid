@@ -219,6 +219,16 @@ describe('BlobStorageService Chunked Upload', function () {
             ->and(file_exists($upload->temp_path))->toBeTrue();
     });
 
+    it('initializes chunked upload with string config value without type error', function () {
+        config()->set('packgrid.docker.upload_timeout', '86400');
+        $repository = DockerRepository::factory()->create();
+
+        $upload = $this->blobService->initChunkedUpload($repository);
+
+        expect($upload)->not->toBeNull()
+            ->and($upload->expires_at)->not->toBeNull();
+    });
+
     it('appends chunk to upload', function () {
         $repository = DockerRepository::factory()->create();
         $upload = $this->blobService->initChunkedUpload($repository);

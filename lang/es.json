@@ -810,6 +810,14 @@
     "docs.docker.setup.section.compose_desc": "Referencia imágenes privadas en archivos compose",
     "docs.docker.setup.compose.intro": "Referencia tus imágenes privadas directamente en <code>docker-compose.yml</code>:",
 
+    "docs.docker.setup.section.server_config": "Configuración del Servidor para Subidas Grandes",
+    "docs.docker.setup.section.server_config_desc": "Ajusta los límites de PHP y del servidor web para manejar capas grandes de imágenes Docker",
+    "docs.docker.setup.server_config.intro": "Las imágenes Docker pueden ser muy grandes. Es posible que necesites aumentar los límites de subida tanto en PHP como en tu servidor web para manejar operaciones de Docker push.",
+    "docs.docker.setup.server_config.php_label": "Agrega lo siguiente a tu <code>php.ini</code> o a la configuración del pool de PHP-FPM:",
+    "docs.docker.setup.server_config.nginx_label": "Para Nginx, agrega lo siguiente dentro del bloque <code>server</code>:",
+    "docs.docker.setup.server_config.nginx_note": "Establecer <code>client_max_body_size</code> en <code>0</code> deshabilita completamente la verificación de tamaño de subida, lo cual es recomendado para un registro Docker ya que los tamaños de las capas varían ampliamente.",
+    "docs.docker.setup.server_config.restart_note": "Después de cambiar estas configuraciones, reinicia PHP-FPM y recarga tu servidor web para que los cambios surtan efecto.",
+
     "docs.docker.trouble.section.auth": "Errores de Autenticación",
     "docs.docker.trouble.section.auth_desc": "unauthorized: se requiere autenticación",
     "docs.docker.trouble.auth.intro": "Si ves errores de autenticación, verifica lo siguiente:",

@@ -74,6 +74,32 @@ class SetupGuideContent extends Component implements HasSchemas
                             ->language('yaml')
                             ->copyable(),
                     ]),
+
+                Section::make(__('docs.docker.setup.section.server_config'))
+                    ->icon('heroicon-o-server-stack')
+                    ->iconColor('warning')
+                    ->description(__('docs.docker.setup.section.server_config_desc'))
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        TextContent::make(__('docs.docker.setup.server_config.intro')),
+                        TextContent::make(__('docs.docker.setup.server_config.php_label')),
+                        CodeBlock::make("post_max_size = 500M\nupload_max_filesize = 500M")
+                            ->language('ini')
+                            ->copyable(),
+                        TextContent::make(__('docs.docker.setup.server_config.nginx_label')),
+                        CodeBlock::make("client_max_body_size 0;")
+                            ->language('nginx')
+                            ->copyable(),
+                        AlertBox::make()
+                            ->info()
+                            ->icon('heroicon-o-information-circle')
+                            ->description(__('docs.docker.setup.server_config.nginx_note')),
+                        AlertBox::make()
+                            ->warning()
+                            ->icon('heroicon-o-exclamation-triangle')
+                            ->description(__('docs.docker.setup.server_config.restart_note')),
+                    ]),
             ]);
     }
 

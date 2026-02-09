@@ -388,6 +388,27 @@ PACKGRID_DOCKER_DISK=s3
 PACKGRID_DOCKER_STORAGE_PATH=docker/blobs
 ```
 
+### Server Configuration for Large Uploads
+
+Docker images can be very large. You may need to increase upload limits on both PHP and your web server to handle Docker push operations.
+
+**PHP (php.ini or php-fpm pool config):**
+
+```ini
+post_max_size = 500M
+upload_max_filesize = 500M
+```
+
+**Nginx:** Add the following inside your `server` block:
+
+```nginx
+client_max_body_size 0;
+```
+
+Setting `client_max_body_size` to `0` disables the upload size check entirely, which is recommended for a Docker registry since layer sizes vary widely.
+
+> **Note:** After changing PHP settings, restart PHP-FPM (`sudo systemctl restart php8.2-fpm`). After changing Nginx settings, reload Nginx (`sudo systemctl reload nginx`).
+
 ### Docker API Endpoints
 
 | Method | Endpoint | Description |

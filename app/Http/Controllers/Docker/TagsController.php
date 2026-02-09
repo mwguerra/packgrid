@@ -21,6 +21,11 @@ class TagsController extends Controller
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $n = (int) $request->query('n', 100);
         $last = $request->query('last');
 

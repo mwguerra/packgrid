@@ -915,5 +915,21 @@
     "settings.field.docker_enabled_helper": "Enable Docker container registry for OCI images.",
     "settings.action.save": "Save Settings",
     "settings.notification.saved": "Settings saved successfully",
-    "settings.notification.at_least_one_required": "At least one feature must be enabled"
+    "settings.notification.at_least_one_required": "At least one feature must be enabled",
+
+    "token.section.network_restrictions": "Network Restrictions",
+    "token.section.network_restrictions_description": "Restrict token usage by IP address or domain.",
+    "token.section.package_restrictions": "Package Repositories",
+    "token.section.package_restrictions_description": "Restrict access to specific Composer/NPM repositories.",
+    "token.section.docker_restrictions": "Docker Repositories",
+    "token.section.docker_restrictions_description": "Restrict access to specific Docker repositories.",
+    "token.field.scope_repositories": "Restrict to specific repositories",
+    "token.field.scope_repositories_helper": "When enabled, this token can only access the selected repositories.",
+    "token.field.scope_docker_repositories": "Restrict to specific Docker repositories",
+    "token.field.scope_docker_repositories_helper": "When enabled, this token can only access the selected Docker repositories.",
+    "token.field.allowed_docker_repositories": "Allowed Docker Repositories",
+    "token.field.allowed_docker_repositories_helper": "Select the Docker repositories this token can access.",
+    "token.field.allowed_docker_repositories_empty": "All Docker repositories allowed",
+    "token.table.restrictions_docker_repos": ":count Docker repo(s)",
+    "token.error.docker_repository_access_denied": "Token is not authorized for this Docker repository."
 }

@@ -20,6 +20,11 @@ class CatalogController extends Controller
 
         $query = DockerRepository::where('enabled', true)->orderBy('name');
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && $token->dockerRepositories()->count() > 0) {
+            $query->whereIn('id', $token->dockerRepositories()->pluck('docker_repositories.id'));
+        }
+
         if ($last) {
             $query->where('name', '>', $last);
         }

@@ -915,5 +915,21 @@
     "settings.field.docker_enabled_helper": "Activer le registre de conteneurs Docker pour les images OCI.",
     "settings.action.save": "Enregistrer les Paramètres",
     "settings.notification.saved": "Paramètres enregistrés avec succès",
-    "settings.notification.at_least_one_required": "Au moins une fonctionnalité doit être activée"
+    "settings.notification.at_least_one_required": "Au moins une fonctionnalité doit être activée",
+
+    "token.section.network_restrictions": "Restrictions Réseau",
+    "token.section.network_restrictions_description": "Restreindre l'utilisation du jeton par adresse IP ou domaine.",
+    "token.section.package_restrictions": "Dépôts de Paquets",
+    "token.section.package_restrictions_description": "Restreindre l'accès à des dépôts Composer/NPM spécifiques.",
+    "token.section.docker_restrictions": "Dépôts Docker",
+    "token.section.docker_restrictions_description": "Restreindre l'accès à des dépôts Docker spécifiques.",
+    "token.field.scope_repositories": "Restreindre à des dépôts spécifiques",
+    "token.field.scope_repositories_helper": "Lorsque activé, ce jeton ne peut accéder qu'aux dépôts sélectionnés.",
+    "token.field.scope_docker_repositories": "Restreindre à des dépôts Docker spécifiques",
+    "token.field.scope_docker_repositories_helper": "Lorsque activé, ce jeton ne peut accéder qu'aux dépôts Docker sélectionnés.",
+    "token.field.allowed_docker_repositories": "Dépôts Docker Autorisés",
+    "token.field.allowed_docker_repositories_helper": "Sélectionnez les dépôts Docker auxquels ce jeton peut accéder.",
+    "token.field.allowed_docker_repositories_empty": "Tous les dépôts Docker autorisés",
+    "token.table.restrictions_docker_repos": ":count dépôt(s) Docker",
+    "token.error.docker_repository_access_denied": "Le jeton n'est pas autorisé pour ce dépôt Docker."
 }

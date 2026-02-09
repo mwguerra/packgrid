@@ -96,6 +96,12 @@ class TokenInfolist
                             ->badge()
                             ->color('info')
                             ->placeholder(__('token.field.allowed_repositories_empty')),
+                        TextEntry::make('dockerRepositories.name')
+                            ->label(__('token.field.allowed_docker_repositories'))
+                            ->icon('heroicon-o-cube')
+                            ->badge()
+                            ->color('purple')
+                            ->placeholder(__('token.field.allowed_docker_repositories_empty')),
                     ])
                     ->columns(2)
                     ->collapsible()

@@ -41,6 +41,8 @@ class DockerRegistryAuth
 
         $token->recordUsage();
 
+        $request->attributes->set('packgrid_token', $token);
+
         return $next($request);
     }
 

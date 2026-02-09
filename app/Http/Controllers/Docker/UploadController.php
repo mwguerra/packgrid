@@ -6,6 +6,7 @@ use App\Enums\RepositoryVisibility;
 use App\Http\Controllers\Controller;
 use App\Models\DockerActivity;
 use App\Models\DockerRepository;
+use App\Models\Token;
 use App\Services\Docker\BlobStorageService;
 use App\Services\Docker\DigestService;
 use Illuminate\Http\JsonResponse;
@@ -35,12 +36,17 @@ class UploadController extends Controller
             return $this->errorResponse('DENIED', "repository is disabled: {$name}", 403);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         // Check for cross-repository mount
         $mount = $request->query('mount');
         $from = $request->query('from');
 
         if ($mount && $from) {
-            return $this->handleMount($repository, $mount, $from);
+            return $this->handleMount($repository, $mount, $from, $token);
         }
 
         // Check for single-request (monolithic) upload
@@ -70,6 +76,11 @@ class UploadController extends Controller
 
         if (! $repository) {
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $upload = $this->blobStorageService->getUpload($uuid);
@@ -127,6 +138,11 @@ class UploadController extends Controller
 
         if (! $repository) {
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $upload = $this->blobStorageService->getUpload($uuid);
@@ -188,6 +204,11 @@ class UploadController extends Controller
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $upload = $this->blobStorageService->getUpload($uuid);
 
         if (! $upload || $upload->docker_repository_id !== $repository->id) {
@@ -213,6 +234,11 @@ class UploadController extends Controller
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $upload = $this->blobStorageService->getUpload($uuid);
 
         if (! $upload || $upload->docker_repository_id !== $repository->id) {
@@ -227,7 +253,7 @@ class UploadController extends Controller
         ]);
     }
 
-    private function handleMount(DockerRepository $repository, string $digest, string $fromName): Response|JsonResponse
+    private function handleMount(DockerRepository $repository, string $digest, string $fromName, ?Token $token = null): Response|JsonResponse
     {
         $fromRepository = DockerRepository::where('name', $fromName)->where('enabled', true)->first();
 
@@ -241,6 +267,10 @@ class UploadController extends Controller
                 'Range' => '0-0',
                 'Docker-Distribution-Api-Version' => 'registry/2.0',
             ]);
+        }
+
+        if ($token && ! $token->isAllowedForDockerRepository($fromRepository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for the source repository', 403);
         }
 
         $mounted = $this->blobStorageService->mountBlob($digest, $fromRepository, $repository);

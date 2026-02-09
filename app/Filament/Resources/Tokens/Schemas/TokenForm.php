@@ -11,6 +11,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -63,24 +64,71 @@ class TokenForm
                 Section::make(__('token.section.restrictions'))
                     ->description(__('token.section.restrictions_description'))
                     ->schema([
-                        TagsInput::make('allowed_ips')
-                            ->label(__('token.field.allowed_ips'))
-                            ->placeholder(__('token.field.allowed_ips_placeholder'))
-                            ->helperText(__('token.field.allowed_ips_helper'))
-                            ->columnSpanFull(),
-                        TagsInput::make('allowed_domains')
-                            ->label(__('token.field.allowed_domains'))
-                            ->placeholder(__('token.field.allowed_domains_placeholder'))
-                            ->helperText(__('token.field.allowed_domains_helper'))
-                            ->columnSpanFull(),
-                        Select::make('repositories')
-                            ->label(__('token.field.allowed_repositories'))
-                            ->relationship('repositories', 'name')
-                            ->multiple()
-                            ->searchable()
-                            ->preload()
-                            ->helperText(__('token.field.allowed_repositories_helper'))
-                            ->columnSpanFull(),
+                        Fieldset::make(__('token.section.network_restrictions'))
+                            ->schema([
+                                TagsInput::make('allowed_ips')
+                                    ->label(__('token.field.allowed_ips'))
+                                    ->placeholder(__('token.field.allowed_ips_placeholder'))
+                                    ->helperText(__('token.field.allowed_ips_helper'))
+                                    ->columnSpanFull(),
+                                TagsInput::make('allowed_domains')
+                                    ->label(__('token.field.allowed_domains'))
+                                    ->placeholder(__('token.field.allowed_domains_placeholder'))
+                                    ->helperText(__('token.field.allowed_domains_helper'))
+                                    ->columnSpanFull(),
+                            ]),
+                        Fieldset::make(__('token.section.package_restrictions'))
+                            ->schema([
+                                Toggle::make('scope_repositories')
+                                    ->label(__('token.field.scope_repositories'))
+                                    ->helperText(__('token.field.scope_repositories_helper'))
+                                    ->dehydrated(false)
+                                    ->live()
+                                    ->afterStateHydrated(function (Toggle $component, ?Token $record) {
+                                        $component->state($record?->repositories()->count() > 0);
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (! $state) {
+                                            $set('repositories', []);
+                                        }
+                                    })
+                                    ->columnSpanFull(),
+                                Select::make('repositories')
+                                    ->label(__('token.field.allowed_repositories'))
+                                    ->relationship('repositories', 'name')
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText(__('token.field.allowed_repositories_helper'))
+                                    ->visible(fn (callable $get) => $get('scope_repositories'))
+                                    ->columnSpanFull(),
+                            ]),
+                        Fieldset::make(__('token.section.docker_restrictions'))
+                            ->schema([
+                                Toggle::make('scope_docker_repositories')
+                                    ->label(__('token.field.scope_docker_repositories'))
+                                    ->helperText(__('token.field.scope_docker_repositories_helper'))
+                                    ->dehydrated(false)
+                                    ->live()
+                                    ->afterStateHydrated(function (Toggle $component, ?Token $record) {
+                                        $component->state($record?->dockerRepositories()->count() > 0);
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (! $state) {
+                                            $set('dockerRepositories', []);
+                                        }
+                                    })
+                                    ->columnSpanFull(),
+                                Select::make('dockerRepositories')
+                                    ->label(__('token.field.allowed_docker_repositories'))
+                                    ->relationship('dockerRepositories', 'name')
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText(__('token.field.allowed_docker_repositories_helper'))
+                                    ->visible(fn (callable $get) => $get('scope_docker_repositories'))
+                                    ->columnSpanFull(),
+                            ]),
                     ])
                     ->collapsed()
                     ->collapsible()

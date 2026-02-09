@@ -60,6 +60,11 @@ class DockerRepository extends Model
         return $this->hasMany(DockerActivity::class);
     }
 
+    public function tokens(): BelongsToMany
+    {
+        return $this->belongsToMany(Token::class);
+    }
+
     public function blobs(): BelongsToMany
     {
         return $this->belongsToMany(DockerBlob::class, 'docker_blob_repository')

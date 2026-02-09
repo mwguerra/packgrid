@@ -110,6 +110,14 @@ class TokensTable
                             $parts[] = "<span title=\"{$repoLabel}\" style=\"display:inline-flex;align-items:center;color:#3b82f6;cursor:help\">{$repoIcon}</span>";
                         }
 
+                        $hasDockerRepos = $record->dockerRepositories()->count() > 0;
+                        if ($hasDockerRepos) {
+                            $dockerRepoCount = $record->dockerRepositories()->count();
+                            $dockerRepoLabel = __('token.table.restrictions_docker_repos', ['count' => $dockerRepoCount]);
+                            $dockerRepoIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+                            $parts[] = "<span title=\"{$dockerRepoLabel}\" style=\"display:inline-flex;align-items:center;color:#a855f7;cursor:help\">{$dockerRepoIcon}</span>";
+                        }
+
                         // Last used time
                         if ($record->last_used_at) {
                             $lastUsedTooltip = __('token.tooltip.last_used', ['time' => $record->last_used_at->diffForHumans()]);
@@ -150,6 +158,9 @@ class TokensTable
                         }
                         if ($record->repositories()->count() > 0) {
                             $restrictions[] = __('token.table.restrictions_repos', ['count' => $record->repositories()->count()]);
+                        }
+                        if ($record->dockerRepositories()->count() > 0) {
+                            $restrictions[] = __('token.table.restrictions_docker_repos', ['count' => $record->dockerRepositories()->count()]);
                         }
 
                         return $restrictions ? implode(', ', $restrictions) : __('common.none');

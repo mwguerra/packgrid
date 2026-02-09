@@ -30,6 +30,11 @@ class ManifestController extends Controller
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $manifest = $this->manifestService->getManifest($repository, $reference);
 
         if (! $manifest) {
@@ -52,7 +57,7 @@ class ManifestController extends Controller
      * Check if a manifest exists (HEAD request).
      * HEAD /v2/{name}/manifests/{reference}
      */
-    public function head(Request $request, string $name, string $reference): Response
+    public function head(Request $request, string $name, string $reference): Response|JsonResponse
     {
         $repository = $this->getRepository($name);
 
@@ -60,6 +65,11 @@ class ManifestController extends Controller
             return response('', 404, [
                 'Docker-Distribution-Api-Version' => 'registry/2.0',
             ]);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $manifest = $this->manifestService->getManifest($repository, $reference);
@@ -94,6 +104,11 @@ class ManifestController extends Controller
             return $this->errorResponse('DENIED', "repository is disabled: {$name}", 403);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $content = $request->getContent();
         $contentType = $request->header('Content-Type', DockerMediaType::ManifestV2->value);
 
@@ -125,6 +140,11 @@ class ManifestController extends Controller
 
         if (! $repository) {
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $deleted = $this->manifestService->deleteManifest($repository, $reference);

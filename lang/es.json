@@ -915,5 +915,21 @@
     "settings.field.docker_enabled_helper": "Activar registro de contenedores Docker para imágenes OCI.",
     "settings.action.save": "Guardar Configuración",
     "settings.notification.saved": "Configuración guardada correctamente",
-    "settings.notification.at_least_one_required": "Al menos una funcionalidad debe estar activa"
+    "settings.notification.at_least_one_required": "Al menos una funcionalidad debe estar activa",
+
+    "token.section.network_restrictions": "Restricciones de Red",
+    "token.section.network_restrictions_description": "Restringir el uso del token por dirección IP o dominio.",
+    "token.section.package_restrictions": "Repositorios de Paquetes",
+    "token.section.package_restrictions_description": "Restringir acceso a repositorios Composer/NPM específicos.",
+    "token.section.docker_restrictions": "Repositorios Docker",
+    "token.section.docker_restrictions_description": "Restringir acceso a repositorios Docker específicos.",
+    "token.field.scope_repositories": "Restringir a repositorios específicos",
+    "token.field.scope_repositories_helper": "Cuando está activado, este token solo puede acceder a los repositorios seleccionados.",
+    "token.field.scope_docker_repositories": "Restringir a repositorios Docker específicos",
+    "token.field.scope_docker_repositories_helper": "Cuando está activado, este token solo puede acceder a los repositorios Docker seleccionados.",
+    "token.field.allowed_docker_repositories": "Repositorios Docker Permitidos",
+    "token.field.allowed_docker_repositories_helper": "Seleccione los repositorios Docker a los que este token puede acceder.",
+    "token.field.allowed_docker_repositories_empty": "Todos los repositorios Docker permitidos",
+    "token.table.restrictions_docker_repos": ":count repo(s) Docker",
+    "token.error.docker_repository_access_denied": "Token no autorizado para este repositorio Docker."
 }

@@ -99,6 +99,20 @@ class Token extends Model
         return $this->repositories()->where('repositories.id', $repository->id)->exists();
     }
 
+    public function dockerRepositories(): BelongsToMany
+    {
+        return $this->belongsToMany(DockerRepository::class);
+    }
+
+    public function isAllowedForDockerRepository(DockerRepository $repository): bool
+    {
+        if ($this->dockerRepositories()->count() === 0) {
+            return true;
+        }
+
+        return $this->dockerRepositories()->where('docker_repositories.id', $repository->id)->exists();
+    }
+
     public function recordUsage(): void
     {
         $this->forceFill(['last_used_at' => now()])->save();

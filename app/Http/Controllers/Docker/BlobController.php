@@ -29,6 +29,11 @@ class BlobController extends Controller
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
         }
 
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
+        }
+
         $blob = $this->blobStorageService->getBlob($digest);
 
         if (! $blob) {
@@ -58,6 +63,11 @@ class BlobController extends Controller
             return response('', 404, [
                 'Docker-Distribution-Api-Version' => 'registry/2.0',
             ]);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $blob = $this->blobStorageService->getBlob($digest);
@@ -93,6 +103,11 @@ class BlobController extends Controller
 
         if (! $repository) {
             return $this->errorResponse('NAME_UNKNOWN', "repository name not known to registry: {$name}", 404);
+        }
+
+        $token = $request->attributes->get('packgrid_token');
+        if ($token && ! $token->isAllowedForDockerRepository($repository)) {
+            return $this->errorResponse('DENIED', 'token is not authorized for this repository', 403);
         }
 
         $blob = $this->blobStorageService->getBlob($digest);

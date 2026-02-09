@@ -22,6 +22,7 @@ class DockerRepository extends Model
         'total_size',
         'pull_count',
         'push_count',
+        'download_count',
         'tag_count',
         'manifest_count',
         'last_push_at',
@@ -34,6 +35,7 @@ class DockerRepository extends Model
         'total_size' => 'integer',
         'pull_count' => 'integer',
         'push_count' => 'integer',
+        'download_count' => 'integer',
         'tag_count' => 'integer',
         'manifest_count' => 'integer',
         'last_push_at' => 'datetime',
@@ -88,6 +90,7 @@ class DockerRepository extends Model
     public function incrementPullCount(): void
     {
         $this->increment('pull_count');
+        $this->increment('download_count');
         $this->forceFill(['last_pull_at' => now()])->save();
     }
 

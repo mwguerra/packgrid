@@ -155,6 +155,13 @@ class DockerRepositoryResource extends Resource
 
                         return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">'.implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts).'</span>');
                     }),
+                TextColumn::make('download_count')
+                    ->label(__('docker_repository.table.downloads'))
+                    ->sortable()
+                    ->numeric()
+                    ->badge()
+                    ->color('info')
+                    ->default(0),
                 TextColumn::make('tag_count')
                     ->label(__('docker_repository.table.tags'))
                     ->sortable()

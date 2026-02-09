@@ -23,6 +23,7 @@ class DockerRepositoryFactory extends Factory
             'total_size' => 0,
             'pull_count' => 0,
             'push_count' => 0,
+            'download_count' => 0,
             'tag_count' => 0,
             'manifest_count' => 0,
             'last_push_at' => null,
@@ -50,6 +51,7 @@ class DockerRepositoryFactory extends Factory
         return $this->state([
             'pull_count' => $pulls,
             'push_count' => $pushes,
+            'download_count' => $pulls,
             'last_push_at' => now()->subHours($pushes),
             'last_pull_at' => now()->subHours(1),
         ]);

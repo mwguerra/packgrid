@@ -203,6 +203,7 @@
     "docker_repository.table.tags": "Etiquetas",
     "docker_repository.table.tag": "Etiqueta",
     "docker_repository.table.size": "Tamaño",
+    "docker_repository.table.downloads": "Descargas",
     "docker_repository.table.pulls": "Descargas",
     "docker_repository.table.pushes": "Subidas",
     "docker_repository.table.last_push": "Última Subida",

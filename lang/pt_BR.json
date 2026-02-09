@@ -203,6 +203,7 @@
     "docker_repository.table.tags": "Tags",
     "docker_repository.table.tag": "Tag",
     "docker_repository.table.size": "Tamanho",
+    "docker_repository.table.downloads": "Downloads",
     "docker_repository.table.pulls": "Downloads",
     "docker_repository.table.pushes": "Uploads",
     "docker_repository.table.last_push": "Último Push",

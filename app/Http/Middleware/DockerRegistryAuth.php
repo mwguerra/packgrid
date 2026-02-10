@@ -50,9 +50,9 @@ class DockerRegistryAuth
     {
         // Docker clients send credentials via HTTP Basic Auth
         // We accept the token as either username or password for flexibility
+        [$username, $password] = $this->parseBasicAuth($request);
 
         // Try username first (docker login -u <token>)
-        $username = $request->getUser();
         if ($username && $this->isValidTokenFormat($username)) {
             // Verify it's a real token
             if (Token::query()->where('token', $username)->exists()) {
@@ -60,13 +60,45 @@ class DockerRegistryAuth
             }
         }
 
-        // Try password (docker login -u anything -p <token>)
-        $password = $request->getPassword();
+        // Try password (docker login -u token -p <actual_token>)
         if ($password && $this->isValidTokenFormat($password)) {
             return $password;
         }
 
         return null;
+    }
+
+    /**
+     * Parse Basic Auth credentials from the request.
+     *
+     * Tries PHP's built-in auth variables first, then falls back to manually
+     * parsing the Authorization header. This fallback is needed because many
+     * nginx + PHP-FPM configurations don't set PHP_AUTH_USER/PHP_AUTH_PW.
+     *
+     * @return array{0: ?string, 1: ?string} [username, password]
+     */
+    private function parseBasicAuth(Request $request): array
+    {
+        $username = $request->getUser();
+        $password = $request->getPassword();
+
+        if ($username !== null || $password !== null) {
+            return [$username, $password];
+        }
+
+        // Fallback: manually parse the Authorization header
+        $header = $request->header('Authorization')
+            ?? $request->server->get('HTTP_AUTHORIZATION')
+            ?? $request->server->get('REDIRECT_HTTP_AUTHORIZATION');
+
+        if ($header && stripos($header, 'Basic ') === 0) {
+            $decoded = base64_decode(substr($header, 6), true);
+            if ($decoded !== false && str_contains($decoded, ':')) {
+                return explode(':', $decoded, 2);
+            }
+        }
+
+        return [null, null];
     }
 
     private function isValidTokenFormat(string $value): bool

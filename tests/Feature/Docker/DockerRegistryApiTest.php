@@ -498,6 +498,56 @@ describe('Docker Authentication', function () {
             ->get('/v2/_catalog')
             ->assertUnauthorized();
     });
+
+    it('authenticates via raw Authorization header when PHP_AUTH vars are missing', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+        $encoded = base64_encode('token:test-docker-token-12345');
+
+        test()->get('/v2/_catalog', [
+            'HTTP_AUTHORIZATION' => "Basic {$encoded}",
+        ])->assertOk();
+    });
+
+    it('authenticates via REDIRECT_HTTP_AUTHORIZATION server variable fallback', function () {
+        DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+        $encoded = base64_encode('token:test-docker-token-12345');
+
+        test()->call('GET', '/v2/_catalog', [], [], [], [
+            'REDIRECT_HTTP_AUTHORIZATION' => "Basic {$encoded}",
+        ])->assertOk();
+    });
+
+    it('authenticates HEAD requests with Basic Auth', function () {
+        $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+        $content = 'Blob content for HEAD auth test';
+        $digest = 'sha256:'.hash('sha256', $content);
+
+        $blobService = app(BlobStorageService::class);
+        $blob = $blobService->storeBlob($digest, $content);
+        $blobService->linkBlobToRepository($blob, $repository);
+
+        dockerAuth()
+            ->head("/v2/myorg/myapp/blobs/{$digest}")
+            ->assertOk()
+            ->assertHeader('Docker-Content-Digest', $digest);
+    });
+
+    it('authenticates HEAD requests via raw Authorization header', function () {
+        $repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
+        $content = 'Blob content for raw header HEAD test';
+        $digest = 'sha256:'.hash('sha256', $content);
+
+        $blobService = app(BlobStorageService::class);
+        $blob = $blobService->storeBlob($digest, $content);
+        $blobService->linkBlobToRepository($blob, $repository);
+
+        $encoded = base64_encode('token:test-docker-token-12345');
+
+        test()->call('HEAD', "/v2/myorg/myapp/blobs/{$digest}", [], [], [], [
+            'HTTP_AUTHORIZATION' => "Basic {$encoded}",
+        ])->assertOk()
+            ->assertHeader('Docker-Content-Digest', $digest);
+    });
 });
 
 // =============================================================================

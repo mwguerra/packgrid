@@ -108,9 +108,13 @@ server {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
+    # Required for Docker registry authentication (forwards Basic Auth to PHP)
+    client_max_body_size 0;
+
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
         include fastcgi_params;
     }
 }

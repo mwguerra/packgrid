@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BackupRestore extends Page
@@ -136,9 +137,13 @@ class BackupRestore extends Page
                 $service = new BackupService;
 
                 try {
-                    /** @var TemporaryUploadedFile $file */
                     $file = $data['backup_file'];
-                    $content = file_get_contents($file->getRealPath());
+
+                    if ($file instanceof TemporaryUploadedFile) {
+                        $content = $file->get();
+                    } else {
+                        $content = Storage::get($file);
+                    }
 
                     $service->restoreBackup($content, $data['password']);
 

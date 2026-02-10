@@ -940,5 +940,23 @@
     "token.field.allowed_docker_repositories_helper": "Sélectionnez les dépôts Docker auxquels ce jeton peut accéder.",
     "token.field.allowed_docker_repositories_empty": "Tous les dépôts Docker autorisés",
     "token.table.restrictions_docker_repos": ":count dépôt(s) Docker",
-    "token.error.docker_repository_access_denied": "Le jeton n'est pas autorisé pour ce dépôt Docker."
+    "token.error.docker_repository_access_denied": "Le jeton n'est pas autorisé pour ce dépôt Docker.",
+
+    "backup.title": "Sauvegarde et Restauration",
+    "backup.section.backup": "Sauvegarde",
+    "backup.section.backup_description": "Créez une sauvegarde chiffrée de toute votre base de données, y compris les jetons, dépôts et paramètres.",
+    "backup.section.restore": "Restauration",
+    "backup.section.restore_description": "Restaurez une sauvegarde créée précédemment. Cela écrasera toutes les données actuelles.",
+    "backup.field.last_backup_at": "Dernière sauvegarde",
+    "backup.field.last_restore_at": "Dernière restauration",
+    "backup.field.password": "Mot de passe de chiffrement",
+    "backup.field.password_confirmation": "Confirmer le mot de passe",
+    "backup.field.backup_file": "Fichier de sauvegarde",
+    "backup.action.create_backup": "Créer une sauvegarde",
+    "backup.action.restore": "Restaurer",
+    "backup.action.restore_warning": "Cela écrasera TOUTES les données actuelles avec le contenu de la sauvegarde. Cette action est irréversible. Êtes-vous sûr de vouloir continuer ?",
+    "backup.notification.backup_created": "Sauvegarde créée avec succès",
+    "backup.notification.restore_completed": "Sauvegarde restaurée avec succès",
+    "backup.notification.restore_failed": "Échec de la restauration",
+    "backup.notification.wrong_password": "Mot de passe incorrect. Vérifiez votre mot de passe de chiffrement et réessayez."
 }

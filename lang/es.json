@@ -940,5 +940,23 @@
     "token.field.allowed_docker_repositories_helper": "Seleccione los repositorios Docker a los que este token puede acceder.",
     "token.field.allowed_docker_repositories_empty": "Todos los repositorios Docker permitidos",
     "token.table.restrictions_docker_repos": ":count repo(s) Docker",
-    "token.error.docker_repository_access_denied": "Token no autorizado para este repositorio Docker."
+    "token.error.docker_repository_access_denied": "Token no autorizado para este repositorio Docker.",
+
+    "backup.title": "Copia de Seguridad y Restauración",
+    "backup.section.backup": "Copia de Seguridad",
+    "backup.section.backup_description": "Cree una copia de seguridad cifrada de toda su base de datos, incluyendo tokens, repositorios y configuraciones.",
+    "backup.section.restore": "Restauración",
+    "backup.section.restore_description": "Restaure una copia de seguridad creada anteriormente. Esto sobrescribirá todos los datos actuales.",
+    "backup.field.last_backup_at": "Última copia",
+    "backup.field.last_restore_at": "Última restauración",
+    "backup.field.password": "Contraseña de Cifrado",
+    "backup.field.password_confirmation": "Confirmar Contraseña",
+    "backup.field.backup_file": "Archivo de Copia de Seguridad",
+    "backup.action.create_backup": "Crear Copia de Seguridad",
+    "backup.action.restore": "Restaurar",
+    "backup.action.restore_warning": "Esto sobrescribirá TODOS los datos actuales con el contenido de la copia de seguridad. Esta acción no se puede deshacer. ¿Está seguro de que desea continuar?",
+    "backup.notification.backup_created": "Copia de seguridad creada exitosamente",
+    "backup.notification.restore_completed": "Copia de seguridad restaurada exitosamente",
+    "backup.notification.restore_failed": "Error en la restauración",
+    "backup.notification.wrong_password": "Contraseña incorrecta. Verifique su contraseña de cifrado e intente nuevamente."
 }

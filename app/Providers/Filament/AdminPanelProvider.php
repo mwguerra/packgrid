@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
+use App\Filament\Pages\BackupRestore;
 use App\Filament\Pages\Settings;
 use App\Filament\Widgets\AttentionRequired;
 use App\Filament\Widgets\PackgridStats;
@@ -48,6 +49,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => __('settings.title'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->url(fn () => Settings::getUrl()),
+                MenuItem::make()
+                    ->label(fn () => __('backup.title'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn () => BackupRestore::getUrl()),
             ])
             ->colors([
                 'primary' => Color::Amber,

@@ -940,5 +940,23 @@
     "token.field.allowed_docker_repositories_helper": "Select the Docker repositories this token can access.",
     "token.field.allowed_docker_repositories_empty": "All Docker repositories allowed",
     "token.table.restrictions_docker_repos": ":count Docker repo(s)",
-    "token.error.docker_repository_access_denied": "Token is not authorized for this Docker repository."
+    "token.error.docker_repository_access_denied": "Token is not authorized for this Docker repository.",
+
+    "backup.title": "Backup & Restore",
+    "backup.section.backup": "Backup",
+    "backup.section.backup_description": "Create an encrypted backup of your entire database, including tokens, repositories, and settings.",
+    "backup.section.restore": "Restore",
+    "backup.section.restore_description": "Restore a previously created backup. This will overwrite all current data.",
+    "backup.field.last_backup_at": "Last backup",
+    "backup.field.last_restore_at": "Last restore",
+    "backup.field.password": "Encryption Password",
+    "backup.field.password_confirmation": "Confirm Password",
+    "backup.field.backup_file": "Backup File",
+    "backup.action.create_backup": "Create Backup",
+    "backup.action.restore": "Restore",
+    "backup.action.restore_warning": "This will overwrite ALL current data with the backup contents. This action cannot be undone. Are you sure you want to proceed?",
+    "backup.notification.backup_created": "Backup created successfully",
+    "backup.notification.restore_completed": "Backup restored successfully",
+    "backup.notification.restore_failed": "Restore failed",
+    "backup.notification.wrong_password": "Wrong password. Please check your encryption password and try again."
 }

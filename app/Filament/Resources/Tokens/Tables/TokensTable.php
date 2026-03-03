@@ -10,12 +10,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Js;
 
 class TokensTable
 {
@@ -28,21 +28,48 @@ class TokensTable
         return $host.($port ? ':'.$port : '');
     }
 
-    private static function getAuthJsonContent(string $token): string
+    private static function getBaseUrl(): string
     {
-        return json_encode([
-            'http-basic' => [
-                self::getHost() => [
-                    'username' => 'composer',
-                    'password' => $token,
-                ],
-            ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        return rtrim(config('app.url'), '/');
     }
 
-    private static function getNpmrcContent(string $token): string
+    private static function getComposerCommands(string $token): string
     {
-        return '//'.self::getHost().'/:_authToken='.$token;
+        $host = self::getHost();
+        $baseUrl = self::getBaseUrl();
+
+        return "composer config repositories.packgrid composer {$baseUrl}\ncomposer config --auth http-basic.{$host} \"composer\" \"{$token}\"";
+    }
+
+    private static function getNpmCommands(string $token): string
+    {
+        $host = self::getHost();
+        $baseUrl = self::getBaseUrl();
+
+        return "npm config set @YOUR_SCOPE:registry {$baseUrl}/npm/\nnpm config set //{$host}/npm/:_authToken \"{$token}\"";
+    }
+
+    private static function makeCopyAction(string $name, string $label, string $icon, \Closure $textResolver): Action
+    {
+        return Action::make($name)
+            ->label($label)
+            ->icon($icon)
+            ->color('gray')
+            ->alpineClickHandler(fn (Token $record): string => self::buildCopyJs($textResolver($record)));
+    }
+
+    private static function buildCopyJs(string $text): string
+    {
+        $textJs = Js::from($text);
+        $messageJs = Js::from(__('token.notification.copied'));
+
+        return <<<JS
+            window.navigator.clipboard.writeText({$textJs})
+            \$tooltip({$messageJs}, {
+                theme: \$store.theme,
+                timeout: 2000,
+            })
+            JS;
     }
 
     public static function configure(Table $table): Table
@@ -189,51 +216,24 @@ class TokensTable
                     ->falseLabel(__('common.disabled')),
             ])
             ->recordActions([
-                Action::make('copyToken')
-                    ->label(__('token.action.copy'))
-                    ->icon('heroicon-o-clipboard-document')
-                    ->action(function (Token $record): void {
-                        $token = $record->token;
-
-                        Notification::make()
-                            ->title(__('token.notification.copied'))
-                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($token).'</code></pre>'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode($record->token).')',
-                    ]),
-                Action::make('copyAuthJson')
-                    ->label(__('token.action.copy_auth_json'))
-                    ->icon('heroicon-o-clipboard-document-list')
-                    ->action(function (Token $record): void {
-                        $authJson = self::getAuthJsonContent($record->token);
-
-                        Notification::make()
-                            ->title(__('token.notification.auth_json_copied'))
-                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($authJson).'</code></pre>'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getAuthJsonContent($record->token)).')',
-                    ]),
-                Action::make('copyNpmrc')
-                    ->label(__('token.action.copy_npmrc'))
-                    ->icon('heroicon-o-clipboard-document-list')
-                    ->action(function (Token $record): void {
-                        $npmrc = self::getNpmrcContent($record->token);
-
-                        Notification::make()
-                            ->title(__('token.notification.npmrc_copied'))
-                            ->body(new HtmlString('<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto"><code>'.e($npmrc).'</code></pre>'))
-                            ->success()
-                            ->send();
-                    })
-                    ->extraAttributes(fn (Token $record): array => [
-                        'x-on:click' => 'navigator.clipboard.writeText('.json_encode(self::getNpmrcContent($record->token)).')',
-                    ]),
+                self::makeCopyAction(
+                    'copyToken',
+                    __('token.action.copy'),
+                    'heroicon-o-clipboard-document',
+                    fn (Token $record): string => $record->token,
+                ),
+                self::makeCopyAction(
+                    'copyComposer',
+                    __('token.action.copy_composer'),
+                    'heroicon-o-clipboard-document-list',
+                    fn (Token $record): string => self::getComposerCommands($record->token),
+                ),
+                self::makeCopyAction(
+                    'copyNpm',
+                    __('token.action.copy_npm'),
+                    'heroicon-o-clipboard-document-list',
+                    fn (Token $record): string => self::getNpmCommands($record->token),
+                ),
                 ActionGroup::make([
                     ActionGroup::make([
                         ViewAction::make(),

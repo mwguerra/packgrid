@@ -7,6 +7,7 @@ use App\Enums\PackageFormat;
 use App\Models\Credential;
 use App\Models\Repository;
 use App\Services\GitHubClient;
+use App\Support\PackgridSettings;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -113,7 +114,9 @@ class ComposerAdapter implements FormatAdapterInterface
             'version' => $version,
             'source' => [
                 'type' => 'git',
-                'url' => $repoUrl,
+                'url' => PackgridSettings::gitEnabled()
+                    ? rtrim(config('app.url'), '/').'/git/'.$this->extractFullName($repoUrl).'.git'
+                    : $repoUrl,
                 'reference' => $sha,
             ],
             'dist' => [

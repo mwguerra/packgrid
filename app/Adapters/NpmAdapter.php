@@ -7,6 +7,7 @@ use App\Enums\PackageFormat;
 use App\Models\Credential;
 use App\Models\Repository;
 use App\Services\GitHubClient;
+use App\Support\PackgridSettings;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -135,7 +136,9 @@ class NpmAdapter implements FormatAdapterInterface
             'peerDependencies' => $manifest['peerDependencies'] ?? [],
             'repository' => [
                 'type' => 'git',
-                'url' => 'git+'.$repoUrl.'.git',
+                'url' => PackgridSettings::gitEnabled()
+                    ? 'git+'.rtrim(config('app.url'), '/').'/git/'.$fullName.'.git'
+                    : 'git+'.$repoUrl.'.git',
             ],
             'gitHead' => $sha,
             'dist' => [

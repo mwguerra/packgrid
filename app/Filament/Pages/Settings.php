@@ -46,12 +46,14 @@ class Settings extends Page
             'composer_enabled' => true,
             'npm_enabled' => true,
             'docker_enabled' => true,
+            'git_enabled' => false,
         ]);
 
         $this->form->fill([
             'composer_enabled' => $settings->composer_enabled,
             'npm_enabled' => $settings->npm_enabled,
             'docker_enabled' => $settings->docker_enabled,
+            'git_enabled' => $settings->git_enabled,
         ]);
     }
 
@@ -71,6 +73,9 @@ class Settings extends Page
                         Toggle::make('docker_enabled')
                             ->label(__('settings.field.docker_enabled'))
                             ->helperText(__('settings.field.docker_enabled_helper')),
+                        Toggle::make('git_enabled')
+                            ->label(__('settings.field.git_enabled'))
+                            ->helperText(__('settings.field.git_enabled_helper')),
                     ]),
             ])
             ->statePath('data');
@@ -130,7 +135,7 @@ class Settings extends Page
         $data = $this->form->getState();
 
         // Validate that at least one feature is enabled
-        if (! $data['composer_enabled'] && ! $data['npm_enabled'] && ! $data['docker_enabled']) {
+        if (! $data['composer_enabled'] && ! $data['npm_enabled'] && ! $data['docker_enabled'] && ! $data['git_enabled']) {
             Notification::make()
                 ->title(__('settings.notification.at_least_one_required'))
                 ->danger()

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tokens\Schemas;
 
 use App\Models\Token;
+use App\Support\PackgridSettings;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
@@ -129,6 +130,33 @@ class TokenForm
                                     ->visible(fn (callable $get) => $get('scope_docker_repositories'))
                                     ->columnSpanFull(),
                             ]),
+                        Fieldset::make(__('token.section.clone_restrictions'))
+                            ->schema([
+                                Toggle::make('scope_clone_repositories')
+                                    ->label(__('token.field.scope_clone_repositories'))
+                                    ->helperText(__('token.field.scope_clone_repositories_helper'))
+                                    ->dehydrated(false)
+                                    ->live()
+                                    ->afterStateHydrated(function (Toggle $component, ?Token $record) {
+                                        $component->state($record?->cloneRepositories()->count() > 0);
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (! $state) {
+                                            $set('cloneRepositories', []);
+                                        }
+                                    })
+                                    ->columnSpanFull(),
+                                Select::make('cloneRepositories')
+                                    ->label(__('token.field.allowed_clone_repositories'))
+                                    ->relationship('cloneRepositories', 'name')
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText(__('token.field.allowed_clone_repositories_helper'))
+                                    ->visible(fn (callable $get) => $get('scope_clone_repositories'))
+                                    ->columnSpanFull(),
+                            ])
+                            ->visible(fn (): bool => PackgridSettings::gitEnabled()),
                     ])
                     ->collapsed()
                     ->collapsible()

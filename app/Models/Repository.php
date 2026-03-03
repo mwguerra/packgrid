@@ -26,6 +26,8 @@ class Repository extends Model
         'enabled',
         'package_count',
         'download_count',
+        'clone_enabled',
+        'clone_count',
         'last_sync_at',
         'last_error',
         'ref_filter',
@@ -37,6 +39,8 @@ class Repository extends Model
         'enabled' => 'boolean',
         'package_count' => 'integer',
         'download_count' => 'integer',
+        'clone_enabled' => 'boolean',
+        'clone_count' => 'integer',
         'last_sync_at' => 'datetime',
     ];
 

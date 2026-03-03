@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'p/*',
             'dist/*',
             'npm/*',
+            'git/*',
             'v2/*',
         ]);
     })

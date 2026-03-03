@@ -28,6 +28,8 @@ class RepositoryFactory extends Factory
             'credential_id' => null,
             'enabled' => true,
             'package_count' => 0,
+            'clone_enabled' => false,
+            'clone_count' => 0,
             'last_sync_at' => null,
             'last_error' => null,
             'ref_filter' => null,
@@ -40,6 +42,15 @@ class RepositoryFactory extends Factory
             return [
                 'visibility' => RepositoryVisibility::PrivateRepo,
                 'credential_id' => Credential::factory(),
+            ];
+        });
+    }
+
+    public function cloneEnabled(): static
+    {
+        return $this->state(function () {
+            return [
+                'clone_enabled' => true,
             ];
         });
     }

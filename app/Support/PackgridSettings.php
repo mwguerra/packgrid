@@ -27,12 +27,18 @@ class PackgridSettings
         return static::get()->docker_enabled;
     }
 
+    public static function gitEnabled(): bool
+    {
+        return static::get()->git_enabled;
+    }
+
     public static function isFeatureEnabled(string $feature): bool
     {
         return match ($feature) {
             'composer' => static::composerEnabled(),
             'npm' => static::npmEnabled(),
             'docker' => static::dockerEnabled(),
+            'git' => static::gitEnabled(),
             default => false,
         };
     }
@@ -76,6 +82,10 @@ class PackgridSettings
 
         if (static::dockerEnabled()) {
             $types[] = 'docker';
+        }
+
+        if (static::gitEnabled()) {
+            $types[] = 'git';
         }
 
         return $types;
@@ -135,6 +145,7 @@ class PackgridSettings
                 'composer_enabled' => true,
                 'npm_enabled' => true,
                 'docker_enabled' => true,
+                'git_enabled' => false,
             ]);
         });
     }

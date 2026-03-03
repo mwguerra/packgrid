@@ -150,6 +150,11 @@ class RepositoryResource extends Resource
                             ->label(__('common.enabled'))
                             ->helperText(__('repository.field.enabled_helper'))
                             ->default(true),
+                        Toggle::make('clone_enabled')
+                            ->label(__('repository.field.clone_enabled'))
+                            ->helperText(__('repository.field.clone_enabled_helper'))
+                            ->default(false)
+                            ->visible(fn (): bool => PackgridSettings::gitEnabled()),
                     ])
                     ->collapsed()
                     ->collapsible()
@@ -217,6 +222,17 @@ class RepositoryResource extends Resource
                     ->badge()
                     ->color('info')
                     ->default(0),
+                TextColumn::make('clone_count')
+                    ->label(__('repository.table.clones'))
+                    ->sortable()
+                    ->numeric()
+                    ->badge()
+                    ->color('success')
+                    ->default(0)
+                    ->visible(fn (): bool => PackgridSettings::gitEnabled()),
+                ToggleColumn::make('clone_enabled')
+                    ->label(__('repository.table.clone_enabled'))
+                    ->visible(fn (): bool => PackgridSettings::gitEnabled()),
                 TextColumn::make('sync_status')
                     ->label(__('repository.table.status'))
                     ->badge()
@@ -385,6 +401,17 @@ class RepositoryResource extends Resource
                             ->label(__('repository.infolist.packages'))
                             ->icon('heroicon-o-square-3-stack-3d')
                             ->suffix(fn (Repository $record): string => ' '.trans_choice('repository.infolist.package_plural', $record->package_count ?? 0)),
+                        TextEntry::make('clone_count')
+                            ->label(__('repository.infolist.clone_count'))
+                            ->icon('heroicon-o-document-duplicate')
+                            ->visible(fn (Repository $record): bool => PackgridSettings::gitEnabled() && $record->clone_enabled),
+                        TextEntry::make('clone_url')
+                            ->label(__('repository.infolist.clone_url'))
+                            ->icon('heroicon-o-command-line')
+                            ->state(fn (Repository $record): string => 'git -c http.extraHeader="Authorization: Bearer <YOUR_TOKEN>" clone '.rtrim(config('app.url'), '/').'/git/'.$record->repo_full_name.'.git')
+                            ->copyable()
+                            ->columnSpanFull()
+                            ->visible(fn (Repository $record): bool => PackgridSettings::gitEnabled() && $record->clone_enabled),
                     ])
                     ->columns(4)
                     ->columnSpanFull(),

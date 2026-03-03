@@ -6,6 +6,7 @@ use App\Http\Controllers\Docker\ManifestController;
 use App\Http\Controllers\Docker\TagsController;
 use App\Http\Controllers\Docker\UploadController;
 use App\Http\Controllers\Docker\VersionController;
+use App\Http\Controllers\GitProxyController;
 use App\Http\Controllers\NpmMetadataController;
 use App\Http\Controllers\NpmProxyController;
 use App\Http\Controllers\PackageMetadataController;
@@ -51,6 +52,18 @@ Route::prefix('npm')->middleware(['packgrid.token', 'feature:npm'])->group(funct
     Route::get('/-/{owner}/{repo}/{ref}.tgz', [NpmProxyController::class, 'download'])
         ->where('ref', '.*');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Git Smart HTTP Proxy Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('git/{owner}/{repo}.git')
+    ->middleware(['packgrid.token', 'feature:git'])
+    ->group(function () {
+        Route::get('/info/refs', [GitProxyController::class, 'infoRefs']);
+        Route::post('/git-upload-pack', [GitProxyController::class, 'uploadPack']);
+    });
 
 /*
 |--------------------------------------------------------------------------

@@ -29,7 +29,7 @@ class PackgridSettings
 
     public static function gitEnabled(): bool
     {
-        return static::get()->git_enabled;
+        return static::get()->git_enabled ?? false;
     }
 
     public static function isFeatureEnabled(string $feature): bool

@@ -49,26 +49,39 @@ class TokensTable
         return "npm config set @YOUR_SCOPE:registry {$baseUrl}/npm/\nnpm config set //{$host}/npm/:_authToken \"{$token}\"";
     }
 
-    private static function makeCopyAction(string $name, string $label, string $icon, \Closure $textResolver): Action
+    private static function makeCopyAction(string $name, string $label, string $tooltip, string $icon, string $notificationTitle, \Closure $textResolver): Action
     {
         return Action::make($name)
             ->label($label)
+            ->tooltip($tooltip)
             ->icon($icon)
             ->color('gray')
-            ->alpineClickHandler(fn (Token $record): string => self::buildCopyJs($textResolver($record)));
+            ->alpineClickHandler(fn (Token $record): string => self::buildCopyJs(
+                $textResolver($record),
+                $notificationTitle,
+            ));
     }
 
-    private static function buildCopyJs(string $text): string
+    private static function buildCopyJs(string $text, string $notificationTitle): string
     {
         $textJs = Js::from($text);
-        $messageJs = Js::from(__('token.notification.copied'));
+        $tooltipJs = Js::from(__('token.notification.copied'));
+        $titleJs = Js::from($notificationTitle);
+        $bodyHtml = '<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto whitespace-pre-wrap">'.e($text).'</pre>';
+        $bodyJs = Js::from($bodyHtml);
 
         return <<<JS
             window.navigator.clipboard.writeText({$textJs})
-            \$tooltip({$messageJs}, {
+            \$tooltip({$tooltipJs}, {
                 theme: \$store.theme,
                 timeout: 2000,
             })
+            new FilamentNotification()
+                .title({$titleJs})
+                .body({$bodyJs})
+                .success()
+                .seconds(10)
+                .send()
             JS;
     }
 
@@ -219,19 +232,25 @@ class TokensTable
                 self::makeCopyAction(
                     'copyToken',
                     __('token.action.copy'),
+                    __('token.action.copy_tooltip'),
                     'heroicon-o-clipboard-document',
+                    __('token.notification.token_copied'),
                     fn (Token $record): string => $record->token,
                 ),
                 self::makeCopyAction(
                     'copyComposer',
                     __('token.action.copy_composer'),
+                    __('token.action.copy_composer_tooltip'),
                     'heroicon-o-clipboard-document-list',
+                    __('token.notification.composer_copied'),
                     fn (Token $record): string => self::getComposerCommands($record->token),
                 ),
                 self::makeCopyAction(
                     'copyNpm',
                     __('token.action.copy_npm'),
+                    __('token.action.copy_npm_tooltip'),
                     'heroicon-o-clipboard-document-list',
+                    __('token.notification.npm_copied'),
                     fn (Token $record): string => self::getNpmCommands($record->token),
                 ),
                 ActionGroup::make([

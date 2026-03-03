@@ -22,19 +22,29 @@ class ListTokens extends ListRecords
         $baseUrl = rtrim(config('app.url'), '/');
         $command = "composer config repositories.packgrid composer {$baseUrl}";
         $commandJs = Js::from($command);
-        $messageJs = Js::from(__('token.notification.copied'));
+        $tooltipJs = Js::from(__('token.notification.copied'));
+        $titleJs = Js::from(__('token.notification.composer_setup_copied'));
+        $bodyHtml = '<pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-mono overflow-x-auto whitespace-pre-wrap">'.e($command).'</pre>';
+        $bodyJs = Js::from($bodyHtml);
 
         return [
             Action::make('copyComposerSetup')
                 ->label(__('token.action.copy_composer_setup'))
+                ->tooltip(__('token.action.copy_composer_setup_tooltip'))
                 ->icon('heroicon-o-clipboard-document-list')
                 ->color('gray')
                 ->alpineClickHandler(<<<JS
                     window.navigator.clipboard.writeText({$commandJs})
-                    \$tooltip({$messageJs}, {
+                    \$tooltip({$tooltipJs}, {
                         theme: \$store.theme,
                         timeout: 2000,
                     })
+                    new FilamentNotification()
+                        .title({$titleJs})
+                        .body({$bodyJs})
+                        .success()
+                        .seconds(10)
+                        .send()
                     JS),
             CreateAction::make(),
         ];

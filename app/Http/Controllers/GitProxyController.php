@@ -7,6 +7,7 @@ use App\Models\DownloadLog;
 use App\Models\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GitProxyController extends Controller
@@ -24,9 +25,17 @@ class GitProxyController extends Controller
         $credential = $repository->credential;
         $gitUrl = "https://github.com/{$owner}/{$repo}.git/info/refs?service=git-upload-pack";
 
-        $response = $this->githubRequest($credential)
-            ->get($gitUrl)
-            ->throw();
+        $response = $this->githubRequest($credential)->get($gitUrl);
+
+        if ($response->failed()) {
+            Log::error('Git proxy: GitHub info/refs failed', [
+                'repo' => "{$owner}/{$repo}",
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'has_credential' => $credential !== null,
+            ]);
+            abort($response->status(), 'Upstream GitHub request failed.');
+        }
 
         return response()->stream(function () use ($response) {
             echo $response->body();
@@ -46,8 +55,16 @@ class GitProxyController extends Controller
 
         $response = $this->githubRequest($credential)
             ->withBody($request->getContent(), 'application/x-git-upload-pack-request')
-            ->post($gitUrl)
-            ->throw();
+            ->post($gitUrl);
+
+        if ($response->failed()) {
+            Log::error('Git proxy: GitHub upload-pack failed', [
+                'repo' => "{$owner}/{$repo}",
+                'status' => $response->status(),
+                'has_credential' => $credential !== null,
+            ]);
+            abort($response->status(), 'Upstream GitHub request failed.');
+        }
 
         $token = $request->attributes->get('packgrid_token');
         DownloadLog::logDownload($repository, 'clone', PackageFormat::Git, $token);
@@ -88,7 +105,7 @@ class GitProxyController extends Controller
 
     private function githubRequest(?\App\Models\Credential $credential): \Illuminate\Http\Client\PendingRequest
     {
-        $request = Http::withHeaders([
+        $request = Http::timeout(120)->withHeaders([
             'User-Agent' => 'Packgrid',
         ]);
 

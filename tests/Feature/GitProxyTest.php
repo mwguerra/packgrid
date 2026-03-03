@@ -298,7 +298,7 @@ describe('Token clone repository scoping', function () {
 // =============================================================================
 
 describe('GitHub authentication', function () {
-    it('sends Bearer scheme for github_pat_ tokens', function () {
+    it('sends Basic Auth with x-access-token for github_pat_ tokens', function () {
         $credential = Credential::factory()->create(['token' => 'github_pat_abc123']);
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/private',
@@ -313,11 +313,13 @@ describe('GitHub authentication', function () {
             ->assertOk();
 
         Http::assertSent(function ($request) {
-            return str_starts_with($request->header('Authorization')[0] ?? '', 'Bearer github_pat_');
+            $expected = 'Basic '.base64_encode('x-access-token:github_pat_abc123');
+
+            return ($request->header('Authorization')[0] ?? '') === $expected;
         });
     });
 
-    it('sends token scheme for classic tokens', function () {
+    it('sends Basic Auth with x-access-token for classic tokens', function () {
         $credential = Credential::factory()->create(['token' => 'ghp_classic123']);
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/classic',
@@ -332,7 +334,9 @@ describe('GitHub authentication', function () {
             ->assertOk();
 
         Http::assertSent(function ($request) {
-            return str_starts_with($request->header('Authorization')[0] ?? '', 'token ghp_');
+            $expected = 'Basic '.base64_encode('x-access-token:ghp_classic123');
+
+            return ($request->header('Authorization')[0] ?? '') === $expected;
         });
     });
 });

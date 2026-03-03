@@ -110,10 +110,7 @@ class GitProxyController extends Controller
         ]);
 
         if ($credential?->token) {
-            $scheme = str_starts_with($credential->token, 'github_pat_') ? 'Bearer' : 'token';
-            $request = $request->withHeaders([
-                'Authorization' => $scheme.' '.$credential->token,
-            ]);
+            $request = $request->withBasicAuth('x-access-token', $credential->token);
         }
 
         return $request;

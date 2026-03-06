@@ -71,8 +71,12 @@ Route::prefix('git/{owner}/{repo}.git')
 |--------------------------------------------------------------------------
 */
 
+// DEBUG: temporary route to verify deploy version (remove after fixing)
+Route::get('/v2-debug', fn () => response()->json(['deployed_at' => '2026-03-06T01:10:00Z', 'route_match' => true]));
+
 // Version check (no auth required per OCI spec)
 Route::match(['GET', 'HEAD'], '/v2/', VersionController::class);
+Route::match(['GET', 'HEAD'], '/v2', VersionController::class);
 
 // Authenticated Docker Registry routes
 Route::prefix('v2')->middleware(['docker.auth', 'feature:docker'])->group(function () {

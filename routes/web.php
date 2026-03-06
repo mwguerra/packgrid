@@ -72,7 +72,7 @@ Route::prefix('git/{owner}/{repo}.git')
 */
 
 // Version check (no auth required per OCI spec)
-Route::get('/v2/', VersionController::class);
+Route::match(['GET', 'HEAD'], '/v2/', VersionController::class);
 
 // Authenticated Docker Registry routes
 Route::prefix('v2')->middleware(['docker.auth', 'feature:docker'])->group(function () {

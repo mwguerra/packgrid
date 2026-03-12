@@ -11,10 +11,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Js;
 
 class TokenForm
 {
@@ -40,15 +40,13 @@ class TokenForm
                             ->suffixAction(
                                 Action::make('copyToken')
                                     ->icon('heroicon-o-clipboard-document')
-                                    ->action(function ($state) {
-                                        Notification::make()
-                                            ->title(__('token.notification.copied'))
-                                            ->success()
-                                            ->send();
-                                    })
-                                    ->extraAttributes([
-                                        'x-on:click' => 'navigator.clipboard.writeText($wire.data.token)',
-                                    ])
+                                    ->alpineClickHandler(
+                                        'window.navigator.clipboard.writeText($wire.data.token); '
+                                        .'new FilamentNotification()'
+                                        .'.title('.Js::from(__('token.notification.copied')).')'
+                                        .'.success()'
+                                        .'.send()'
+                                    )
                             )
                             ->helperText(__('token.field.token_helper_create'))
                             ->columnSpanFull()

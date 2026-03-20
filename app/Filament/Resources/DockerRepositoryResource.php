@@ -6,6 +6,7 @@ use App\Enums\DockerActivityType;
 use App\Enums\RepositoryVisibility;
 use App\Filament\Resources\DockerRepositoryResource\Pages;
 use App\Filament\Resources\DockerRepositoryResource\RelationManagers;
+use App\Filament\Resources\DockerRepositoryResource\Widgets;
 use App\Models\DockerRepository;
 use App\Support\PackgridSettings;
 use Filament\Actions\ActionGroup;
@@ -216,6 +217,13 @@ class DockerRepositoryResource extends Resource
         return [
             RelationManagers\TagsRelationManager::class,
             RelationManagers\ManifestsRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            Widgets\DockerRepositoryStats::class,
         ];
     }
 

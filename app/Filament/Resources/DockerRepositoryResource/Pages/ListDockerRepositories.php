@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DockerRepositoryResource\Pages;
 
 use App\Filament\Resources\DockerRepositoryResource;
+use App\Filament\Resources\DockerRepositoryResource\Widgets\DockerRepositoryStats;
 use Filament\Resources\Pages\ListRecords;
 
 class ListDockerRepositories extends ListRecords
@@ -12,5 +13,12 @@ class ListDockerRepositories extends ListRecords
     public function getSubheading(): ?string
     {
         return __('docker_repository.subheading');
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            DockerRepositoryStats::class,
+        ];
     }
 }

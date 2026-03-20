@@ -851,6 +851,11 @@
     "widget.stats.docker_storage": "Docker Storage",
     "widget.stats.docker_storage_desc": ":size total",
 
+    "widget.docker_stats.total_storage": "Total Image Storage",
+    "widget.docker_stats.total_storage_desc": "Daily push volume (7 days)",
+    "widget.docker_stats.downloads_7d": "Downloads (7 days)",
+    "widget.docker_stats.downloads_7d_desc": "Docker image pulls",
+
     "widget.stats.packages": "Packages",
     "widget.stats.packages_desc": "Total versions available",
     "widget.stats.repositories": "Repositories",

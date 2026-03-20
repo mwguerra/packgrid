@@ -851,6 +851,11 @@
     "widget.stats.docker_storage": "Armazenamento Docker",
     "widget.stats.docker_storage_desc": ":size total",
 
+    "widget.docker_stats.total_storage": "Armazenamento Total de Imagens",
+    "widget.docker_stats.total_storage_desc": "Volume diário de push (7 dias)",
+    "widget.docker_stats.downloads_7d": "Downloads (7 dias)",
+    "widget.docker_stats.downloads_7d_desc": "Pulls de imagens Docker",
+
     "widget.stats.packages": "Pacotes",
     "widget.stats.packages_desc": "Versões totais disponíveis",
     "widget.stats.repositories": "Repositórios",

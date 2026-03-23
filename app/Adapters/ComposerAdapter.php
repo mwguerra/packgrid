@@ -8,6 +8,8 @@ use App\Models\Credential;
 use App\Models\Repository;
 use App\Services\GitHubClient;
 use App\Support\PackgridSettings;
+use Composer\Semver\VersionParser;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -41,6 +43,12 @@ class ComposerAdapter implements FormatAdapterInterface
 
             $packageName = $this->getPackageName($manifest, $fullName);
             $version = $this->normalizeVersion($ref['ref'], $ref['type']);
+
+            if (! $this->isValidVersion($version)) {
+                Log::warning("Skipping invalid Composer version '{$version}' from ref '{$ref['ref']}' in '{$fullName}'");
+
+                continue;
+            }
 
             $versionData = $this->buildVersionData(
                 $manifest,
@@ -94,6 +102,17 @@ class ComposerAdapter implements FormatAdapterInterface
     public function normalizeVersion(string $ref, string $type): string
     {
         return $type === 'branch' ? 'dev-'.$ref : $ref;
+    }
+
+    public function isValidVersion(string $version): bool
+    {
+        try {
+            (new VersionParser)->normalize($version);
+
+            return true;
+        } catch (\UnexpectedValueException) {
+            return false;
+        }
     }
 
     public function buildDistUrl(string $fullName, string $ref): string

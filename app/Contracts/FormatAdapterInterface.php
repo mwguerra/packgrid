@@ -37,6 +37,11 @@ interface FormatAdapterInterface
     public function normalizeVersion(string $ref, string $type): string;
 
     /**
+     * Check if a normalized version string is valid for this format.
+     */
+    public function isValidVersion(string $version): bool;
+
+    /**
      * Build the distribution URL for a package version.
      */
     public function buildDistUrl(string $fullName, string $ref): string;

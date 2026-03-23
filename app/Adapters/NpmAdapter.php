@@ -8,6 +8,7 @@ use App\Models\Credential;
 use App\Models\Repository;
 use App\Services\GitHubClient;
 use App\Support\PackgridSettings;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -41,6 +42,12 @@ class NpmAdapter implements FormatAdapterInterface
 
             $packageName = $this->getPackageName($manifest, $fullName);
             $version = $this->normalizeVersion($ref['ref'], $ref['type']);
+
+            if (! $this->isValidVersion($version)) {
+                Log::warning("Skipping invalid NPM version '{$version}' from ref '{$ref['ref']}' in '{$fullName}'");
+
+                continue;
+            }
 
             $versionData = $this->buildVersionData(
                 $manifest,
@@ -104,6 +111,12 @@ class NpmAdapter implements FormatAdapterInterface
 
         // Remove 'v' prefix if present (v1.0.0 -> 1.0.0)
         return ltrim($ref, 'vV');
+    }
+
+    public function isValidVersion(string $version): bool
+    {
+        // NPM semver: major.minor.patch with optional pre-release and build metadata
+        return (bool) preg_match('/^\d+\.\d+\.\d+(-[\w.\-]+)?(\+[\w.\-]+)?$/', $version);
     }
 
     public function buildDistUrl(string $fullName, string $ref): string

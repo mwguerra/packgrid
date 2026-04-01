@@ -22,33 +22,38 @@ Packgrid is a self-hosted solution for teams who need to manage and distribute p
 - **Simple Admin Panel** — Manage repositories, credentials, and tokens through a clean Filament interface
 - **Streaming Proxy** — Package files stream directly from GitHub without being stored on your server
 - **Credential Isolation** — Your GitHub token never leaves the Packgrid server
+- **Download Tracking** — Track package downloads per repository with per-token audit logs
 - **Two-Factor Authentication** — Secure admin accounts with TOTP-based 2FA using authenticator apps
+- **Backup & Restore** — Built-in database backup and restore from the admin panel
 
 ## Screenshots
 
 ### Dashboard
-![Dashboard](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/dashboard.jpg)
+![Dashboard](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/dashboard.png)
 
 ### Repositories
-![Repositories](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/repositories.jpg)
+![Repositories](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/repositories.png)
+
+### Docker Repositories
+![Docker Repositories](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/docker-repositories.png)
 
 ### Credentials
-![Credentials](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/credentials.jpg)
+![Credentials](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/credentials.png)
 
 ### Tokens
-![Tokens](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/tokens.jpg)
+![Tokens](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/tokens.png)
 
 ### Documentation
-![Documentation](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/documentation.jpg)
+![Documentation](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/documentation.png)
 
 ### Login
-![Login](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/login.jpg)
+![Login](https://raw.githubusercontent.com/mwguerra/packgrid/main/docs/images/login.png)
 
 ## Requirements
 
 - PHP 8.2 or higher
 - Composer 2.x
-- MySQL 8.0+ or PostgreSQL 13+
+- SQLite 3.35+ (default), MySQL 8.0+, or PostgreSQL 13+
 - Node.js 18+ (for building assets)
 - A domain or subdomain pointing to your server
 - SSL certificate (Let's Encrypt recommended)
@@ -145,12 +150,16 @@ Edit `.env` with your settings:
 APP_URL=https://packgrid.yourdomain.com
 APP_LOCALE=en
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=packgrid
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+# SQLite (default — zero config)
+DB_CONNECTION=sqlite
+
+# Or use MySQL/PostgreSQL
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=packgrid
+# DB_USERNAME=your_username
+# DB_PASSWORD=your_password
 ```
 
 ### Environment Setup Command
@@ -638,10 +647,11 @@ Or via CLI flags:
 | Web Admin Panel | Yes | Yes | No | Yes |
 | Two-Factor Auth (2FA) | Yes | Via SSO | No | No |
 | GitHub Integration | Yes | Yes | Yes | Yes |
-| GitLab Integration | Planned | Yes | Yes | Yes |
-| Bitbucket Integration | Planned | Yes | Yes | Yes |
-| Webhooks | Planned | Yes | Partial | Yes |
-| Security Scanning | Planned | Yes | No | Yes |
+| GitLab Integration | No | Yes | Yes | Yes |
+| Bitbucket Integration | No | Yes | Yes | Yes |
+| Webhooks | No | Yes | Partial | Yes |
+| Security Scanning | No | Yes | No | Yes |
+| Download Tracking | Yes | Yes | No | No |
 | Package Mirroring | No | Yes | Yes | No |
 | Team Permissions | No | Yes | No | Yes |
 | Setup Complexity | Simple | Managed | Manual | Moderate |
@@ -665,20 +675,6 @@ Or via CLI flags:
 | Setup Complexity | Simple | Simple | Managed | Complex |
 
 **Packgrid's advantage:** If you already use Packgrid for Composer packages, adding npm support requires zero additional setup. You get a unified registry for both PHP and JavaScript packages with the same token management and GitHub integration.
-
-## Roadmap
-
-Future features that may be added (without compromising simplicity):
-
-- [x] NPM Support (completed)
-- [x] Docker Registry (completed) — Full OCI Distribution Spec v2 compliant
-- [ ] GitLab Support
-- [ ] Bitbucket Support
-- [ ] Gitea/Forgejo Support
-- [ ] Webhooks (automatic sync on push)
-- [ ] Security Scanning (vulnerability alerts)
-- [ ] Package Statistics (download tracking)
-- [ ] PyPI Support (Python packages)
 
 ## Contributing
 

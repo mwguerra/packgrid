@@ -676,6 +676,26 @@ Or via CLI flags:
 
 **Packgrid's advantage:** If you already use Packgrid for Composer packages, adding npm support requires zero additional setup. You get a unified registry for both PHP and JavaScript packages with the same token management and GitHub integration.
 
+### Docker (OCI) Private Registries
+
+| Feature | Packgrid | Docker Hub | Harbor | GitLab Container Registry |
+|---------|----------|------------|--------|---------------------------|
+| Hosting | Self-hosted | Cloud | Self-hosted | Both |
+| Cost | Free | Free tier + Paid | Free | Free tier + Paid |
+| Open Source | Yes | No | Yes | Partial |
+| Composer/NPM Support | Yes | No | No | No |
+| OCI Distribution v2 | Yes | Yes | Yes | Yes |
+| Web Admin Panel | Yes | Yes | Yes | Yes |
+| Garbage Collection | Yes | Automatic | Yes | Yes |
+| Image Scanning | No | Paid | Yes (Trivy) | Yes |
+| Replication | No | Paid | Yes | Yes |
+| Webhooks | No | Yes | Yes | Yes |
+| Storage Backend | Local / S3 | Managed | S3 / GCS / Azure | Managed / S3 |
+| Token Management | Unified with Composer/NPM | Separate | Separate | Separate |
+| Setup Complexity | Simple | Managed | Moderate | Managed |
+
+**Packgrid's advantage:** One server, one set of tokens for Composer, NPM, and Docker. If you already use Packgrid for PHP or JavaScript packages, adding a private Docker registry requires no extra infrastructure. For teams that don't need image scanning or replication, Packgrid covers the essentials with minimal setup.
+
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
@@ -822,7 +842,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```
 MIT License
 
-Copyright (c) 2024 Packgrid Contributors
+Copyright (c) 2025 Packgrid Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

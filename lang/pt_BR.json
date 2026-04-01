@@ -847,7 +847,7 @@
     "docs.docker.trouble.ssl.warning": "Apenas desabilite a verificação SSL para desenvolvimento local. Registros em produção devem sempre usar certificados SSL válidos.",
 
     "widget.stats.docker_repos": "Repos Docker",
-    "widget.stats.docker_repos_desc": ":count repositórios",
+    "widget.stats.docker_repos_desc": ":tags tags / :storage",
     "widget.stats.docker_storage": "Armazenamento Docker",
     "widget.stats.docker_storage_desc": ":size total",
 

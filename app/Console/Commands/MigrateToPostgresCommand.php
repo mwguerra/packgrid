@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\DB;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\password;
-use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
 class MigrateToPostgresCommand extends Command
@@ -56,6 +54,19 @@ class MigrateToPostgresCommand extends Command
         'settings' => ['composer_enabled', 'npm_enabled', 'docker_enabled', 'git_enabled'],
     ];
 
+    /**
+     * Integer columns that SQLite may store as floats (e.g., 1.2 * 1024 * 1024 * 1024).
+     * PostgreSQL bigint rejects decimal values, so these need (int) casting.
+     */
+    private const INTEGER_COLUMNS = [
+        'docker_repositories' => ['total_size', 'pull_count', 'push_count', 'download_count', 'tag_count', 'manifest_count'],
+        'docker_blobs' => ['size', 'reference_count'],
+        'docker_manifests' => ['size'],
+        'docker_uploads' => ['uploaded_bytes', 'expected_size'],
+        'docker_activities' => ['size'],
+        'repositories' => ['package_count', 'download_count', 'clone_count'],
+    ];
+
     private const SEQUENCE_TABLES = ['users', 'settings'];
 
     public function handle(): int
@@ -70,9 +81,9 @@ class MigrateToPostgresCommand extends Command
             }
         }
 
-        $database = $this->argument('database') ?? text('PostgreSQL database name:', required: true);
-        $username = $this->argument('username') ?? text('PostgreSQL username:', required: true);
-        $pw = password('PostgreSQL password:', required: true);
+        $database = $this->argument('database') ?? $this->ask('PostgreSQL database name:');
+        $username = $this->argument('username') ?? $this->ask('PostgreSQL username:');
+        $pw = $this->secret('PostgreSQL password:');
         $host = $this->option('host');
         $port = $this->option('port');
 
@@ -81,13 +92,6 @@ class MigrateToPostgresCommand extends Command
         if (! $this->testConnection()) {
             return self::FAILURE;
         }
-
-        info('Running migrations on PostgreSQL...');
-        Artisan::call('migrate', [
-            '--database' => 'pgsql_target',
-            '--force' => true,
-        ]);
-        info('Migrations complete.');
 
         if (! $this->handleExistingData()) {
             return self::SUCCESS;
@@ -99,7 +103,6 @@ class MigrateToPostgresCommand extends Command
 
         try {
             DB::connection('pgsql_target')->beginTransaction();
-            DB::connection('pgsql_target')->statement("SET session_replication_role = 'replica'");
 
             foreach (self::TABLES as $table => $chunkSize) {
                 $this->migrateTable($table, $chunkSize);
@@ -107,10 +110,8 @@ class MigrateToPostgresCommand extends Command
 
             $this->resetSequences();
 
-            DB::connection('pgsql_target')->statement("SET session_replication_role = 'default'");
             DB::connection('pgsql_target')->commit();
         } catch (\Throwable $e) {
-            DB::connection('pgsql_target')->statement("SET session_replication_role = 'default'");
             DB::connection('pgsql_target')->rollBack();
             error("Migration failed: {$e->getMessage()}");
 
@@ -127,7 +128,7 @@ class MigrateToPostgresCommand extends Command
         return self::SUCCESS;
     }
 
-    private function configureTargetConnection(string $database, string $username, string $password, string $host, string $port): void
+    private function configureTargetConnection(string $database, string $username, ?string $password, string $host, string $port): void
     {
         Config::set('database.connections.pgsql_target', [
             'driver' => 'pgsql',
@@ -135,7 +136,7 @@ class MigrateToPostgresCommand extends Command
             'port' => $port,
             'database' => $database,
             'username' => $username,
-            'password' => $password,
+            'password' => $password ?? '',
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
@@ -161,6 +162,7 @@ class MigrateToPostgresCommand extends Command
     private function handleExistingData(): bool
     {
         $hasData = false;
+
         foreach (array_keys(self::TABLES) as $table) {
             try {
                 if (DB::connection('pgsql_target')->table($table)->exists()) {
@@ -168,29 +170,39 @@ class MigrateToPostgresCommand extends Command
                     break;
                 }
             } catch (\Throwable) {
-                // Table may not exist yet
+                // Table doesn't exist yet
             }
         }
 
-        if (! $hasData) {
-            return true;
+        if ($hasData) {
+            warning('The PostgreSQL database already contains data.');
+            $wipe = confirm('Wipe all existing data and start fresh?', default: false);
+
+            if (! $wipe) {
+                info('Migration aborted. No changes were made.');
+
+                return false;
+            }
         }
 
-        warning('The PostgreSQL database already contains data.');
-        $wipe = confirm('Wipe all existing data and start fresh?', default: false);
+        // Temporarily switch default connection so migration seed queries
+        // (like DB::table('settings')->insert(...)) target postgres, not SQLite
+        $originalDefault = config('database.default');
+        Config::set('database.default', 'pgsql_target');
 
-        if (! $wipe) {
-            info('Migration aborted. No changes were made.');
-
-            return false;
-        }
-
-        info('Wiping PostgreSQL database...');
+        info('Running migrations on PostgreSQL...');
         Artisan::call('migrate:fresh', [
             '--database' => 'pgsql_target',
             '--force' => true,
         ]);
-        info('Database wiped and migrations re-run.');
+        info('Migrations complete.');
+
+        Config::set('database.default', $originalDefault);
+
+        // Truncate all tables to remove any data inserted by migrations (e.g. default settings row)
+        // Use a single TRUNCATE ... CASCADE statement to handle FK dependencies
+        $tableList = implode(', ', array_map(fn ($t) => "\"{$t}\"", array_keys(self::TABLES)));
+        DB::connection('pgsql_target')->statement("TRUNCATE {$tableList} CASCADE");
 
         return true;
     }
@@ -207,10 +219,11 @@ class MigrateToPostgresCommand extends Command
 
         $migrated = 0;
         $booleanCols = self::BOOLEAN_COLUMNS[$table] ?? [];
+        $integerCols = self::INTEGER_COLUMNS[$table] ?? [];
 
         DB::table($table)->orderBy(
             DB::raw('rowid')
-        )->chunk($chunkSize, function ($rows) use ($table, $booleanCols, &$migrated) {
+        )->chunk($chunkSize, function ($rows) use ($table, $booleanCols, $integerCols, &$migrated) {
             $batch = [];
 
             foreach ($rows as $row) {
@@ -219,6 +232,12 @@ class MigrateToPostgresCommand extends Command
                 foreach ($booleanCols as $col) {
                     if (array_key_exists($col, $record)) {
                         $record[$col] = (bool) $record[$col];
+                    }
+                }
+
+                foreach ($integerCols as $col) {
+                    if (array_key_exists($col, $record) && $record[$col] !== null) {
+                        $record[$col] = (int) $record[$col];
                     }
                 }
 

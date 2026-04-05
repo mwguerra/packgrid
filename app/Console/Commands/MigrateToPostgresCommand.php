@@ -19,6 +19,7 @@ class MigrateToPostgresCommand extends Command
                             {username? : PostgreSQL username}
                             {--host=127.0.0.1 : PostgreSQL host}
                             {--port=5432 : PostgreSQL port}
+                            {--password= : PostgreSQL password (prompted if not provided)}
                             {--verify : Verify data integrity after migration}';
 
     protected $description = 'Migrate all application data from SQLite to PostgreSQL';
@@ -83,7 +84,7 @@ class MigrateToPostgresCommand extends Command
 
         $database = $this->argument('database') ?? $this->ask('PostgreSQL database name:');
         $username = $this->argument('username') ?? $this->ask('PostgreSQL username:');
-        $pw = $this->secret('PostgreSQL password:');
+        $pw = $this->option('password') ?? $this->secret('PostgreSQL password:');
         $host = $this->option('host');
         $port = $this->option('port');
 

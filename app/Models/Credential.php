@@ -16,6 +16,7 @@ class Credential extends Model
     protected $fillable = [
         'name',
         'provider',
+        'base_url',
         'token',
         'username',
         'status',

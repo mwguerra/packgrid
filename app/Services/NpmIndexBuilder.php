@@ -10,7 +10,7 @@ class NpmIndexBuilder
 {
     public function __construct(
         private readonly NpmMetadataStore $store,
-        private readonly NpmAdapter $adapter
+        private readonly AdapterFactory $adapterFactory,
     ) {}
 
     /**
@@ -20,6 +20,9 @@ class NpmIndexBuilder
      */
     public function rebuild(): array
     {
+        /** @var NpmAdapter $adapter */
+        $adapter = $this->adapterFactory->make(PackageFormat::Npm);
+
         $packages = [];
 
         Repository::query()
@@ -43,7 +46,7 @@ class NpmIndexBuilder
 
         // Write individual package metadata in NPM registry format
         foreach ($packages as $packageName => $versions) {
-            $registryMetadata = $this->adapter->buildRegistryMetadata($packageName, $versions);
+            $registryMetadata = $adapter->buildRegistryMetadata($packageName, $versions);
             $this->store->writePackage($packageName, $registryMetadata);
         }
 

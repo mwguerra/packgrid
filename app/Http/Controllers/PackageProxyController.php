@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Enums\PackageFormat;
 use App\Models\DownloadLog;
 use App\Models\Repository;
-use App\Services\GitHubClient;
+use App\Services\GitProviderClientFactory;
 use App\Services\RepositorySyncService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PackageProxyController extends Controller
 {
-    public function __construct(private readonly GitHubClient $client) {}
+    public function __construct(private readonly GitProviderClientFactory $clientFactory) {}
 
     public function download(Request $request, string $owner, string $repo, string $ref): StreamedResponse
     {
@@ -40,15 +40,14 @@ class PackageProxyController extends Controller
             }
         }
 
-        $response = $this->client->downloadZipball($fullName, $ref, $repository->credential);
+        $client = $this->clientFactory->forCredential($repository->credential);
+        $response = $client->downloadZip($fullName, $ref);
 
         DownloadLog::logDownload($repository, $ref, PackageFormat::Composer, $token);
 
-        $filename = $owner.'-'.$repo.'-'.$ref.'.zip';
-
         return response()->streamDownload(function () use ($response) {
             echo $response->body();
-        }, $filename, [
+        }, $owner.'-'.$repo.'-'.$ref.'.zip', [
             'Content-Type' => 'application/zip',
         ]);
     }

@@ -299,7 +299,7 @@ test('github client can download tarball', function () {
     ]);
 
     $client = app(GitHubClient::class);
-    $response = $client->downloadTarball('owner/repo', 'v1.0.0');
+    $response = $client->downloadTar('owner/repo', 'v1.0.0');
 
     expect($response->body())->toBe('tarball-content');
 });

@@ -3,10 +3,10 @@
 namespace App\Adapters;
 
 use App\Contracts\FormatAdapterInterface;
+use App\Contracts\GitProviderClientInterface;
+use App\DTOs\RefDto;
 use App\Enums\PackageFormat;
-use App\Models\Credential;
 use App\Models\Repository;
-use App\Services\GitHubClient;
 use App\Support\PackgridSettings;
 use Composer\Semver\VersionParser;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +15,7 @@ use RuntimeException;
 
 class ComposerAdapter implements FormatAdapterInterface
 {
-    public function __construct(private readonly GitHubClient $client) {}
+    public function __construct(private readonly GitProviderClientInterface $client) {}
 
     public function getFormat(): PackageFormat
     {
@@ -26,15 +26,15 @@ class ComposerAdapter implements FormatAdapterInterface
     {
         $packages = [];
         $fullName = $repository->repo_full_name;
-        $credential = $repository->credential;
 
         foreach ($refs as $ref) {
+            /** @var RefDto $ref */
             try {
-                $manifest = $this->getManifest($fullName, $ref['ref'], $credential);
+                $manifest = $this->getManifest($fullName, $ref->name);
             } catch (\Illuminate\Http\Client\RequestException $e) {
                 if ($e->response->status() === 404) {
                     throw new RuntimeException(
-                        "No composer.json found in '{$fullName}' at ref '{$ref['ref']}'. ".
+                        "No composer.json found in '{$fullName}' at ref '{$ref->name}'. ".
                         'This repository is not a valid Composer package.'
                     );
                 }
@@ -42,39 +42,26 @@ class ComposerAdapter implements FormatAdapterInterface
             }
 
             $packageName = $this->getPackageName($manifest, $fullName);
-            $version = $this->normalizeVersion($ref['ref'], $ref['type']);
+            $version = $this->normalizeVersion($ref->name, $ref->type);
 
             if (! $this->isValidVersion($version)) {
-                Log::warning("Skipping invalid Composer version '{$version}' from ref '{$ref['ref']}' in '{$fullName}'");
+                Log::warning("Skipping invalid Composer version '{$version}' from ref '{$ref->name}' in '{$fullName}'");
 
                 continue;
             }
 
-            $versionData = $this->buildVersionData(
-                $manifest,
-                $packageName,
-                $version,
-                $repository->url,
-                $ref['ref'],
-                $ref['sha']
+            $packages[$packageName][$version] = $this->buildVersionData(
+                $manifest, $packageName, $version, $repository->url, $ref->name, $ref->sha
             );
-
-            $packages[$packageName][$version] = $versionData;
         }
 
         return $packages;
     }
 
-    public function getManifest(string $fullName, string $ref, ?Credential $credential): array
+    public function getManifest(string $fullName, string $ref): array
     {
-        $payload = $this->client->getFileContent($fullName, 'composer.json', $ref, $credential);
-
-        if (! isset($payload['content'])) {
-            throw new RuntimeException('composer.json not found for '.$fullName.' at '.$ref);
-        }
-
-        $contents = base64_decode($payload['content']);
-        $decoded = json_decode($contents, true);
+        $dto = $this->client->getFileContent($fullName, 'composer.json', $ref);
+        $decoded = json_decode($dto->content, true);
 
         if (! is_array($decoded)) {
             throw new RuntimeException('composer.json could not be decoded for '.$fullName.' at '.$ref);
@@ -128,22 +115,21 @@ class ComposerAdapter implements FormatAdapterInterface
         string $ref,
         string $sha
     ): array {
+        $fullName = $this->extractFullName($repoUrl);
+
         return array_merge($manifest, [
             'name' => $packageName,
             'version' => $version,
             'source' => [
                 'type' => 'git',
                 'url' => PackgridSettings::gitEnabled()
-                    ? rtrim(config('app.url'), '/').'/git/'.$this->extractFullName($repoUrl).'.git'
+                    ? rtrim(config('app.url'), '/').'/git/'.$fullName.'.git'
                     : $repoUrl,
                 'reference' => $sha,
             ],
             'dist' => [
                 'type' => 'zip',
-                'url' => $this->buildDistUrl(
-                    $this->extractFullName($repoUrl),
-                    $ref
-                ),
+                'url' => $this->buildDistUrl($fullName, $ref),
                 'reference' => $sha,
             ],
         ]);
@@ -151,11 +137,9 @@ class ComposerAdapter implements FormatAdapterInterface
 
     private function extractFullName(string $repoUrl): string
     {
-        // Extract owner/repo from URL like https://github.com/owner/repo
         $path = parse_url($repoUrl, PHP_URL_PATH);
         $path = trim($path ?? '', '/');
-        $path = preg_replace('/\.git$/', '', $path);
 
-        return $path ?: '';
+        return preg_replace('/\.git$/', '', $path) ?: '';
     }
 }

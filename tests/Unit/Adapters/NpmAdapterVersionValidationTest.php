@@ -1,10 +1,10 @@
 <?php
 
 use App\Adapters\NpmAdapter;
-use App\Services\GitHubClient;
+use App\Contracts\GitProviderClientInterface;
 
 beforeEach(function () {
-    $this->adapter = new NpmAdapter(Mockery::mock(GitHubClient::class));
+    $this->adapter = new NpmAdapter(Mockery::mock(GitProviderClientInterface::class));
 });
 
 describe('isValidVersion', function () {

@@ -3,10 +3,10 @@
 namespace App\Adapters;
 
 use App\Contracts\FormatAdapterInterface;
+use App\Contracts\GitProviderClientInterface;
+use App\DTOs\RefDto;
 use App\Enums\PackageFormat;
-use App\Models\Credential;
 use App\Models\Repository;
-use App\Services\GitHubClient;
 use App\Support\PackgridSettings;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -14,7 +14,7 @@ use RuntimeException;
 
 class NpmAdapter implements FormatAdapterInterface
 {
-    public function __construct(private readonly GitHubClient $client) {}
+    public function __construct(private readonly GitProviderClientInterface $client) {}
 
     public function getFormat(): PackageFormat
     {
@@ -25,15 +25,15 @@ class NpmAdapter implements FormatAdapterInterface
     {
         $packages = [];
         $fullName = $repository->repo_full_name;
-        $credential = $repository->credential;
 
         foreach ($refs as $ref) {
+            /** @var RefDto $ref */
             try {
-                $manifest = $this->getManifest($fullName, $ref['ref'], $credential);
+                $manifest = $this->getManifest($fullName, $ref->name);
             } catch (\Illuminate\Http\Client\RequestException $e) {
                 if ($e->response->status() === 404) {
                     throw new RuntimeException(
-                        "No package.json found in '{$fullName}' at ref '{$ref['ref']}'. ".
+                        "No package.json found in '{$fullName}' at ref '{$ref->name}'. ".
                         'This repository is not a valid NPM package.'
                     );
                 }
@@ -41,39 +41,26 @@ class NpmAdapter implements FormatAdapterInterface
             }
 
             $packageName = $this->getPackageName($manifest, $fullName);
-            $version = $this->normalizeVersion($ref['ref'], $ref['type']);
+            $version = $this->normalizeVersion($ref->name, $ref->type);
 
             if (! $this->isValidVersion($version)) {
-                Log::warning("Skipping invalid NPM version '{$version}' from ref '{$ref['ref']}' in '{$fullName}'");
+                Log::warning("Skipping invalid NPM version '{$version}' from ref '{$ref->name}' in '{$fullName}'");
 
                 continue;
             }
 
-            $versionData = $this->buildVersionData(
-                $manifest,
-                $packageName,
-                $version,
-                $repository->url,
-                $ref['ref'],
-                $ref['sha']
+            $packages[$packageName][$version] = $this->buildVersionData(
+                $manifest, $packageName, $version, $repository->url, $ref->name, $ref->sha
             );
-
-            $packages[$packageName][$version] = $versionData;
         }
 
         return $packages;
     }
 
-    public function getManifest(string $fullName, string $ref, ?Credential $credential): array
+    public function getManifest(string $fullName, string $ref): array
     {
-        $payload = $this->client->getFileContent($fullName, 'package.json', $ref, $credential);
-
-        if (! isset($payload['content'])) {
-            throw new RuntimeException('package.json not found for '.$fullName.' at '.$ref);
-        }
-
-        $contents = base64_decode($payload['content']);
-        $decoded = json_decode($contents, true);
+        $dto = $this->client->getFileContent($fullName, 'package.json', $ref);
+        $decoded = json_decode($dto->content, true);
 
         if (! is_array($decoded)) {
             throw new RuntimeException('package.json could not be decoded for '.$fullName.' at '.$ref);
@@ -155,7 +142,7 @@ class NpmAdapter implements FormatAdapterInterface
             ],
             'gitHead' => $sha,
             'dist' => [
-                'shasum' => '', // Will be calculated when creating tarball
+                'shasum' => '',
                 'tarball' => $this->buildDistUrl($fullName, $ref),
             ],
             '_id' => $packageName.'@'.$version,
@@ -211,7 +198,7 @@ class NpmAdapter implements FormatAdapterInterface
     private function sortVersions(array $versions): array
     {
         usort($versions, function ($a, $b) {
-            // Handle pre-release versions (0.0.0-*) - they come last
+            // Handle pre-release versions (0.0.0-*) — they come last
             $aIsPrerelease = str_starts_with($a, '0.0.0-');
             $bIsPrerelease = str_starts_with($b, '0.0.0-');
 
@@ -253,8 +240,7 @@ class NpmAdapter implements FormatAdapterInterface
     {
         $path = parse_url($repoUrl, PHP_URL_PATH);
         $path = trim($path ?? '', '/');
-        $path = preg_replace('/\.git$/', '', $path);
 
-        return $path ?: '';
+        return preg_replace('/\.git$/', '', $path) ?: '';
     }
 }

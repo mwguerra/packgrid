@@ -1,10 +1,10 @@
 <?php
 
 use App\Adapters\ComposerAdapter;
-use App\Services\GitHubClient;
+use App\Contracts\GitProviderClientInterface;
 
 beforeEach(function () {
-    $this->adapter = new ComposerAdapter(Mockery::mock(GitHubClient::class));
+    $this->adapter = new ComposerAdapter(Mockery::mock(GitProviderClientInterface::class));
 });
 
 describe('isValidVersion', function () {

@@ -29,7 +29,7 @@ class GitHubClient implements GitProviderClientInterface
 
         return new RepositoryInfoDto(
             fullName: $fullName,
-            name: $data['name'],
+            name: $data['name'] ?? basename($fullName),
             isPrivate: $data['private'] ?? false,
             defaultBranch: $data['default_branch'] ?? 'main',
         );

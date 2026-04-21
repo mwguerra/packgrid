@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\GitProviderClientInterface;
 use App\Enums\PackageFormat;
 use App\Models\Credential;
 use Illuminate\Http\Client\RequestException;
@@ -9,7 +10,7 @@ use RuntimeException;
 
 class RepositoryFormatDetector
 {
-    public function __construct(private readonly GitHubClient $client) {}
+    public function __construct(private readonly GitProviderClientFactory $clientFactory) {}
 
     /**
      * Detect the package format by checking for manifest files.
@@ -18,15 +19,14 @@ class RepositoryFormatDetector
      */
     public function detect(string $fullName, ?Credential $credential = null): PackageFormat
     {
-        $defaultBranch = $this->getDefaultBranch($fullName, $credential);
+        $client = $this->clientFactory->forCredential($credential);
+        $info = $client->getRepositoryInfo($fullName);
 
-        // Try Composer first (more common in this ecosystem)
-        if ($this->hasFile($fullName, 'composer.json', $defaultBranch, $credential)) {
+        if ($this->hasFile($client, $fullName, 'composer.json', $info->defaultBranch)) {
             return PackageFormat::Composer;
         }
 
-        // Try NPM
-        if ($this->hasFile($fullName, 'package.json', $defaultBranch, $credential)) {
+        if ($this->hasFile($client, $fullName, 'package.json', $info->defaultBranch)) {
             return PackageFormat::Npm;
         }
 
@@ -35,17 +35,14 @@ class RepositoryFormatDetector
         );
     }
 
-    private function getDefaultBranch(string $fullName, ?Credential $credential): string
-    {
-        $repo = $this->client->getRepository($fullName, $credential);
-
-        return $repo['default_branch'] ?? 'main';
-    }
-
-    private function hasFile(string $fullName, string $path, string $ref, ?Credential $credential): bool
-    {
+    private function hasFile(
+        GitProviderClientInterface $client,
+        string $fullName,
+        string $path,
+        string $ref
+    ): bool {
         try {
-            $this->client->getFileContent($fullName, $path, $ref, $credential);
+            $client->getFileContent($fullName, $path, $ref);
 
             return true;
         } catch (RequestException $e) {

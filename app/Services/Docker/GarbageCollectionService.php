@@ -3,18 +3,24 @@
 namespace App\Services\Docker;
 
 use App\Models\DockerBlob;
+use App\Models\DockerManifest;
 use App\Models\DockerUpload;
 use Illuminate\Support\Collection;
 
 class GarbageCollectionService
 {
     public function __construct(
-        private readonly BlobStorageService $blobStorageService
+        private readonly BlobStorageService $blobStorageService,
+        private readonly ManifestService $manifestService
     ) {}
 
     public function collectGarbage(bool $dryRun = false): array
     {
         $results = [
+            'untagged_manifests' => [
+                'count' => 0,
+                'items' => [],
+            ],
             'orphaned_blobs' => [
                 'count' => 0,
                 'size' => 0,
@@ -26,7 +32,24 @@ class GarbageCollectionService
             ],
         ];
 
-        // Clean orphaned blobs
+        // Prune untagged manifests first - this unlinks their no-longer-reachable
+        // blobs, which is what makes them detectable by findOrphanedBlobs below.
+        $untaggedManifests = $this->findUntaggedManifests();
+        foreach ($untaggedManifests as $manifest) {
+            $results['untagged_manifests']['count']++;
+            $results['untagged_manifests']['items'][] = [
+                'digest' => $manifest->digest,
+                'repository' => $manifest->repository?->name ?? 'unknown',
+                'size' => $manifest->size,
+                'created_at' => $manifest->created_at->toDateTimeString(),
+            ];
+
+            if (! $dryRun && $manifest->repository) {
+                $this->manifestService->cleanupIfOrphaned($manifest, $manifest->repository);
+            }
+        }
+
+        // Clean orphaned blobs (now includes blobs unlinked above)
         $orphanedBlobs = $this->findOrphanedBlobs();
         foreach ($orphanedBlobs as $blob) {
             $results['orphaned_blobs']['count']++;
@@ -59,6 +82,11 @@ class GarbageCollectionService
         }
 
         return $results;
+    }
+
+    public function findUntaggedManifests(): Collection
+    {
+        return DockerManifest::doesntHave('tags')->with('repository')->get();
     }
 
     public function findOrphanedBlobs(): Collection
@@ -105,6 +133,8 @@ class GarbageCollectionService
         $orphanedBlobs = $this->findOrphanedBlobs()->count();
         $orphanedSize = $this->findOrphanedBlobs()->sum('size');
         $staleUploads = $this->findStaleUploads()->count();
+        $untaggedManifests = $this->findUntaggedManifests();
+        $untaggedSize = $this->estimateReclaimableFromUntaggedManifests($untaggedManifests);
 
         return [
             'total_blobs' => $totalBlobs,
@@ -113,10 +143,49 @@ class GarbageCollectionService
             'orphaned_blobs' => $orphanedBlobs,
             'orphaned_size' => $orphanedSize,
             'orphaned_size_formatted' => $this->formatSize($orphanedSize),
+            'untagged_manifests' => $untaggedManifests->count(),
+            'untagged_reclaimable_size' => $untaggedSize,
+            'untagged_reclaimable_size_formatted' => $this->formatSize($untaggedSize),
             'stale_uploads' => $staleUploads,
-            'potential_savings' => $orphanedSize,
-            'potential_savings_formatted' => $this->formatSize($orphanedSize),
+            'potential_savings' => $orphanedSize + $untaggedSize,
+            'potential_savings_formatted' => $this->formatSize($orphanedSize + $untaggedSize),
         ];
+    }
+
+    /**
+     * Estimate space reclaimable by pruning untagged manifests, by summing the
+     * sizes of blobs that are referenced ONLY by untagged manifests in their
+     * repository (i.e. not also reachable from tagged manifests).
+     */
+    protected function estimateReclaimableFromUntaggedManifests(Collection $untaggedManifests): int
+    {
+        $reclaimable = [];
+
+        $byRepo = $untaggedManifests->groupBy('docker_repository_id');
+
+        foreach ($byRepo as $manifests) {
+            $repository = $manifests->first()->repository;
+            if (! $repository) {
+                continue;
+            }
+
+            $reachable = $this->manifestService->collectReachableBlobDigests($repository);
+
+            foreach ($manifests as $manifest) {
+                foreach ($this->manifestService->collectManifestBlobDigests($manifest) as $digest) {
+                    if (in_array($digest, $reachable, true)) {
+                        continue;
+                    }
+                    $reclaimable[$digest] = true;
+                }
+            }
+        }
+
+        if ($reclaimable === []) {
+            return 0;
+        }
+
+        return (int) DockerBlob::whereIn('digest', array_keys($reclaimable))->sum('size');
     }
 
     protected function formatSize(int $bytes): string

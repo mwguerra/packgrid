@@ -52,6 +52,9 @@ class DockerGarbageCollectionCommand extends Command
 
             $results = $gcService->collectGarbage($dryRun);
 
+            // Report untagged manifests
+            $this->reportUntaggedManifests($results['untagged_manifests'], $dryRun);
+
             // Report orphaned blobs
             $this->reportOrphanedBlobs($results['orphaned_blobs'], $dryRun);
 
@@ -62,10 +65,11 @@ class DockerGarbageCollectionCommand extends Command
             $this->newLine();
             $action = $dryRun ? 'Would delete' : 'Deleted';
             $this->info('Summary:');
+            $this->line("  {$action} {$results['untagged_manifests']['count']} untagged manifests");
             $this->line("  {$action} {$results['orphaned_blobs']['count']} orphaned blobs ({$this->formatSize($results['orphaned_blobs']['size'])})");
             $this->line("  {$action} {$results['stale_uploads']['count']} stale uploads");
 
-            if ($dryRun && ($results['orphaned_blobs']['count'] > 0 || $results['stale_uploads']['count'] > 0)) {
+            if ($dryRun && ($results['untagged_manifests']['count'] > 0 || $results['orphaned_blobs']['count'] > 0 || $results['stale_uploads']['count'] > 0)) {
                 $this->newLine();
                 $this->info('Run without --dry-run to actually delete these items.');
             }
@@ -90,6 +94,8 @@ class DockerGarbageCollectionCommand extends Command
             [
                 ['Total Blobs', $stats['total_blobs']],
                 ['Total Size', $stats['total_size_formatted']],
+                ['Untagged Manifests', $stats['untagged_manifests']],
+                ['Untagged Reclaimable', $stats['untagged_reclaimable_size_formatted']],
                 ['Orphaned Blobs', $stats['orphaned_blobs']],
                 ['Orphaned Size', $stats['orphaned_size_formatted']],
                 ['Stale Uploads', $stats['stale_uploads']],
@@ -97,12 +103,32 @@ class DockerGarbageCollectionCommand extends Command
             ]
         );
 
-        if ($stats['orphaned_blobs'] > 0 || $stats['stale_uploads'] > 0) {
+        if ($stats['orphaned_blobs'] > 0 || $stats['stale_uploads'] > 0 || $stats['untagged_manifests'] > 0) {
             $this->newLine();
             $this->info('Run `php artisan packgrid:docker-gc` to clean up.');
         }
 
         return Command::SUCCESS;
+    }
+
+    protected function reportUntaggedManifests(array $untaggedManifests, bool $dryRun): void
+    {
+        $action = $dryRun ? 'Would delete' : 'Deleting';
+
+        $this->line("Untagged Manifests ({$untaggedManifests['count']}):");
+
+        if ($untaggedManifests['count'] === 0) {
+            $this->info('  No untagged manifests found.');
+            $this->newLine();
+
+            return;
+        }
+
+        foreach ($untaggedManifests['items'] as $manifest) {
+            $shortDigest = substr($manifest['digest'], 0, 19).'...';
+            $this->line("  {$action}: {$manifest['repository']} {$shortDigest}");
+        }
+        $this->newLine();
     }
 
     protected function reportOrphanedBlobs(array $orphanedBlobs, bool $dryRun): void

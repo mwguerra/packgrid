@@ -53,9 +53,19 @@ class ManifestService
                 ]);
             }
 
-            // Handle tag if reference is a tag (not a digest)
+            // Handle tag if reference is a tag (not a digest).
+            // Capture the previously-tagged manifest before the tag is moved so we
+            // can clean it up if it's left orphaned (no remaining tags).
+            $previousManifest = null;
             if (! $this->isDigest($reference)) {
+                $previousManifest = $this->getTaggedManifest($repository, $reference);
                 $this->updateOrCreateTag($repository, $reference, $manifest);
+            }
+
+            // If this push moved the tag to a different manifest and the
+            // previously-tagged manifest now has no tags, prune it.
+            if ($previousManifest !== null && $previousManifest->id !== $manifest->id) {
+                $this->cleanupIfOrphaned($previousManifest, $repository);
             }
 
             // Update repository statistics
@@ -67,6 +77,13 @@ class ManifestService
 
             return $manifest;
         });
+    }
+
+    protected function getTaggedManifest(DockerRepository $repository, string $tagName): ?DockerManifest
+    {
+        $tag = $repository->tags()->where('name', $tagName)->first();
+
+        return $tag?->manifest;
     }
 
     public function getManifest(DockerRepository $repository, string $reference): ?DockerManifest
@@ -238,20 +255,111 @@ class ManifestService
 
     protected function unlinkManifestBlobs(DockerRepository $repository, DockerManifest $manifest): void
     {
-        // Unlink config blob
-        if ($manifest->config_digest) {
-            $blob = $this->blobStorageService->getBlob($manifest->config_digest);
+        // Only unlink blobs that are no longer reachable from any other manifest
+        // tagged in this repository. This prevents stripping a blob that's
+        // shared with a still-tagged manifest.
+        $reachable = $this->collectReachableBlobDigests($repository, excludeManifest: $manifest);
+
+        foreach ($this->collectManifestBlobDigests($manifest) as $digest) {
+            if (in_array($digest, $reachable, true)) {
+                continue;
+            }
+
+            $blob = $this->blobStorageService->getBlob($digest);
             if ($blob) {
                 $this->blobStorageService->unlinkBlobFromRepository($blob, $repository);
             }
         }
+    }
 
-        // Unlink layer blobs
-        foreach ($manifest->layer_digests ?? [] as $layerDigest) {
-            $blob = $this->blobStorageService->getBlob($layerDigest);
-            if ($blob) {
-                $this->blobStorageService->unlinkBlobFromRepository($blob, $repository);
+    /**
+     * If the given manifest has no remaining tags, unlink its (now-unreachable)
+     * blobs from the repository and delete the manifest row.
+     */
+    public function cleanupIfOrphaned(DockerManifest $manifest, DockerRepository $repository): bool
+    {
+        if ($manifest->tags()->count() > 0) {
+            return false;
+        }
+
+        $this->unlinkManifestBlobs($repository, $manifest);
+        $manifest->delete();
+        $repository->updateStatistics();
+
+        return true;
+    }
+
+    /**
+     * Collect all blob digests reachable from tagged manifests in this repository,
+     * optionally excluding one manifest from the walk (used when checking what
+     * would still be reachable after that manifest is removed).
+     *
+     * @return array<int, string>
+     */
+    public function collectReachableBlobDigests(DockerRepository $repository, ?DockerManifest $excludeManifest = null): array
+    {
+        $digests = [];
+        $visited = [];
+
+        $tags = $repository->tags()->with('manifest')->get();
+
+        foreach ($tags as $tag) {
+            $manifest = $tag->manifest;
+            if (! $manifest) {
+                continue;
             }
+            if ($excludeManifest !== null && $manifest->id === $excludeManifest->id) {
+                continue;
+            }
+            $this->walkManifestBlobs($manifest, $digests, $visited);
+        }
+
+        return array_values(array_unique($digests));
+    }
+
+    /**
+     * Collect blob digests directly referenced by a single manifest. For
+     * manifest lists / OCI indexes, recursively follow child manifests.
+     *
+     * @return array<int, string>
+     */
+    public function collectManifestBlobDigests(DockerManifest $manifest): array
+    {
+        $digests = [];
+        $visited = [];
+        $this->walkManifestBlobs($manifest, $digests, $visited);
+
+        return array_values(array_unique($digests));
+    }
+
+    /**
+     * @param  array<int, string>  $digests
+     * @param  array<int, string>  $visited
+     */
+    protected function walkManifestBlobs(DockerManifest $manifest, array &$digests, array &$visited): void
+    {
+        if (in_array($manifest->id, $visited, true)) {
+            return;
+        }
+        $visited[] = $manifest->id;
+
+        if ($manifest->isMultiArch()) {
+            foreach ($manifest->layer_digests ?? [] as $childDigest) {
+                $child = DockerManifest::where('digest', $childDigest)->first();
+                if ($child) {
+                    $this->walkManifestBlobs($child, $digests, $visited);
+                }
+            }
+
+            return;
+        }
+
+        if ($manifest->config_digest) {
+            $digests[] = $manifest->config_digest;
+        }
+
+        foreach ($manifest->layer_digests ?? [] as $layerDigest) {
+            $digests[] = $layerDigest;
         }
     }
 

@@ -5,12 +5,14 @@ use App\Models\DockerActivity;
 use App\Models\DockerManifest;
 use App\Models\DockerRepository;
 use App\Models\DockerTag;
+use App\Services\Docker\BlobStorageService;
 use App\Services\Docker\ManifestService;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     Storage::fake('local');
     $this->manifestService = app(ManifestService::class);
+    $this->blobService = app(BlobStorageService::class);
     $this->repository = DockerRepository::factory()->create(['name' => 'myorg/myapp']);
 });
 
@@ -459,6 +461,184 @@ describe('ManifestService Exists', function () {
 
         expect($this->manifestService->manifestExists($this->repository, $digest))->toBeTrue()
             ->and($this->manifestService->manifestExists($this->repository, 'sha256:'.str_repeat('a', 64)))->toBeFalse();
+    });
+});
+
+// =============================================================================
+// TAG OVERWRITE / ORPHAN CLEANUP TESTS
+// =============================================================================
+
+describe('ManifestService Tag Overwrite Cleanup', function () {
+    it('deletes the previously-tagged manifest when a tag is moved to a new manifest', function () {
+        $content1 = createManifestContent(['sha256:'.fake()->sha256()]);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
+
+        $manifest1 = $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content2,
+            DockerMediaType::ManifestV2->value
+        );
+
+        expect(DockerManifest::find($manifest1->id))->toBeNull();
+    });
+
+    it('keeps the previously-tagged manifest if another tag still references it', function () {
+        $content1 = createManifestContent(['sha256:'.fake()->sha256()]);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
+
+        $manifest1 = $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'stable',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content2,
+            DockerMediaType::ManifestV2->value
+        );
+
+        expect(DockerManifest::find($manifest1->id))->not->toBeNull();
+    });
+
+    it('unlinks blobs of the orphaned manifest from the repository', function () {
+        $configDigest = 'sha256:'.hash('sha256', 'config-1');
+        $layerDigest = 'sha256:'.hash('sha256', 'layer-1');
+
+        $configBlob = $this->blobService->storeBlob($configDigest, 'config-1');
+        $layerBlob = $this->blobService->storeBlob($layerDigest, 'layer-1');
+        $this->blobService->linkBlobToRepository($configBlob, $this->repository);
+        $this->blobService->linkBlobToRepository($layerBlob, $this->repository);
+
+        $content1 = createManifestContent([$layerDigest], $configDigest);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
+
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content2,
+            DockerMediaType::ManifestV2->value
+        );
+
+        $configBlob->refresh();
+        $layerBlob->refresh();
+
+        expect($this->repository->blobs()->where('docker_blob_id', $configBlob->id)->exists())->toBeFalse()
+            ->and($this->repository->blobs()->where('docker_blob_id', $layerBlob->id)->exists())->toBeFalse()
+            ->and($configBlob->reference_count)->toBe(0)
+            ->and($layerBlob->reference_count)->toBe(0);
+    });
+
+    it('does not unlink blobs that are still reachable from a tagged manifest', function () {
+        // Shared config + layer between two manifests in the same repo
+        $sharedConfig = 'sha256:'.hash('sha256', 'shared-config');
+        $sharedLayer = 'sha256:'.hash('sha256', 'shared-layer');
+
+        $sharedConfigBlob = $this->blobService->storeBlob($sharedConfig, 'shared-config');
+        $sharedLayerBlob = $this->blobService->storeBlob($sharedLayer, 'shared-layer');
+        $this->blobService->linkBlobToRepository($sharedConfigBlob, $this->repository);
+        $this->blobService->linkBlobToRepository($sharedLayerBlob, $this->repository);
+
+        $content1 = createManifestContent([$sharedLayer], $sharedConfig);
+        $content2 = createManifestContent(['sha256:'.fake()->sha256()]);
+
+        // Push manifest1 as 'stable' (keeps it tagged), and as 'latest'
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'stable',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+
+        // Now overwrite 'latest' with a new manifest. manifest1 still has 'stable' tag.
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content2,
+            DockerMediaType::ManifestV2->value
+        );
+
+        $sharedConfigBlob->refresh();
+        $sharedLayerBlob->refresh();
+
+        expect($this->repository->blobs()->where('docker_blob_id', $sharedConfigBlob->id)->exists())->toBeTrue()
+            ->and($this->repository->blobs()->where('docker_blob_id', $sharedLayerBlob->id)->exists())->toBeTrue();
+    });
+
+    it('keeps blobs shared between the orphaned manifest and another tagged manifest', function () {
+        // Shared blob is used by both manifest1 (about to be orphaned) and manifest2 (tagged 'stable')
+        $sharedLayer = 'sha256:'.hash('sha256', 'shared-layer');
+        $exclusiveLayer = 'sha256:'.hash('sha256', 'exclusive-layer');
+
+        $sharedBlob = $this->blobService->storeBlob($sharedLayer, 'shared-layer');
+        $exclusiveBlob = $this->blobService->storeBlob($exclusiveLayer, 'exclusive-layer');
+        $this->blobService->linkBlobToRepository($sharedBlob, $this->repository);
+        $this->blobService->linkBlobToRepository($exclusiveBlob, $this->repository);
+
+        $content1 = createManifestContent([$sharedLayer, $exclusiveLayer]);
+        $content2 = createManifestContent([$sharedLayer]);
+        $content3 = createManifestContent(['sha256:'.fake()->sha256()]);
+
+        // manifest1 -> 'latest', manifest2 -> 'stable' (both reference sharedLayer)
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content1,
+            DockerMediaType::ManifestV2->value
+        );
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'stable',
+            $content2,
+            DockerMediaType::ManifestV2->value
+        );
+
+        // Move 'latest' to manifest3 -> manifest1 becomes orphaned
+        $this->manifestService->storeManifest(
+            $this->repository,
+            'latest',
+            $content3,
+            DockerMediaType::ManifestV2->value
+        );
+
+        $sharedBlob->refresh();
+        $exclusiveBlob->refresh();
+
+        // sharedLayer is still reachable via 'stable' -> manifest2, so it must stay linked
+        expect($this->repository->blobs()->where('docker_blob_id', $sharedBlob->id)->exists())->toBeTrue()
+            ->and($sharedBlob->reference_count)->toBeGreaterThan(0);
+
+        // exclusiveLayer was only reachable via the now-orphaned manifest1, so it must be unlinked
+        expect($this->repository->blobs()->where('docker_blob_id', $exclusiveBlob->id)->exists())->toBeFalse()
+            ->and($exclusiveBlob->reference_count)->toBe(0);
     });
 });
 

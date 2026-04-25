@@ -1,18 +1,42 @@
 <?php
 
+use App\Enums\DockerMediaType;
 use App\Enums\DockerUploadStatus;
 use App\Models\DockerBlob;
+use App\Models\DockerManifest;
 use App\Models\DockerRepository;
 use App\Models\DockerUpload;
 use App\Services\Docker\BlobStorageService;
 use App\Services\Docker\GarbageCollectionService;
+use App\Services\Docker\ManifestService;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     Storage::fake('local');
     $this->gcService = app(GarbageCollectionService::class);
     $this->blobService = app(BlobStorageService::class);
+    $this->manifestService = app(ManifestService::class);
 });
+
+function gcManifestContent(array $layers, ?string $configDigest = null): string
+{
+    $configDigest = $configDigest ?? 'sha256:'.fake()->sha256();
+
+    return json_encode([
+        'schemaVersion' => 2,
+        'mediaType' => DockerMediaType::ManifestV2->value,
+        'config' => [
+            'mediaType' => DockerMediaType::ContainerConfig->value,
+            'digest' => $configDigest,
+            'size' => 1024,
+        ],
+        'layers' => array_map(fn ($digest) => [
+            'mediaType' => DockerMediaType::LayerTarGzip->value,
+            'digest' => $digest,
+            'size' => 10240,
+        ], $layers),
+    ]);
+}
 
 // =============================================================================
 // ORPHANED BLOB DETECTION TESTS
@@ -265,5 +289,126 @@ describe('GarbageCollectionService Statistics', function () {
             ->and($stats['potential_savings'])->toBe(1000)
             ->and($stats['total_size_formatted'])->toBe('2.93 KB')
             ->and($stats['orphaned_size_formatted'])->toBe('1000 B');
+    });
+});
+
+// =============================================================================
+// UNTAGGED-MANIFEST PRUNE TESTS (legacy data path - simulates state created
+// by tag overwrites BEFORE the storeManifest fix was added)
+// =============================================================================
+
+describe('GarbageCollectionService Untagged Manifest Prune', function () {
+    function seedOrphanManifest($repository, $blobService): array
+    {
+        $configContent = 'cfg-'.uniqid('', true);
+        $layerContent = 'layer-'.uniqid('', true);
+        $configDigest = 'sha256:'.hash('sha256', $configContent);
+        $layerDigest = 'sha256:'.hash('sha256', $layerContent);
+
+        $configBlob = $blobService->storeBlob($configDigest, $configContent);
+        $layerBlob = $blobService->storeBlob($layerDigest, $layerContent);
+        $blobService->linkBlobToRepository($configBlob, $repository);
+        $blobService->linkBlobToRepository($layerBlob, $repository);
+
+        $manifestContent = gcManifestContent([$layerDigest], $configDigest);
+
+        $manifest = DockerManifest::create([
+            'docker_repository_id' => $repository->id,
+            'digest' => 'sha256:'.hash('sha256', $manifestContent.'-'.uniqid('', true)),
+            'media_type' => DockerMediaType::ManifestV2->value,
+            'content' => $manifestContent,
+            'size' => strlen($manifestContent),
+            'layer_digests' => [$layerDigest],
+            'config_digest' => $configDigest,
+        ]);
+
+        return ['manifest' => $manifest, 'configBlob' => $configBlob, 'layerBlob' => $layerBlob];
+    }
+
+    it('finds untagged manifests', function () {
+        $repository = DockerRepository::factory()->create();
+        seedOrphanManifest($repository, $this->blobService);
+        seedOrphanManifest($repository, $this->blobService);
+
+        $untagged = $this->gcService->findUntaggedManifests();
+
+        expect($untagged)->toHaveCount(2);
+    });
+
+    it('prunes untagged manifests and unlinks their blobs, then GC sweeps the blobs', function () {
+        $repository = DockerRepository::factory()->create();
+        $orphan = seedOrphanManifest($repository, $this->blobService);
+
+        $results = $this->gcService->collectGarbage();
+
+        expect($results['untagged_manifests']['count'])->toBe(1)
+            ->and(DockerManifest::find($orphan['manifest']->id))->toBeNull()
+            ->and(DockerBlob::find($orphan['configBlob']->id))->toBeNull()
+            ->and(DockerBlob::find($orphan['layerBlob']->id))->toBeNull()
+            ->and($results['orphaned_blobs']['count'])->toBe(2);
+    });
+
+    it('preserves blobs that are still reachable from a tagged manifest', function () {
+        $repository = DockerRepository::factory()->create(['name' => 'shared/repo']);
+
+        // Tagged manifest references sharedLayer
+        $sharedContent = 'shared-layer-content';
+        $sharedLayer = 'sha256:'.hash('sha256', $sharedContent);
+        $sharedBlob = $this->blobService->storeBlob($sharedLayer, $sharedContent);
+        $this->blobService->linkBlobToRepository($sharedBlob, $repository);
+
+        $taggedContent = gcManifestContent([$sharedLayer]);
+        $this->manifestService->storeManifest(
+            $repository,
+            'stable',
+            $taggedContent,
+            DockerMediaType::ManifestV2->value
+        );
+
+        // Untagged manifest also references sharedLayer + an exclusive layer
+        $exclusiveContent = 'exclusive-layer-content';
+        $exclusiveLayer = 'sha256:'.hash('sha256', $exclusiveContent);
+        $exclusiveBlob = $this->blobService->storeBlob($exclusiveLayer, $exclusiveContent);
+        $this->blobService->linkBlobToRepository($exclusiveBlob, $repository);
+
+        DockerManifest::create([
+            'docker_repository_id' => $repository->id,
+            'digest' => 'sha256:'.hash('sha256', 'orphan-manifest'),
+            'media_type' => DockerMediaType::ManifestV2->value,
+            'content' => gcManifestContent([$sharedLayer, $exclusiveLayer]),
+            'size' => 256,
+            'layer_digests' => [$sharedLayer, $exclusiveLayer],
+            'config_digest' => null,
+        ]);
+
+        $this->gcService->collectGarbage();
+
+        // sharedBlob must survive because the tagged manifest still references it
+        expect(DockerBlob::find($sharedBlob->id))->not->toBeNull()
+            ->and($repository->blobs()->where('docker_blob_id', $sharedBlob->id)->exists())->toBeTrue();
+
+        // exclusiveBlob is gone (only the orphan manifest referenced it)
+        expect(DockerBlob::find($exclusiveBlob->id))->toBeNull();
+    });
+
+    it('dry run does not delete untagged manifests', function () {
+        $repository = DockerRepository::factory()->create();
+        $orphan = seedOrphanManifest($repository, $this->blobService);
+
+        $results = $this->gcService->collectGarbage(dryRun: true);
+
+        expect($results['untagged_manifests']['count'])->toBe(1)
+            ->and(DockerManifest::find($orphan['manifest']->id))->not->toBeNull()
+            ->and(DockerBlob::find($orphan['configBlob']->id))->not->toBeNull();
+    });
+
+    it('reports untagged manifests in statistics', function () {
+        $repository = DockerRepository::factory()->create();
+        seedOrphanManifest($repository, $this->blobService);
+
+        $stats = $this->gcService->getStatistics();
+
+        expect($stats['untagged_manifests'])->toBe(1)
+            ->and($stats['untagged_reclaimable_size'])->toBeGreaterThan(0);
     });
 });

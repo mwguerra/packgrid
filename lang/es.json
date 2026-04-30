@@ -874,6 +874,7 @@
     "widget.sync_activity.column.repository": "Repositorio",
     "widget.sync_activity.column.result": "Resultado",
     "widget.sync_activity.column.action": "Acción Sugerida",
+    "widget.sync_activity.column.refs": "Refs",
     "widget.sync_activity.column.when": "Cuándo",
 
     "widget.sync_activity.result.success": "Sincronizados :count paquetes",
@@ -913,6 +914,7 @@
     "token.table.restrictions_repos": ":count repo(s)",
     "token.error.repository_access_denied": "Token no autorizado para este repositorio.",
 
+    "repository.table.latest_version": "Última Versión",
     "repository.table.downloads": "Descargas",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Logs de Descarga",

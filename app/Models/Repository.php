@@ -31,6 +31,7 @@ class Repository extends Model
         'last_sync_at',
         'last_error',
         'ref_filter',
+        'latest_version',
     ];
 
     protected $casts = [

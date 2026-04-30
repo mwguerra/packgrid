@@ -13,6 +13,9 @@ class RepositoryMetadataBuilder
         private readonly AdapterFactory $adapterFactory
     ) {}
 
+    /**
+     * @return array{packages: array, refs: array, latest_version: string|null}
+     */
     public function build(Repository $repository): array
     {
         $fullName = $repository->repo_full_name;
@@ -32,11 +35,14 @@ class RepositoryMetadataBuilder
 
         $refs = $this->resolveRefs($repository->ref_filter, $tagMap, $branchMap);
 
-        // Get the appropriate adapter based on repository format
         $format = $repository->format ?? PackageFormat::Composer;
         $adapter = $this->adapterFactory->make($format);
 
-        return $adapter->buildMetadata($repository, $refs);
+        return [
+            'packages' => $adapter->buildMetadata($repository, $refs),
+            'refs' => $refs,
+            'latest_version' => array_key_first($tagMap),
+        ];
     }
 
     private function resolveRefs(?string $filter, array $tagMap, array $branchMap): array

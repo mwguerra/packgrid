@@ -874,6 +874,7 @@
     "widget.sync_activity.column.repository": "Repository",
     "widget.sync_activity.column.result": "Result",
     "widget.sync_activity.column.action": "Suggested Action",
+    "widget.sync_activity.column.refs": "Refs",
     "widget.sync_activity.column.when": "When",
 
     "widget.sync_activity.result.success": "Synced :count packages",
@@ -913,6 +914,7 @@
     "token.table.restrictions_repos": ":count repo(s)",
     "token.error.repository_access_denied": "Token is not authorized for this repository.",
 
+    "repository.table.latest_version": "Latest Version",
     "repository.table.downloads": "Downloads",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Download Logs",

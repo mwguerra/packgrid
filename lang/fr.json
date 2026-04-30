@@ -874,6 +874,7 @@
     "widget.sync_activity.column.repository": "Dépôt",
     "widget.sync_activity.column.result": "Résultat",
     "widget.sync_activity.column.action": "Action Suggérée",
+    "widget.sync_activity.column.refs": "Refs",
     "widget.sync_activity.column.when": "Quand",
 
     "widget.sync_activity.result.success": ":count paquets synchronisés",
@@ -913,6 +914,7 @@
     "token.table.restrictions_repos": ":count dépôt(s)",
     "token.error.repository_access_denied": "Le jeton n'est pas autorisé pour ce dépôt.",
 
+    "repository.table.latest_version": "Dernière Version",
     "repository.table.downloads": "Téléchargements",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Logs de Téléchargement",

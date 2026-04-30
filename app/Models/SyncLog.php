@@ -19,12 +19,14 @@ class SyncLog extends Model
         'started_at',
         'finished_at',
         'error',
+        'synced_refs',
     ];
 
     protected $casts = [
         'status' => SyncStatus::class,
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
+        'synced_refs' => 'array',
     ];
 
     public function repository(): BelongsTo

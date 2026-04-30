@@ -215,6 +215,12 @@ class RepositoryResource extends Resource
 
                         return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">'.implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts).'</span>');
                     }),
+                TextColumn::make('latest_version')
+                    ->label(__('repository.table.latest_version'))
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('—')
+                    ->sortable(),
                 TextColumn::make('download_count')
                     ->label(__('repository.table.downloads'))
                     ->sortable()

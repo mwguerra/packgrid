@@ -44,6 +44,12 @@ class SyncActivity extends TableWidget
                         ? 'success'
                         : 'danger'),
 
+                TextColumn::make('synced_refs')
+                    ->label(__('widget.sync_activity.column.refs'))
+                    ->state(fn (SyncLog $record): string => $this->getRefsDisplay($record))
+                    ->html()
+                    ->visible(fn (SyncLog $record): bool => $record->status === SyncStatus::Success),
+
                 TextColumn::make('action')
                     ->label(__('widget.sync_activity.column.action'))
                     ->state(fn (SyncLog $record): string => $this->getSuggestedAction($record))
@@ -261,5 +267,30 @@ class SyncActivity extends TableWidget
             // Default
             default => 'warning',
         };
+    }
+
+    protected function getRefsDisplay(SyncLog $record): string
+    {
+        $refs = $record->synced_refs;
+
+        if (empty($refs)) {
+            return '-';
+        }
+
+        $parts = array_map(function (array $ref): string {
+            $name = htmlspecialchars($ref['ref'], ENT_QUOTES, 'UTF-8');
+            $isNew = $ref['is_new'] ?? false;
+
+            if ($isNew) {
+                return '<span style="display:inline-flex;align-items:center;gap:4px">'
+                    .$name
+                    .'<span style="font-size:0.65rem;font-weight:600;color:#16a34a;background:#dcfce7;border-radius:9999px;padding:1px 6px">new</span>'
+                    .'</span>';
+            }
+
+            return $name;
+        }, $refs);
+
+        return implode('<span style="color:#9ca3af"> · </span>', $parts);
     }
 }

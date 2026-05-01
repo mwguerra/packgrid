@@ -48,7 +48,7 @@ class SyncActivity extends TableWidget
                     ->label(__('widget.sync_activity.column.refs'))
                     ->state(fn (SyncLog $record): string => $this->getRefsDisplay($record))
                     ->html()
-                    ->visible(fn (SyncLog $record): bool => $record->status === SyncStatus::Success),
+                    ->visible(fn (?SyncLog $record): bool => $record?->status === SyncStatus::Success),
 
                 TextColumn::make('action')
                     ->label(__('widget.sync_activity.column.action'))

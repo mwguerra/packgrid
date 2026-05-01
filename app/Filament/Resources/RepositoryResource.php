@@ -291,7 +291,7 @@ class RepositoryResource extends Resource
                     ->color('info')
                     ->modalHeading(__('repository.modal.download_logs_heading'))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'))
+                    ->modalCancelActionLabel(__('filament::components/modal.actions.close.label'))
                     ->infolist(function (Repository $record): array {
                         $logs = $record->downloadLogs()->with('token')->latest()->limit(50)->get();
 

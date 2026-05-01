@@ -9,3 +9,9 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Centre the OTP digit boxes on the MFA challenge page */
+.fi-one-time-code-input-ctn {
+    width: fit-content;
+    margin-inline: auto;
+}

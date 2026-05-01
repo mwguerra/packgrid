@@ -2,6 +2,7 @@
 
 namespace App\Contracts;
 
+use App\DTOs\RefDto;
 use App\Enums\PackageFormat;
 use App\Models\Repository;
 
@@ -15,16 +16,17 @@ interface FormatAdapterInterface
     /**
      * Build package metadata from repository refs.
      *
+     * @param  RefDto[]  $refs
      * @return array<string, array<string, array<string, mixed>>>
      */
     public function buildMetadata(Repository $repository, array $refs): array;
 
     /**
-     * Get the manifest file content from the repository at a specific ref.
+     * Fetch and decode the manifest file (composer.json / package.json).
      *
      * @return array<string, mixed>
      */
-    public function getManifest(string $fullName, string $ref, ?\App\Models\Credential $credential): array;
+    public function getManifest(string $fullName, string $ref): array;
 
     /**
      * Get the package name from manifest data.
@@ -37,7 +39,7 @@ interface FormatAdapterInterface
     public function normalizeVersion(string $ref, string $type): string;
 
     /**
-     * Check if a normalized version string is valid for this format.
+     * Check if a normalised version string is valid for this format.
      */
     public function isValidVersion(string $version): bool;
 

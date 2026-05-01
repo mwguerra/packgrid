@@ -291,7 +291,7 @@ class RepositoryResource extends Resource
                     ->color('info')
                     ->modalHeading(__('repository.modal.download_logs_heading'))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'))
+                    ->modalCancelActionLabel(__('filament::components/modal.actions.close.label'))
                     ->infolist(function (Repository $record): array {
                         $logs = $record->downloadLogs()->with('token')->latest()->limit(50)->get();
 
@@ -387,10 +387,10 @@ class RepositoryResource extends Resource
                             ->copyable()
                             ->copyMessage(__('repository.notification.name_copied')),
                         TextEntry::make('repo_full_name')
-                            ->label(__('repository.infolist.github_repo'))
+                            ->label(__('repository.infolist.repository_path'))
                             ->icon('heroicon-o-code-bracket')
                             ->copyable()
-                            ->url(fn (Repository $record): string => "https://github.com/{$record->repo_full_name}", shouldOpenInNewTab: true),
+                            ->url(fn (Repository $record): string => $record->url, shouldOpenInNewTab: true),
                         TextEntry::make('format')
                             ->label(__('repository.field.format'))
                             ->icon('heroicon-o-cube')

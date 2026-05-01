@@ -73,6 +73,7 @@ describe('Git info/refs endpoint', function () {
         $credential = Credential::factory()->create(['token' => 'github_pat_test123']);
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
             'credential_id' => $credential->id,
         ]);
 
@@ -109,6 +110,7 @@ describe('Git info/refs endpoint', function () {
     it('respects token clone repo scoping — allows access', function () {
         $allowedRepo = Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/allowed',
+            'url' => 'https://github.com/acme/allowed',
         ]);
 
         $token = Token::factory()->create(['token' => 'test-clone-token']);
@@ -132,6 +134,7 @@ describe('Git upload-pack endpoint', function () {
     it('returns 200 with correct content-type', function () {
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
             'clone_count' => 0,
         ]);
 
@@ -150,6 +153,7 @@ describe('Git upload-pack endpoint', function () {
     it('increments clone_count on repository', function () {
         $repository = Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
             'clone_count' => 5,
         ]);
 
@@ -166,6 +170,7 @@ describe('Git upload-pack endpoint', function () {
     it('creates DownloadLog with PackageFormat::Git', function () {
         $repository = Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
         ]);
 
         $token = Token::factory()->create(['token' => 'test-git-token']);
@@ -188,6 +193,7 @@ describe('Git upload-pack endpoint', function () {
     it('creates DownloadLog without token when no tokens exist', function () {
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
         ]);
 
         Http::fake([
@@ -241,6 +247,7 @@ describe('Token clone repository scoping', function () {
     it('allows clone of any repo when token has no clone restrictions', function () {
         $repository = Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/anything',
+            'url' => 'https://github.com/acme/anything',
         ]);
 
         $token = Token::factory()->create(['token' => 'unrestricted-token']);
@@ -278,6 +285,7 @@ describe('Token clone repository scoping', function () {
     it('allows clone of repos in the token clone scope', function () {
         $scopedRepo = Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/scoped',
+            'url' => 'https://github.com/acme/scoped',
         ]);
 
         $token = Token::factory()->create(['token' => 'scoped-token']);
@@ -302,6 +310,7 @@ describe('GitHub authentication', function () {
         $credential = Credential::factory()->create(['token' => 'github_pat_abc123']);
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/private',
+            'url' => 'https://github.com/acme/private',
             'credential_id' => $credential->id,
         ]);
 
@@ -323,6 +332,7 @@ describe('GitHub authentication', function () {
         $credential = Credential::factory()->create(['token' => 'ghp_classic123']);
         Repository::factory()->cloneEnabled()->create([
             'repo_full_name' => 'acme/classic',
+            'url' => 'https://github.com/acme/classic',
             'credential_id' => $credential->id,
         ]);
 

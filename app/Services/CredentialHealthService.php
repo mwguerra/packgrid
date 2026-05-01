@@ -9,14 +9,14 @@ use Throwable;
 
 class CredentialHealthService
 {
-    public function __construct(private readonly GitHubClient $client) {}
+    public function __construct(private readonly GitProviderClientFactory $clientFactory) {}
 
     public function test(Credential $credential): Credential
     {
         $credential->last_checked_at = Carbon::now();
 
         try {
-            $this->client->testCredential($credential);
+            $this->clientFactory->forCredential($credential)->testConnection();
             $credential->status = CredentialStatus::Ok;
             $credential->last_error = null;
         } catch (Throwable $exception) {

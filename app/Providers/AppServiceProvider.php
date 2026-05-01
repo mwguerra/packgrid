@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\GitProviderClientInterface;
+use App\Services\GitHubClient;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Default provider client for contexts where no credential is available
+        $this->app->bind(GitProviderClientInterface::class, GitHubClient::class);
     }
 
     /**

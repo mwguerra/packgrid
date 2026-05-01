@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\PackageFormat;
 use App\Models\DownloadLog;
 use App\Models\Repository;
+use App\Services\GitProviderClientFactory;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +14,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GitProxyController extends Controller
 {
+    public function __construct(private readonly GitProviderClientFactory $clientFactory) {}
+
     public function infoRefs(Request $request, string $owner, string $repo): StreamedResponse
     {
         $service = $request->query('service');
@@ -22,19 +26,15 @@ class GitProxyController extends Controller
         $repository = $this->findRepository($owner, $repo);
         $this->authorizeClone($request, $repository);
 
-        $credential = $repository->credential;
-        $gitUrl = "https://github.com/{$owner}/{$repo}.git/info/refs?service=git-upload-pack";
-
-        $response = $this->githubRequest($credential)->get($gitUrl);
+        $gitUrl = $this->upstreamBase($repository).'/info/refs?service=git-upload-pack';
+        $response = $this->gitRequest($repository)->get($gitUrl);
 
         if ($response->failed()) {
-            Log::error('Git proxy: GitHub info/refs failed', [
+            Log::error('Git proxy: upstream info/refs failed', [
                 'repo' => "{$owner}/{$repo}",
                 'status' => $response->status(),
-                'body' => $response->body(),
-                'has_credential' => $credential !== null,
             ]);
-            abort($response->status(), 'Upstream GitHub request failed.');
+            abort($response->status(), 'Upstream request failed.');
         }
 
         return response()->stream(function () use ($response) {
@@ -50,20 +50,17 @@ class GitProxyController extends Controller
         $repository = $this->findRepository($owner, $repo);
         $this->authorizeClone($request, $repository);
 
-        $credential = $repository->credential;
-        $gitUrl = "https://github.com/{$owner}/{$repo}.git/git-upload-pack";
-
-        $response = $this->githubRequest($credential)
+        $gitUrl = $this->upstreamBase($repository).'/git-upload-pack';
+        $response = $this->gitRequest($repository)
             ->withBody($request->getContent(), 'application/x-git-upload-pack-request')
             ->post($gitUrl);
 
         if ($response->failed()) {
-            Log::error('Git proxy: GitHub upload-pack failed', [
+            Log::error('Git proxy: upstream upload-pack failed', [
                 'repo' => "{$owner}/{$repo}",
                 'status' => $response->status(),
-                'has_credential' => $credential !== null,
             ]);
-            abort($response->status(), 'Upstream GitHub request failed.');
+            abort($response->status(), 'Upstream request failed.');
         }
 
         $token = $request->attributes->get('packgrid_token');
@@ -78,12 +75,31 @@ class GitProxyController extends Controller
         ]);
     }
 
+    private function upstreamBase(Repository $repository): string
+    {
+        return rtrim($repository->url, '/').'.git';
+    }
+
+    private function gitRequest(Repository $repository): PendingRequest
+    {
+        $request = Http::timeout(120)->withHeaders(['User-Agent' => 'Packgrid']);
+
+        $credentials = $this->clientFactory
+            ->forCredential($repository->credential)
+            ->getHttpGitCredentials();
+
+        if ($credentials) {
+            [$username, $password] = $credentials;
+            $request = $request->withBasicAuth($username, $password);
+        }
+
+        return $request;
+    }
+
     private function findRepository(string $owner, string $repo): Repository
     {
-        $fullName = $owner.'/'.$repo;
-
         $repository = Repository::query()
-            ->where('repo_full_name', $fullName)
+            ->where('repo_full_name', $owner.'/'.$repo)
             ->where('enabled', true)
             ->where('clone_enabled', true)
             ->first();
@@ -101,18 +117,5 @@ class GitProxyController extends Controller
         if ($token && ! $token->isAllowedToCloneRepository($repository)) {
             abort(403, __('token.error.clone_access_denied'));
         }
-    }
-
-    private function githubRequest(?\App\Models\Credential $credential): \Illuminate\Http\Client\PendingRequest
-    {
-        $request = Http::timeout(120)->withHeaders([
-            'User-Agent' => 'Packgrid',
-        ]);
-
-        if ($credential?->token) {
-            $request = $request->withBasicAuth('x-access-token', $credential->token);
-        }
-
-        return $request;
     }
 }

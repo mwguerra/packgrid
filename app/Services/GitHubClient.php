@@ -2,113 +2,116 @@
 
 namespace App\Services;
 
+use App\Contracts\GitProviderClientInterface;
+use App\DTOs\FileContentDto;
+use App\DTOs\RefDto;
+use App\DTOs\RepositoryInfoDto;
 use App\Models\Credential;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-class GitHubClient
+class GitHubClient implements GitProviderClientInterface
 {
     private const API_BASE = 'https://api.github.com';
 
-    public function testCredential(Credential $credential): array
+    public function __construct(private readonly ?Credential $credential = null) {}
+
+    public function testConnection(): array
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/user')
-            ->throw()
-            ->json();
+        return $this->request()->get(self::API_BASE.'/user')->throw()->json();
     }
 
-    public function getRepository(string $fullName, ?Credential $credential = null): array
+    public function getRepositoryInfo(string $fullName): RepositoryInfoDto
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName)
-            ->throw()
-            ->json();
+        $data = $this->request()->get(self::API_BASE.'/repos/'.$fullName)->throw()->json();
+
+        return new RepositoryInfoDto(
+            fullName: $fullName,
+            name: $data['name'] ?? basename($fullName),
+            isPrivate: $data['private'] ?? false,
+            defaultBranch: $data['default_branch'] ?? 'main',
+        );
     }
 
-    public function listTags(string $fullName, ?Credential $credential = null): array
+    public function listTags(string $fullName): array
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/tags')
-            ->throw()
-            ->json();
+        $data = $this->request()->get(self::API_BASE.'/repos/'.$fullName.'/tags')->throw()->json();
+
+        return collect($data)
+            ->filter(fn ($t) => isset($t['name'], $t['commit']['sha']))
+            ->map(fn ($t) => new RefDto(name: $t['name'], sha: $t['commit']['sha'], type: 'tag'))
+            ->values()
+            ->all();
     }
 
-    public function listBranches(string $fullName, ?Credential $credential = null): array
+    public function listBranches(string $fullName): array
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/branches', [
-                'per_page' => 100,
-            ])
+        $data = $this->request()
+            ->get(self::API_BASE.'/repos/'.$fullName.'/branches', ['per_page' => 100])
             ->throw()
             ->json();
+
+        return collect($data)
+            ->filter(fn ($b) => isset($b['name'], $b['commit']['sha']))
+            ->map(fn ($b) => new RefDto(name: $b['name'], sha: $b['commit']['sha'], type: 'branch'))
+            ->values()
+            ->all();
     }
 
-    public function getBranch(string $fullName, string $branch, ?Credential $credential = null): array
+    public function getFileContent(string $fullName, string $path, string $ref): FileContentDto
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/branches/'.$branch)
+        $data = $this->request()
+            ->get(self::API_BASE.'/repos/'.$fullName.'/contents/'.$path, ['ref' => $ref])
             ->throw()
             ->json();
-    }
 
-    public function getComposerJson(string $fullName, string $ref, ?Credential $credential = null): array
-    {
-        $payload = $this->getFileContent($fullName, 'composer.json', $ref, $credential);
-
-        if (! isset($payload['content'])) {
-            throw new RuntimeException('composer.json not found for '.$fullName.' at '.$ref);
+        if (! isset($data['content'])) {
+            throw new RuntimeException("{$path} not found in {$fullName} at {$ref}");
         }
 
-        $contents = base64_decode($payload['content']);
-        $decoded = json_decode($contents, true);
-
-        if (! is_array($decoded)) {
-            throw new RuntimeException('composer.json could not be decoded for '.$fullName.' at '.$ref);
-        }
-
-        return $decoded;
+        return new FileContentDto(
+            path: $path,
+            content: base64_decode(str_replace("\n", '', $data['content'])),
+        );
     }
 
-    public function getFileContent(string $fullName, string $path, string $ref, ?Credential $credential = null): array
+    public function downloadZip(string $fullName, string $ref): Response
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/contents/'.$path, [
-                'ref' => $ref,
-            ])
-            ->throw()
-            ->json();
-    }
-
-    public function downloadZipball(string $fullName, string $ref, ?Credential $credential = null): \Illuminate\Http\Client\Response
-    {
-        return $this->request($credential)
+        return $this->request()
             ->withOptions(['stream' => true])
             ->get(self::API_BASE.'/repos/'.$fullName.'/zipball/'.$ref)
             ->throw();
     }
 
-    public function downloadTarball(string $fullName, string $ref, ?Credential $credential = null): \Illuminate\Http\Client\Response
+    public function downloadTar(string $fullName, string $ref): Response
     {
-        return $this->request($credential)
+        return $this->request()
             ->withOptions(['stream' => true])
             ->get(self::API_BASE.'/repos/'.$fullName.'/tarball/'.$ref)
             ->throw();
     }
 
-    private function request(?Credential $credential): PendingRequest
+    public function getHttpGitCredentials(): ?array
+    {
+        if (! $this->credential?->token) {
+            return null;
+        }
+
+        return ['x-access-token', $this->credential->token];
+    }
+
+    private function request(): PendingRequest
     {
         $request = Http::withHeaders([
             'Accept' => 'application/vnd.github+json',
             'User-Agent' => 'Packgrid',
         ]);
 
-        if ($credential?->token) {
-            $scheme = str_starts_with($credential->token, 'github_pat_') ? 'Bearer' : 'token';
-            $request = $request->withHeaders([
-                'Authorization' => $scheme.' '.$credential->token,
-            ]);
+        if ($this->credential?->token) {
+            $scheme = str_starts_with($this->credential->token, 'github_pat_') ? 'Bearer' : 'token';
+            $request = $request->withHeaders(['Authorization' => $scheme.' '.$this->credential->token]);
         }
 
         return $request;

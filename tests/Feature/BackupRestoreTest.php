@@ -5,6 +5,7 @@ use App\Models\Setting;
 use App\Models\Token;
 use App\Models\User;
 use App\Services\BackupService;
+use App\Support\PackgridSettings;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -14,6 +15,7 @@ beforeEach(function () {
         'npm_enabled' => true,
         'docker_enabled' => true,
     ]);
+    PackgridSettings::clearCache();
 });
 
 test('backup service encrypts and decrypts data correctly', function () {
@@ -220,5 +222,31 @@ test('backup restore page shows the system state and encryption method', functio
     Livewire::actingAs($user)
         ->test(BackupRestore::class)
         ->assertOk()
-        ->assertSee('XChaCha20-Poly1305');
+        ->assertSee('XChaCha20-Poly1305')
+        // The Docker-blobs note moved from the sidebar into the Create Backup modal.
+        ->assertDontSee(__('backup.state.docker_blobs_note'));
+});
+
+// Filament v5 lazy-renders modal content client-side, so the callout text is not
+// in the server HTML; these assert the form builds/mounts in both Docker states
+// (the actual security + blobs copy is verified end-to-end via Playwright).
+test('create backup modal mounts with the security guidance form (docker enabled)', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(BackupRestore::class)
+        ->mountAction('createBackup')
+        ->assertActionMounted('createBackup');
+});
+
+test('create backup modal mounts when docker is disabled (no blobs warning)', function () {
+    Setting::query()->update(['docker_enabled' => false]);
+    PackgridSettings::clearCache();
+
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(BackupRestore::class)
+        ->mountAction('createBackup')
+        ->assertActionMounted('createBackup');
 });

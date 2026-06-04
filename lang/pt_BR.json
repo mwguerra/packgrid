@@ -1065,5 +1065,10 @@
     "backup.state.label.tables": "Tabelas incluídas",
     "backup.state.label.records": "Registros",
     "backup.state.label.encryption": "Criptografia",
-    "backup.state.authenticated": "autenticada"
+    "backup.state.authenticated": "autenticada",
+    "backup.modal.description": "Crie um backup criptografado e baixável do seu banco de dados.",
+    "backup.modal.security_heading": "Como seu backup é protegido",
+    "backup.modal.security_info": "O arquivo é criptografado com derivação de chave Argon2id e criptografia autenticada XChaCha20-Poly1305, então qualquer adulteração é detectada. A senha não é armazenada e não pode ser recuperada — guarde-a com segurança. Qualquer pessoa com o arquivo e a senha consegue ler todos os dados, incluindo tokens e credenciais.",
+    "backup.modal.blobs_heading": "Blobs do Docker não são incluídos",
+    "backup.modal.password_hint": "Use uma senha forte e única. Não há recuperação se você perdê-la."
 }

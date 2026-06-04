@@ -1,9 +1,9 @@
 @php($state = $this->systemState())
 
 <x-filament-panels::page>
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {{-- Main column: backup & restore --}}
-        <div class="space-y-6 lg:col-span-9 xl:col-span-8">
+        <div class="space-y-6 xl:col-span-2">
             <x-filament::section
                 :heading="__('backup.section.backup')"
                 :description="__('backup.section.backup_description')"
@@ -41,8 +41,8 @@
             </x-filament::section>
         </div>
 
-        {{-- Sidebar: system state as a clean table (1/4 on lg, 1/3 on xl) --}}
-        <div class="lg:col-span-3 xl:col-span-4">
+        {{-- System state: a sidebar (1/3) from xl up; stacks to the bottom below xl --}}
+        <div class="xl:col-span-1">
             <x-filament::section
                 icon="heroicon-o-server-stack"
                 :heading="__('backup.section.state')"
@@ -81,12 +81,6 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                @if($state['dockerEnabled'])
-                    <p class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-white/10 dark:text-gray-400">
-                        {{ __('backup.state.docker_blobs_note') }}
-                    </p>
-                @endif
             </x-filament::section>
         </div>
     </div>

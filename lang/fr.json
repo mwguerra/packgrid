@@ -1065,5 +1065,10 @@
     "backup.state.label.tables": "Tables incluses",
     "backup.state.label.records": "Enregistrements",
     "backup.state.label.encryption": "Chiffrement",
-    "backup.state.authenticated": "authentifié"
+    "backup.state.authenticated": "authentifié",
+    "backup.modal.description": "Créez une sauvegarde chiffrée et téléchargeable de votre base de données.",
+    "backup.modal.security_heading": "Comment votre sauvegarde est protégée",
+    "backup.modal.security_info": "Le fichier est chiffré avec la dérivation de clé Argon2id et le chiffrement authentifié XChaCha20-Poly1305, donc toute altération est détectée. Le mot de passe n'est jamais stocké et ne peut pas être récupéré — conservez-le en lieu sûr. Quiconque possède le fichier et le mot de passe peut lire toutes les données, y compris les jetons et les identifiants.",
+    "backup.modal.blobs_heading": "Les blobs Docker ne sont pas inclus",
+    "backup.modal.password_hint": "Utilisez un mot de passe fort et unique. Aucune récupération n'est possible en cas de perte."
 }

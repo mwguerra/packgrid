@@ -7,10 +7,13 @@ use App\Services\BackupService;
 use App\Support\PackgridSettings;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Callout;
+use Filament\Schemas\Components\Component;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +44,7 @@ class BackupRestore extends Page
      * Data for the page view: the system-state table rows and the last
      * backup/restore timestamps.
      *
-     * @return array{rows: array<int, array{label: string, value: string, authenticated?: bool}>, dockerEnabled: bool, lastBackupAt: ?Carbon, lastRestoreAt: ?Carbon}
+     * @return array{rows: array<int, array{label: string, value: string, authenticated?: bool}>, lastBackupAt: ?Carbon, lastRestoreAt: ?Carbon}
      */
     public function systemState(): array
     {
@@ -55,7 +58,6 @@ class BackupRestore extends Page
                 ['label' => __('backup.state.label.records'), 'value' => number_format($summary['record_count'])],
                 ['label' => __('backup.state.label.encryption'), 'value' => $summary['encryption'], 'authenticated' => true],
             ],
-            'dockerEnabled' => PackgridSettings::dockerEnabled(),
             'lastBackupAt' => $settings?->last_backup_at,
             'lastRestoreAt' => $settings?->last_restore_at,
         ];
@@ -74,20 +76,8 @@ class BackupRestore extends Page
         return Action::make('createBackup')
             ->label(__('backup.action.create_backup'))
             ->icon('heroicon-o-arrow-down-tray')
-            ->form([
-                TextInput::make('password')
-                    ->label(__('backup.field.password'))
-                    ->password()
-                    ->revealable()
-                    ->required()
-                    ->minLength(8),
-                TextInput::make('password_confirmation')
-                    ->label(__('backup.field.password_confirmation'))
-                    ->password()
-                    ->revealable()
-                    ->required()
-                    ->same('password'),
-            ])
+            ->modalDescription(__('backup.modal.description'))
+            ->form($this->createBackupForm())
             ->action(function (array $data) {
                 $service = new BackupService;
 
@@ -107,6 +97,46 @@ class BackupRestore extends Page
                     'Content-Type' => 'application/octet-stream',
                 ]);
             });
+    }
+
+    /**
+     * The Create Backup modal form: security guidance, an optional Docker-blobs
+     * warning, then the password fields.
+     *
+     * @return array<Component|Field>
+     */
+    protected function createBackupForm(): array
+    {
+        $components = [
+            Callout::make(__('backup.modal.security_heading'))
+                ->description(__('backup.modal.security_info'))
+                ->color('info')
+                ->icon('heroicon-o-lock-closed'),
+        ];
+
+        if (PackgridSettings::dockerEnabled()) {
+            $components[] = Callout::make(__('backup.modal.blobs_heading'))
+                ->description(__('backup.state.docker_blobs_note'))
+                ->color('warning')
+                ->icon('heroicon-o-exclamation-triangle');
+        }
+
+        $components[] = TextInput::make('password')
+            ->label(__('backup.field.password'))
+            ->password()
+            ->revealable()
+            ->required()
+            ->minLength(8)
+            ->helperText(__('backup.modal.password_hint'));
+
+        $components[] = TextInput::make('password_confirmation')
+            ->label(__('backup.field.password_confirmation'))
+            ->password()
+            ->revealable()
+            ->required()
+            ->same('password');
+
+        return $components;
     }
 
     protected function getRestoreAction(): Action

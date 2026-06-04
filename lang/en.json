@@ -1065,5 +1065,10 @@
     "backup.state.label.tables": "Tables included",
     "backup.state.label.records": "Records",
     "backup.state.label.encryption": "Encryption",
-    "backup.state.authenticated": "authenticated"
+    "backup.state.authenticated": "authenticated",
+    "backup.modal.description": "Create an encrypted, downloadable backup of your database.",
+    "backup.modal.security_heading": "How your backup is protected",
+    "backup.modal.security_info": "The file is encrypted with Argon2id key derivation and XChaCha20-Poly1305 authenticated encryption, so tampering is detected. The password is never stored and cannot be recovered — keep it safe. Anyone with the file and the password can read all data, including tokens and credentials.",
+    "backup.modal.blobs_heading": "Docker blobs are not included",
+    "backup.modal.password_hint": "Use a strong, unique password. There is no recovery if you lose it."
 }

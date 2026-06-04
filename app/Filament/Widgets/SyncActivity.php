@@ -61,6 +61,7 @@ class SyncActivity extends TableWidget
                     ->sortable(),
             ])
             ->defaultSort('started_at', 'desc')
+            ->poll('60s')
             ->paginated(false);
     }
 

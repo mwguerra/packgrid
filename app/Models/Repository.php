@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PackageFormat;
 use App\Enums\RepositoryVisibility;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -67,5 +68,26 @@ class Repository extends Model
     public function needsSync(): bool
     {
         return $this->last_sync_at === null || $this->last_sync_at->lt(now()->subMinute());
+    }
+
+    /**
+     * Hours after which an enabled, error-free repository is considered "stale"
+     * on the dashboard. The scheduler syncs every 4 hours, so anything older
+     * than this (or never synced) likely means a stuck or skipped sync.
+     */
+    public const DASHBOARD_STALE_HOURS = 5;
+
+    /**
+     * Enabled, error-free repositories that have never synced or are overdue.
+     */
+    public function scopeStale(Builder $query): Builder
+    {
+        return $query
+            ->where('enabled', true)
+            ->whereNull('last_error')
+            ->where(function (Builder $query): void {
+                $query->whereNull('last_sync_at')
+                    ->orWhere('last_sync_at', '<', now()->subHours(self::DASHBOARD_STALE_HOURS));
+            });
     }
 }

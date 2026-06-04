@@ -88,6 +88,17 @@ class HowItWorksContent extends Component implements HasSchemas
                     ->schema([
                         TextContent::make(__('docs.npm.how.phase1.intro')),
 
+                        AlertBox::make()
+                            ->info()
+                            ->icon('heroicon-o-question-mark-circle')
+                            ->title(__('docs.npm.how.sync.title'))
+                            ->description(__('docs.npm.how.sync.desc'))
+                            ->items([
+                                __('docs.npm.how.sync.item1'),
+                                __('docs.npm.how.sync.item2'),
+                                __('docs.npm.how.sync.item3'),
+                            ]),
+
                         FlowDiagram::make()
                             ->actors([])
                             ->steps([

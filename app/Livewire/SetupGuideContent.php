@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Filament\Schemas\Components\HeroSection;
 use App\Filament\Schemas\Components\OrderedSchema;
 use App\Filament\Schemas\Components\QuickTips;
+use App\Models\Token;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -56,7 +57,7 @@ class SetupGuideContent extends Component implements HasSchemas
 
     public function getHasTokensProperty(): bool
     {
-        return \App\Models\Token::query()->exists();
+        return Token::query()->exists();
     }
 
     public function form(Schema $form): Schema
@@ -99,6 +100,7 @@ class SetupGuideContent extends Component implements HasSchemas
                         ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip2')],
                         ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip3')],
                         ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip4')],
+                        ['icon' => 'heroicon-s-check', 'color' => 'emerald', 'text' => __('docs.setup.tip5')],
                     ]),
             ]);
     }

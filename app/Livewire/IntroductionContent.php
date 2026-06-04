@@ -209,7 +209,7 @@ class IntroductionContent extends Component implements HasSchemas
                                     'name' => __('docs.compare.feature.permissions'),
                                     'description' => __('docs.compare.feature.permissions_desc'),
                                     'values' => [
-                                        'packgrid' => false,
+                                        'packgrid' => true,
                                         'packagist' => true,
                                         'satis' => false,
                                         'repman' => true,
@@ -249,6 +249,8 @@ class IntroductionContent extends Component implements HasSchemas
                             __('docs.intro.features.item2'),
                             __('docs.intro.features.item3'),
                             __('docs.intro.features.item4'),
+                            __('docs.intro.features.item5'),
+                            __('docs.intro.features.item6'),
                         ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
                     ]),
 

@@ -80,6 +80,28 @@ class HowItWorksContent extends Component implements HasSchemas
                             ->steps([]),
                     ]),
 
+                Section::make(__('docs.how.why.title'))
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->iconColor('primary')
+                    ->description(__('docs.how.why.desc'))
+                    ->collapsible()
+                    ->schema([
+                        TextContent::make(__('docs.how.why.body')),
+
+                        BulletList::make([
+                            __('docs.how.why.benefit1'),
+                            __('docs.how.why.benefit2'),
+                            __('docs.how.why.benefit3'),
+                            __('docs.how.why.benefit4'),
+                        ])->bulletIcon('heroicon-s-check-circle')->bulletColor('emerald'),
+
+                        AlertBox::make()
+                            ->info()
+                            ->icon('heroicon-o-arrow-path')
+                            ->title(__('docs.how.why.triggers_title'))
+                            ->description(__('docs.how.why.triggers_desc')),
+                    ]),
+
                 Section::make(__('docs.how.section.phase1'))
                     ->icon('heroicon-o-arrow-path')
                     ->iconColor('primary')
@@ -216,6 +238,12 @@ class HowItWorksContent extends Component implements HasSchemas
                                     'iconColor' => 'text-emerald-600 dark:text-emerald-400',
                                 ],
                             ]),
+
+                        AlertBox::make()
+                            ->info()
+                            ->icon('heroicon-o-link')
+                            ->title(__('docs.how.phase2.source_title'))
+                            ->description(__('docs.how.phase2.source_desc')),
                     ]),
 
                 Section::make(__('docs.how.section.auth_flow'))

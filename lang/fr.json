@@ -1060,5 +1060,10 @@
     "backup.state.tables": "Tables incluses : :count",
     "backup.state.records": "Enregistrements : :count",
     "backup.state.encryption": "Chiffrement : :method (authentifié)",
-    "backup.state.docker_blobs_note": "Remarque : les fichiers blob des images Docker sur le disque ne sont pas inclus — seules les métadonnées de la base de données le sont. Sauvegardez le stockage des blobs séparément."
+    "backup.state.docker_blobs_note": "Remarque : les fichiers blob des images Docker sur le disque ne sont pas inclus — seules les métadonnées de la base de données le sont. Sauvegardez le stockage des blobs séparément.",
+    "backup.state.label.database": "Base de données",
+    "backup.state.label.tables": "Tables incluses",
+    "backup.state.label.records": "Enregistrements",
+    "backup.state.label.encryption": "Chiffrement",
+    "backup.state.authenticated": "authentifié"
 }

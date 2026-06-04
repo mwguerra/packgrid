@@ -11,9 +11,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Text;
-use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -39,50 +37,28 @@ class BackupRestore extends Page
         return __('backup.title');
     }
 
-    public function content(Schema $schema): Schema
+    /**
+     * Data for the page view: the system-state table rows and the last
+     * backup/restore timestamps.
+     *
+     * @return array{rows: array<int, array{label: string, value: string, authenticated?: bool}>, dockerEnabled: bool, lastBackupAt: ?Carbon, lastRestoreAt: ?Carbon}
+     */
+    public function systemState(): array
     {
-        $settings = Setting::first();
         $summary = (new BackupService)->getBackupSummary();
+        $settings = Setting::first();
 
-        $stateComponents = [
-            Text::make('state_database')
-                ->content(__('backup.state.database', ['driver' => strtoupper($summary['driver'])])),
-            Text::make('state_tables')
-                ->content(__('backup.state.tables', ['count' => $summary['table_count']])),
-            Text::make('state_records')
-                ->content(__('backup.state.records', ['count' => number_format($summary['record_count'])])),
-            Text::make('state_encryption')
-                ->content(__('backup.state.encryption', ['method' => $summary['encryption']])),
+        return [
+            'rows' => [
+                ['label' => __('backup.state.label.database'), 'value' => strtoupper($summary['driver'])],
+                ['label' => __('backup.state.label.tables'), 'value' => number_format($summary['table_count'])],
+                ['label' => __('backup.state.label.records'), 'value' => number_format($summary['record_count'])],
+                ['label' => __('backup.state.label.encryption'), 'value' => $summary['encryption'], 'authenticated' => true],
+            ],
+            'dockerEnabled' => PackgridSettings::dockerEnabled(),
+            'lastBackupAt' => $settings?->last_backup_at,
+            'lastRestoreAt' => $settings?->last_restore_at,
         ];
-
-        if (PackgridSettings::dockerEnabled()) {
-            $stateComponents[] = Text::make('state_docker_blobs')
-                ->content(__('backup.state.docker_blobs_note'));
-        }
-
-        return $schema
-            ->components([
-                Section::make(__('backup.section.state'))
-                    ->description(__('backup.section.state_description'))
-                    ->icon('heroicon-o-server-stack')
-                    ->schema($stateComponents),
-                Section::make(__('backup.section.backup'))
-                    ->description(__('backup.section.backup_description'))
-                    ->schema([
-                        Text::make('last_backup_at')
-                            ->content(fn () => $settings?->last_backup_at
-                                ? $settings->last_backup_at->diffForHumans().' ('.$settings->last_backup_at->toDayDateTimeString().')'
-                                : __('common.never')),
-                    ]),
-                Section::make(__('backup.section.restore'))
-                    ->description(__('backup.section.restore_description'))
-                    ->schema([
-                        Text::make('last_restore_at')
-                            ->content(fn () => $settings?->last_restore_at
-                                ? $settings->last_restore_at->diffForHumans().' ('.$settings->last_restore_at->toDayDateTimeString().')'
-                                : __('common.never')),
-                    ]),
-            ]);
     }
 
     protected function getHeaderActions(): array

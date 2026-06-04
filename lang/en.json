@@ -1060,5 +1060,10 @@
     "backup.state.tables": "Tables included: :count",
     "backup.state.records": "Records: :count",
     "backup.state.encryption": "Encryption: :method (authenticated)",
-    "backup.state.docker_blobs_note": "Note: Docker image blob files on disk are not included — only database metadata. Back up the blob storage separately."
+    "backup.state.docker_blobs_note": "Note: Docker image blob files on disk are not included — only database metadata. Back up the blob storage separately.",
+    "backup.state.label.database": "Database",
+    "backup.state.label.tables": "Tables included",
+    "backup.state.label.records": "Records",
+    "backup.state.label.encryption": "Encryption",
+    "backup.state.authenticated": "authenticated"
 }

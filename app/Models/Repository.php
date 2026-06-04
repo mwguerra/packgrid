@@ -90,4 +90,29 @@ class Repository extends Model
                     ->orWhere('last_sync_at', '<', now()->subHours(self::DASHBOARD_STALE_HOURS));
             });
     }
+
+    /**
+     * Single source of truth for the repository's sync status label, shared by
+     * the table column and the view-page infolist. Uses the same staleness
+     * threshold as the dashboard (DASHBOARD_STALE_HOURS) so a repo is never shown
+     * "Outdated" on the dashboard but "Synced" in the table.
+     *
+     * @return 'error'|'pending'|'stale'|'synced'
+     */
+    public function syncStatus(): string
+    {
+        if ($this->last_error) {
+            return 'error';
+        }
+
+        if (! $this->last_sync_at) {
+            return 'pending';
+        }
+
+        if ($this->last_sync_at->lt(now()->subHours(self::DASHBOARD_STALE_HOURS))) {
+            return 'stale';
+        }
+
+        return 'synced';
+    }
 }

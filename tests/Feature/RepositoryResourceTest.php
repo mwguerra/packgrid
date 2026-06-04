@@ -551,3 +551,30 @@ describe('ViewRepository Sync action', function () {
             ->assertOk();
     });
 });
+
+// =============================================================================
+// SYNC STATUS — dashboard/table consistency
+// =============================================================================
+
+describe('Repository sync status', function () {
+    it('uses the 5-hour dashboard threshold so the table matches the dashboard', function () {
+        // 6h old (> DASHBOARD_STALE_HOURS) must read "outdated", not "synced".
+        $repo = Repository::factory()->create(['last_sync_at' => now()->subHours(6), 'last_error' => null, 'enabled' => true]);
+
+        expect($repo->syncStatus())->toBe('stale');
+
+        livewire(ListRepositories::class)
+            ->assertOk()
+            ->assertSee(__('repository.status.stale'));
+    });
+
+    it('treats a recently-synced repository as up to date', function () {
+        expect(Repository::factory()->create(['last_sync_at' => now()->subHours(3), 'last_error' => null])->syncStatus())
+            ->toBe('synced');
+    });
+
+    it('maps error and never-synced repositories to error and pending', function () {
+        expect(Repository::factory()->create(['last_error' => 'boom'])->syncStatus())->toBe('error')
+            ->and(Repository::factory()->create(['last_sync_at' => null, 'last_error' => null])->syncStatus())->toBe('pending');
+    });
+});

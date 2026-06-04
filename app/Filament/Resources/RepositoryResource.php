@@ -236,19 +236,7 @@ class RepositoryResource extends Resource
                 TextColumn::make('sync_status')
                     ->label(__('repository.table.status'))
                     ->badge()
-                    ->state(function (Repository $record): string {
-                        if ($record->last_error) {
-                            return 'error';
-                        }
-                        if (! $record->last_sync_at) {
-                            return 'pending';
-                        }
-                        if ($record->last_sync_at->lt(now()->subDay())) {
-                            return 'stale';
-                        }
-
-                        return 'synced';
-                    })
+                    ->state(fn (Repository $record): string => $record->syncStatus())
                     ->formatStateUsing(fn (string $state): string => __("repository.status.{$state}"))
                     ->color(fn (string $state): string => match ($state) {
                         'synced' => 'success',
@@ -262,14 +250,8 @@ class RepositoryResource extends Resource
                         if ($record->last_error) {
                             return $record->last_error;
                         }
-                        if (! $record->last_sync_at) {
-                            return __('repository.status_tooltip.pending');
-                        }
-                        if ($record->last_sync_at->lt(now()->subDay())) {
-                            return __('repository.status_tooltip.stale');
-                        }
 
-                        return __('repository.status_tooltip.synced');
+                        return __('repository.status_tooltip.'.$record->syncStatus());
                     }),
                 TextColumn::make('repo_full_name')
                     ->label(__('repository.section.repository'))
@@ -467,19 +449,7 @@ class RepositoryResource extends Resource
                         TextEntry::make('sync_status')
                             ->label(__('common.status'))
                             ->badge()
-                            ->state(function (Repository $record): string {
-                                if ($record->last_error) {
-                                    return 'error';
-                                }
-                                if (! $record->last_sync_at) {
-                                    return 'pending';
-                                }
-                                if ($record->last_sync_at->lt(now()->subDay())) {
-                                    return 'stale';
-                                }
-
-                                return 'synced';
-                            })
+                            ->state(fn (Repository $record): string => $record->syncStatus())
                             ->formatStateUsing(fn (string $state): string => __("repository.status.{$state}"))
                             ->color(fn (string $state): string => match ($state) {
                                 'synced' => 'success',

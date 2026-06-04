@@ -4,15 +4,11 @@ namespace App\Filament\Widgets;
 
 use App\Enums\CredentialStatus;
 use App\Models\Credential;
-use App\Models\DockerRepository;
 use App\Models\DockerUpload;
 use App\Models\Repository;
-use App\Models\Setting;
 use App\Models\Token;
 use App\Support\PackgridSettings;
 use Filament\Widgets\Widget;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class AttentionRequired extends Widget
 {
@@ -22,9 +18,6 @@ class AttentionRequired extends Widget
 
     /** Show at most this many items per category before linking to "view all". */
     protected const ITEM_LIMIT = 5;
-
-    /** Backups older than this many days are flagged. */
-    protected const BACKUP_STALE_DAYS = 7;
 
     public static function canView(): bool
     {
@@ -113,8 +106,8 @@ class AttentionRequired extends Widget
     }
 
     /**
-     * Operational, instance-wide problems (no per-record list): missing/stale
-     * backups and disabled Docker garbage collection.
+     * Operational, instance-wide problems (no per-record list): disabled Docker
+     * garbage collection. (Backup status lives on the Backup & Restore page.)
      *
      * @return array<int, array{key: string, color: string}>
      */
@@ -122,31 +115,11 @@ class AttentionRequired extends Widget
     {
         $alerts = [];
 
-        // Only nag about backups once the instance actually holds data worth protecting.
-        if (self::hasProtectableData()) {
-            $raw = Setting::query()->value('last_backup_at');
-            $lastBackup = $raw ? Carbon::parse($raw) : null;
-
-            if ($lastBackup === null) {
-                $alerts[] = ['key' => 'backup_missing', 'color' => 'danger'];
-            } elseif ($lastBackup->lt(now()->subDays(self::BACKUP_STALE_DAYS))) {
-                $alerts[] = ['key' => 'backup_stale', 'color' => 'warning'];
-            }
-        }
-
         if (PackgridSettings::dockerEnabled() && ! (bool) config('packgrid.docker.gc_enabled', true)) {
             $alerts[] = ['key' => 'gc_disabled', 'color' => 'warning'];
         }
 
         return $alerts;
-    }
-
-    /** Whether the instance holds any registry data worth backing up. */
-    protected static function hasProtectableData(): bool
-    {
-        return Repository::query()->exists()
-            || DockerRepository::query()->exists()
-            || Token::query()->exists();
     }
 
     public function getHeading(): string

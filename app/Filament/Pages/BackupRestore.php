@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use App\Services\BackupService;
+use App\Support\PackgridSettings;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -41,15 +42,36 @@ class BackupRestore extends Page
     public function content(Schema $schema): Schema
     {
         $settings = Setting::first();
+        $summary = (new BackupService)->getBackupSummary();
+
+        $stateComponents = [
+            Text::make('state_database')
+                ->content(__('backup.state.database', ['driver' => strtoupper($summary['driver'])])),
+            Text::make('state_tables')
+                ->content(__('backup.state.tables', ['count' => $summary['table_count']])),
+            Text::make('state_records')
+                ->content(__('backup.state.records', ['count' => number_format($summary['record_count'])])),
+            Text::make('state_encryption')
+                ->content(__('backup.state.encryption', ['method' => $summary['encryption']])),
+        ];
+
+        if (PackgridSettings::dockerEnabled()) {
+            $stateComponents[] = Text::make('state_docker_blobs')
+                ->content(__('backup.state.docker_blobs_note'));
+        }
 
         return $schema
             ->components([
+                Section::make(__('backup.section.state'))
+                    ->description(__('backup.section.state_description'))
+                    ->icon('heroicon-o-server-stack')
+                    ->schema($stateComponents),
                 Section::make(__('backup.section.backup'))
                     ->description(__('backup.section.backup_description'))
                     ->schema([
                         Text::make('last_backup_at')
                             ->content(fn () => $settings?->last_backup_at
-                                ? $settings->last_backup_at->diffForHumans()
+                                ? $settings->last_backup_at->diffForHumans().' ('.$settings->last_backup_at->toDayDateTimeString().')'
                                 : __('common.never')),
                     ]),
                 Section::make(__('backup.section.restore'))
@@ -57,7 +79,7 @@ class BackupRestore extends Page
                     ->schema([
                         Text::make('last_restore_at')
                             ->content(fn () => $settings?->last_restore_at
-                                ? $settings->last_restore_at->diffForHumans()
+                                ? $settings->last_restore_at->diffForHumans().' ('.$settings->last_restore_at->toDayDateTimeString().')'
                                 : __('common.never')),
                     ]),
             ]);
@@ -93,16 +115,15 @@ class BackupRestore extends Page
             ->action(function (array $data) {
                 $service = new BackupService;
 
+                // createBackup records last_backup_at on the settings row.
                 $encrypted = $service->createBackup($data['password']);
-
-                Setting::first()?->update(['last_backup_at' => now()]);
 
                 Notification::make()
                     ->title(__('backup.notification.backup_created'))
                     ->success()
                     ->send();
 
-                $filename = 'packgrid-backup-' . now()->format('Y-m-d-His') . '.bin';
+                $filename = 'packgrid-backup-'.now()->format('Y-m-d-His').'.bin';
 
                 return response()->streamDownload(function () use ($encrypted) {
                     echo $encrypted;

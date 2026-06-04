@@ -1053,5 +1053,12 @@
     "widget.docker_activity.type": "Action",
     "widget.docker_activity.reference": "Tag / Digest",
     "widget.docker_activity.size": "Size",
-    "widget.docker_activity.when": "When"
+    "widget.docker_activity.when": "When",
+    "backup.section.state": "System state",
+    "backup.section.state_description": "What a backup includes and how it is protected",
+    "backup.state.database": "Database: :driver",
+    "backup.state.tables": "Tables included: :count",
+    "backup.state.records": "Records: :count",
+    "backup.state.encryption": "Encryption: :method (authenticated)",
+    "backup.state.docker_blobs_note": "Note: Docker image blob files on disk are not included — only database metadata. Back up the blob storage separately."
 }

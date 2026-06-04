@@ -1053,5 +1053,12 @@
     "widget.docker_activity.type": "Action",
     "widget.docker_activity.reference": "Tag / Empreinte",
     "widget.docker_activity.size": "Taille",
-    "widget.docker_activity.when": "Quand"
+    "widget.docker_activity.when": "Quand",
+    "backup.section.state": "État du système",
+    "backup.section.state_description": "Ce qu’une sauvegarde inclut et comment elle est protégée",
+    "backup.state.database": "Base de données : :driver",
+    "backup.state.tables": "Tables incluses : :count",
+    "backup.state.records": "Enregistrements : :count",
+    "backup.state.encryption": "Chiffrement : :method (authentifié)",
+    "backup.state.docker_blobs_note": "Remarque : les fichiers blob des images Docker sur le disque ne sont pas inclus — seules les métadonnées de la base de données le sont. Sauvegardez le stockage des blobs séparément."
 }

@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Models\Credential;
 use App\Models\DockerBlob;
 use App\Models\DockerUpload;
-use App\Models\Setting;
 use App\Models\SyncLog;
 use App\Support\PackgridSettings;
 use Filament\Widgets\StatsOverviewWidget;
@@ -16,9 +15,6 @@ use Illuminate\Support\Facades\Route;
 class SystemHealth extends StatsOverviewWidget
 {
     protected ?string $pollingInterval = '60s';
-
-    /** Backups older than this many days are flagged. */
-    protected const BACKUP_STALE_DAYS = 7;
 
     /**
      * If no scheduled job has run within this many hours, the scheduler
@@ -36,7 +32,6 @@ class SystemHealth extends StatsOverviewWidget
     {
         return array_values(array_filter([
             $this->schedulerStat(),
-            $this->backupStat(),
             PackgridSettings::dockerEnabled() ? $this->storageStat() : null,
         ]));
     }
@@ -61,32 +56,6 @@ class SystemHealth extends StatsOverviewWidget
             ->description(__('widget.health.last_run', ['time' => $lastRun->diffForHumans()]))
             ->color($stalled ? 'danger' : 'success')
             ->icon($stalled ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-bolt');
-    }
-
-    protected function backupStat(): Stat
-    {
-        $raw = Setting::query()->value('last_backup_at');
-        $lastBackup = $raw ? Carbon::parse($raw) : null;
-
-        $url = Route::has('filament.admin.pages.backup-restore')
-            ? route('filament.admin.pages.backup-restore')
-            : null;
-
-        if ($lastBackup === null) {
-            return Stat::make(__('widget.health.backup'), __('widget.health.backup_never'))
-                ->description(__('widget.health.backup_never_desc'))
-                ->color('danger')
-                ->icon('heroicon-o-shield-exclamation')
-                ->url($url);
-        }
-
-        $stale = $lastBackup->lt(now()->subDays(self::BACKUP_STALE_DAYS));
-
-        return Stat::make(__('widget.health.backup'), $lastBackup->diffForHumans())
-            ->description($stale ? __('widget.health.backup_stale_desc') : __('widget.health.backup_ok_desc'))
-            ->color($stale ? 'warning' : 'success')
-            ->icon('heroicon-o-shield-check')
-            ->url($url);
     }
 
     protected function storageStat(): Stat

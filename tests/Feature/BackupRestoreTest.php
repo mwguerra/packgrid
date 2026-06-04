@@ -155,3 +155,70 @@ test('backup restore page shows never when no backups exist', function () {
         ->assertOk()
         ->assertSee(__('common.never'));
 });
+
+test('backup uses the modern authenticated encryption format', function () {
+    $service = new BackupService;
+
+    $encrypted = $service->encrypt('secret', 'pw-12345678');
+
+    // The modern AEAD format is identified by the PGBK magic header.
+    expect(str_starts_with($encrypted, 'PGBK'))->toBeTrue();
+});
+
+test('tampering with an encrypted backup is detected on decrypt', function () {
+    $service = new BackupService;
+    $encrypted = $service->encrypt('secret data', 'pw-12345678');
+
+    // Flip a byte inside the ciphertext body (past the header+salt+nonce).
+    $tampered = $encrypted;
+    $pos = strlen($encrypted) - 1;
+    $tampered[$pos] = $tampered[$pos] === 'A' ? 'B' : 'A';
+
+    expect(fn () => $service->decrypt($tampered, 'pw-12345678'))
+        ->toThrow(RuntimeException::class);
+});
+
+test('legacy AES-256-CBC backups can still be decrypted', function () {
+    $service = new BackupService;
+    $password = 'legacy-password';
+    $plaintext = 'legacy backup payload';
+
+    // Reproduce the old format: salt(16) | iv(16) | AES-256-CBC ciphertext (PBKDF2-SHA256/100k).
+    $salt = random_bytes(16);
+    $iv = random_bytes(16);
+    $key = hash_pbkdf2('sha256', $password, $salt, 100000, 32, true);
+    $ciphertext = openssl_encrypt($plaintext, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+    $legacy = $salt.$iv.$ciphertext;
+
+    expect($service->decrypt($legacy, $password))->toBe($plaintext);
+});
+
+test('getBackupSummary reports tables, records and the encryption method', function () {
+    User::factory()->create();
+    Token::factory()->count(2)->create();
+
+    $summary = (new BackupService)->getBackupSummary();
+
+    expect($summary['table_count'])->toBeGreaterThan(0)
+        ->and($summary['record_count'])->toBeGreaterThanOrEqual(3)
+        ->and($summary['encryption'])->toContain('XChaCha20-Poly1305')
+        ->and($summary['tables'])->toHaveKey('users')
+        ->and($summary['driver'])->toBeString();
+});
+
+test('createBackup records last_backup_at on the settings row', function () {
+    expect(Setting::first()->last_backup_at)->toBeNull();
+
+    (new BackupService)->createBackup('pw-12345678');
+
+    expect(Setting::first()->last_backup_at)->not->toBeNull();
+});
+
+test('backup restore page shows the system state and encryption method', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(BackupRestore::class)
+        ->assertOk()
+        ->assertSee('XChaCha20-Poly1305');
+});

@@ -120,10 +120,13 @@ describe('SystemHealth widget', function () {
             ->assertSee(__('widget.health.scheduler_active'));
     });
 
-    it('warns when no backup has ever been taken', function () {
+    it('does not show any backup information', function () {
+        SyncLog::factory()->create(['started_at' => now()->subMinutes(10)]);
+
         livewire(SystemHealth::class)
             ->assertOk()
-            ->assertSee(__('widget.health.backup_never'));
+            ->assertDontSee(__('widget.health.backup'))
+            ->assertDontSee(__('widget.health.backup_never'));
     });
 });
 
@@ -163,7 +166,6 @@ describe('AttentionRequired widget', function () {
     it('stays hidden when everything is healthy', function () {
         healthyRepository();
         Credential::factory()->create(['status' => CredentialStatus::Ok]);
-        applySettings(['last_backup_at' => now()]);
 
         expect(AttentionRequired::canView())->toBeFalse();
     });
@@ -181,7 +183,6 @@ describe('AttentionRequired widget', function () {
 
     it('appears when a repository is stale / never synced', function () {
         Repository::factory()->create(['name' => 'Never Synced', 'last_sync_at' => null, 'last_error' => null]);
-        applySettings(['last_backup_at' => now()]);
 
         expect(AttentionRequired::canView())->toBeTrue();
 
@@ -197,7 +198,6 @@ describe('AttentionRequired widget', function () {
             'enabled' => true,
             'expires_at' => now()->subDay(),
         ]);
-        applySettings(['last_backup_at' => now()]);
 
         expect(AttentionRequired::canView())->toBeTrue();
 
@@ -217,15 +217,12 @@ describe('AttentionRequired widget', function () {
             ->assertSee(__('widget.attention.invalid_credentials'));
     });
 
-    it('warns about a missing backup once the instance holds data', function () {
+    it('no longer surfaces backup alerts (backup status lives on the backup page)', function () {
+        // Data exists but no backup has been taken — the dashboard must stay silent
+        // about backups now that the concern lives on the Backup & Restore page.
         healthyRepository();
-        // No backup taken.
 
-        expect(AttentionRequired::canView())->toBeTrue();
-
-        livewire(AttentionRequired::class)
-            ->assertOk()
-            ->assertSee(__('widget.attention.backup_missing'));
+        expect(AttentionRequired::canView())->toBeFalse();
     });
 });
 

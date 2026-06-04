@@ -3,11 +3,16 @@
 use App\Enums\CredentialStatus;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\AttentionRequired;
+use App\Filament\Widgets\OnboardingChecklist;
 use App\Filament\Widgets\PackgridStats;
+use App\Filament\Widgets\RecentDockerActivity;
 use App\Filament\Widgets\SecurityAccess;
+use App\Filament\Widgets\StorageCapacity;
 use App\Filament\Widgets\SyncActivity;
 use App\Filament\Widgets\SystemHealth;
+use App\Filament\Widgets\UsageTrend;
 use App\Models\Credential;
+use App\Models\DockerRepository;
 use App\Models\Repository;
 use App\Models\Setting;
 use App\Models\SyncLog;
@@ -45,13 +50,17 @@ describe('Dashboard page', function () {
         livewire(Dashboard::class)->assertOk();
     });
 
-    it('orders the widgets by urgency (attention first, activity last)', function () {
+    it('orders the widgets by urgency (onboarding/attention first, activity last)', function () {
         expect((new Dashboard)->getWidgets())->toBe([
+            OnboardingChecklist::class,
             AttentionRequired::class,
             SystemHealth::class,
             PackgridStats::class,
             SecurityAccess::class,
+            UsageTrend::class,
+            StorageCapacity::class,
             SyncActivity::class,
+            RecentDockerActivity::class,
         ]);
     });
 });
@@ -217,5 +226,68 @@ describe('AttentionRequired widget', function () {
         livewire(AttentionRequired::class)
             ->assertOk()
             ->assertSee(__('widget.attention.backup_missing'));
+    });
+});
+
+describe('UsageTrend widget', function () {
+    it('renders', function () {
+        livewire(UsageTrend::class)->assertOk();
+    });
+});
+
+describe('StorageCapacity widget', function () {
+    it('is visible only when Docker is enabled', function () {
+        applySettings(['docker_enabled' => true]);
+        expect(StorageCapacity::canView())->toBeTrue();
+
+        applySettings(['docker_enabled' => false]);
+        expect(StorageCapacity::canView())->toBeFalse();
+    });
+
+    it('renders the storage stats', function () {
+        applySettings(['docker_enabled' => true]);
+
+        livewire(StorageCapacity::class)
+            ->assertOk()
+            ->assertSee(__('widget.storage.used'))
+            ->assertSee(__('widget.storage.reclaimable'));
+    });
+});
+
+describe('RecentDockerActivity widget', function () {
+    it('is visible only when Docker is enabled', function () {
+        applySettings(['docker_enabled' => true]);
+        expect(RecentDockerActivity::canView())->toBeTrue();
+
+        applySettings(['docker_enabled' => false]);
+        expect(RecentDockerActivity::canView())->toBeFalse();
+    });
+
+    it('renders', function () {
+        applySettings(['docker_enabled' => true]);
+        livewire(RecentDockerActivity::class)->assertOk();
+    });
+});
+
+describe('OnboardingChecklist widget', function () {
+    it('is visible on a fresh, unconfigured instance', function () {
+        expect(OnboardingChecklist::canView())->toBeTrue();
+
+        livewire(OnboardingChecklist::class)
+            ->assertOk()
+            ->assertSee(__('widget.onboarding.credential'))
+            ->assertSee(__('widget.onboarding.two_factor'));
+    });
+
+    it('hides once every setup step is complete', function () {
+        $user = User::factory()->create();
+        $user->forceFill(['app_authentication_secret' => 'DEMOSECRET'])->save();
+        actingAs($user);
+
+        Credential::factory()->create(['status' => CredentialStatus::Ok, 'last_checked_at' => now()]);
+        Token::factory()->create();
+        DockerRepository::factory()->create();
+
+        expect(OnboardingChecklist::canView())->toBeFalse();
     });
 });

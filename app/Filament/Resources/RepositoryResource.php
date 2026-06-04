@@ -257,7 +257,20 @@ class RepositoryResource extends Resource
                         'pending' => 'gray',
                         default => 'gray',
                     })
-                    ->tooltip(fn (Repository $record): ?string => $record->last_error ?: null),
+                    ->tooltip(function (Repository $record): string {
+                        // For errors, the raw message is the most useful hover; otherwise explain the state.
+                        if ($record->last_error) {
+                            return $record->last_error;
+                        }
+                        if (! $record->last_sync_at) {
+                            return __('repository.status_tooltip.pending');
+                        }
+                        if ($record->last_sync_at->lt(now()->subDay())) {
+                            return __('repository.status_tooltip.stale');
+                        }
+
+                        return __('repository.status_tooltip.synced');
+                    }),
                 TextColumn::make('repo_full_name')
                     ->label(__('repository.section.repository'))
                     ->searchable()
@@ -361,6 +374,9 @@ class RepositoryResource extends Resource
                         ->modalSubmitActionLabel(__('repository.action.remove')),
                 ]),
             ])
+            ->emptyStateIcon('heroicon-o-cube')
+            ->emptyStateHeading(__('repository.empty.heading'))
+            ->emptyStateDescription(__('repository.empty.description'))
             ->defaultSort('name');
     }
 
@@ -446,6 +462,7 @@ class RepositoryResource extends Resource
 
                 Section::make(__('repository.section.sync_status'))
                     ->icon('heroicon-o-arrow-path')
+                    ->description(__('repository.section.sync_status_description'))
                     ->schema([
                         TextEntry::make('sync_status')
                             ->label(__('common.status'))
@@ -474,7 +491,7 @@ class RepositoryResource extends Resource
                         TextEntry::make('last_sync_at')
                             ->label(__('repository.table.last_sync'))
                             ->icon('heroicon-o-clock')
-                            ->dateTime()
+                            ->since()
                             ->placeholder(__('common.never')),
                         TextEntry::make('last_error')
                             ->label(__('repository.infolist.last_error'))

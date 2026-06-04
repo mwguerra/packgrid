@@ -18,6 +18,7 @@ use App\Models\Setting;
 use App\Models\SyncLog;
 use App\Models\Token;
 use App\Models\User;
+use App\Services\RepositorySyncService;
 use App\Support\PackgridSettings;
 
 use function Pest\Laravel\actingAs;
@@ -181,7 +182,7 @@ describe('AttentionRequired widget', function () {
             ->assertSee(__('widget.attention.failed_repos'));
     });
 
-    it('appears when a repository is stale / never synced', function () {
+    it('shows a never-synced repository under "Awaiting first sync" (benign)', function () {
         Repository::factory()->create(['name' => 'Never Synced', 'last_sync_at' => null, 'last_error' => null]);
 
         expect(AttentionRequired::canView())->toBeTrue();
@@ -189,7 +190,47 @@ describe('AttentionRequired widget', function () {
         livewire(AttentionRequired::class)
             ->assertOk()
             ->assertSee('Never Synced')
-            ->assertSee(__('widget.attention.stale_repos'));
+            ->assertSee(__('widget.attention.awaiting_repos'))
+            ->assertDontSee(__('widget.attention.overdue_repos'));
+    });
+
+    it('shows an overdue repository under "Outdated mirrors" with a Sync now action', function () {
+        Repository::factory()->create([
+            'name' => 'Overdue Repo',
+            'last_sync_at' => now()->subHours(9),
+            'last_error' => null,
+            'enabled' => true,
+        ]);
+
+        livewire(AttentionRequired::class)
+            ->assertOk()
+            ->assertSee('Overdue Repo')
+            ->assertSee(__('widget.attention.overdue_repos'))
+            ->assertSee(__('widget.attention.sync_now'));
+    });
+
+    it('diagnoses a stopped scheduler when several repositories are overdue at once', function () {
+        Repository::factory()->count(3)->create([
+            'last_sync_at' => now()->subHours(9),
+            'last_error' => null,
+            'enabled' => true,
+        ]);
+
+        livewire(AttentionRequired::class)
+            ->assertOk()
+            ->assertSee(__('widget.attention.scheduler_down_heading'));
+    });
+
+    it('syncRepository triggers the sync service for the given repository', function () {
+        $repo = Repository::factory()->create(['last_sync_at' => now()->subHours(9), 'last_error' => null]);
+
+        $mock = Mockery::mock(RepositorySyncService::class);
+        $mock->shouldReceive('sync')->once()->with(Mockery::on(fn ($r) => $r->id === $repo->id));
+        app()->instance(RepositorySyncService::class, $mock);
+
+        livewire(AttentionRequired::class)
+            ->call('syncRepository', $repo->id)
+            ->assertOk();
     });
 
     it('appears when a token is already expired', function () {

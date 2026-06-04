@@ -5,9 +5,11 @@ use App\Enums\RepositoryVisibility;
 use App\Filament\Resources\RepositoryResource\Pages\CreateRepository;
 use App\Filament\Resources\RepositoryResource\Pages\EditRepository;
 use App\Filament\Resources\RepositoryResource\Pages\ListRepositories;
+use App\Filament\Resources\RepositoryResource\Pages\ViewRepository;
 use App\Models\Credential;
 use App\Models\Repository;
 use App\Models\User;
+use App\Services\RepositorySyncService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -523,3 +525,29 @@ function fakeGitHubForNpmRepo(string $packageName, string $fullName, bool $publi
         return Http::response([], 404);
     });
 }
+
+// =============================================================================
+// VIEW REPOSITORY — SYNC ACTION
+// =============================================================================
+
+describe('ViewRepository Sync action', function () {
+    it('exposes a sync action on the repository view page', function () {
+        $repo = Repository::factory()->create(['last_sync_at' => now()->subHours(9), 'last_error' => null]);
+
+        livewire(ViewRepository::class, ['record' => $repo->getKey()])
+            ->assertOk()
+            ->assertActionExists('sync');
+    });
+
+    it('runs the sync service when the view-page sync action is triggered', function () {
+        $repo = Repository::factory()->create(['last_sync_at' => now()->subHours(9), 'last_error' => null]);
+
+        $mock = Mockery::mock(RepositorySyncService::class);
+        $mock->shouldReceive('sync')->once();
+        app()->instance(RepositorySyncService::class, $mock);
+
+        livewire(ViewRepository::class, ['record' => $repo->getKey()])
+            ->callAction('sync')
+            ->assertOk();
+    });
+});

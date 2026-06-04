@@ -7,7 +7,9 @@ use App\Models\Credential;
 use App\Models\DockerUpload;
 use App\Models\Repository;
 use App\Models\Token;
+use App\Services\RepositorySyncService;
 use App\Support\PackgridSettings;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 
 class AttentionRequired extends Widget
@@ -18,6 +20,9 @@ class AttentionRequired extends Widget
 
     /** Show at most this many items per category before linking to "view all". */
     protected const ITEM_LIMIT = 5;
+
+    /** If at least this many repos are overdue at once, the scheduler is likely down. */
+    protected const SCHEDULER_DOWN_MIN_OVERDUE = 3;
 
     public static function canView(): bool
     {
@@ -34,19 +39,61 @@ class AttentionRequired extends Widget
             || self::operationalAlerts() !== [];
     }
 
+    /**
+     * Manually refresh one repository's mirror from GitHub (reuses the same
+     * service the per-row Sync action and the scheduler use — behaviour unchanged).
+     */
+    public function syncRepository(string $id): void
+    {
+        $repository = Repository::find($id);
+
+        if (! $repository) {
+            return;
+        }
+
+        try {
+            app(RepositorySyncService::class)->sync($repository);
+
+            Notification::make()
+                ->title(__('repository.notification.synced'))
+                ->success()
+                ->send();
+        } catch (\Throwable $exception) {
+            Notification::make()
+                ->title(__('repository.notification.sync_failed'))
+                ->body($exception->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getViewData(): array
     {
+        $overdueCount = self::overdueQuery()->count();
+        $enabledCount = Repository::query()->where('enabled', true)->count();
+
         return [
             'failedRepositories' => self::failedRepositoriesQuery()
                 ->select(['id', 'name', 'last_error', 'last_sync_at'])
                 ->limit(self::ITEM_LIMIT)->get(),
             'failedRepositoriesCount' => self::failedRepositoriesQuery()->count(),
 
-            'staleRepositories' => self::staleRepositoriesQuery()
+            // Overdue: enabled, no error, synced before but not in the last 5h.
+            'overdueRepositories' => self::overdueQuery()
                 ->select(['id', 'name', 'last_sync_at'])
                 ->orderBy('last_sync_at')
                 ->limit(self::ITEM_LIMIT)->get(),
-            'staleRepositoriesCount' => self::staleRepositoriesQuery()->count(),
+            'overdueCount' => $overdueCount,
+
+            // Awaiting first sync: enabled, no error, never synced (benign — just added).
+            'awaitingRepositories' => self::neverSyncedQuery()
+                ->select(['id', 'name'])
+                ->limit(self::ITEM_LIMIT)->get(),
+            'awaitingCount' => self::neverSyncedQuery()->count(),
+
+            // Many repos overdue at once usually means the scheduler (cron) isn't running.
+            'schedulerLikelyDown' => $overdueCount >= self::SCHEDULER_DOWN_MIN_OVERDUE
+                || ($enabledCount >= 2 && $overdueCount === $enabledCount),
 
             'problematicTokens' => self::problematicTokensQuery()
                 ->select(['id', 'name', 'expires_at'])
@@ -73,6 +120,16 @@ class AttentionRequired extends Widget
     protected static function staleRepositoriesQuery()
     {
         return Repository::query()->stale();
+    }
+
+    protected static function overdueQuery()
+    {
+        return Repository::query()->stale()->whereNotNull('last_sync_at');
+    }
+
+    protected static function neverSyncedQuery()
+    {
+        return Repository::query()->stale()->whereNull('last_sync_at');
     }
 
     /** Enabled tokens that are already expired or expiring within 7 days. */

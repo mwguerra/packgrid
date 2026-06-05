@@ -25,7 +25,7 @@ class DockerRegistryAuth
             return $this->unauthorized();
         }
 
-        $token = Token::query()->where('token', $tokenValue)->first();
+        $token = Token::findByPlainText($tokenValue);
 
         if (! $token) {
             return $this->unauthorized('UNAUTHORIZED');
@@ -55,7 +55,7 @@ class DockerRegistryAuth
         // Try username first (docker login -u <token>)
         if ($username && $this->isValidTokenFormat($username)) {
             // Verify it's a real token
-            if (Token::query()->where('token', $username)->exists()) {
+            if (Token::plainTextExists($username)) {
                 return $username;
             }
         }

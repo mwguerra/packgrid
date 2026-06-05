@@ -13,6 +13,13 @@ class Token extends Model
     use HasFactory;
     use HasUuids;
 
+    /**
+     * The plaintext token value, only populated in-memory right after the
+     * token is generated/rotated. It is never persisted; the database stores
+     * only the SHA-256 hash. Use this to display the value to the user once.
+     */
+    public ?string $plainTextToken = null;
+
     protected $fillable = [
         'name',
         'token',
@@ -32,12 +39,69 @@ class Token extends Model
     ];
 
     protected $hidden = [
-        'token',
+        'token_hash',
     ];
 
     public static function generateToken(): string
     {
         return Str::random(64);
+    }
+
+    /**
+     * One-way hash used for storing and looking up tokens. SHA-256 is
+     * appropriate here because the token is a 64-char high-entropy random
+     * string (brute-forcing the hash is infeasible regardless of speed).
+     */
+    public static function hashToken(string $plain): string
+    {
+        return hash('sha256', $plain);
+    }
+
+    /**
+     * Find a token by its plaintext value via the stored hash.
+     */
+    public static function findByPlainText(string $plain): ?self
+    {
+        return static::query()->where('token_hash', static::hashToken($plain))->first();
+    }
+
+    /**
+     * Whether a token with the given plaintext value exists.
+     */
+    public static function plainTextExists(string $plain): bool
+    {
+        return static::query()->where('token_hash', static::hashToken($plain))->exists();
+    }
+
+    /**
+     * Set the token from a plaintext value: store only its hash and keep the
+     * plaintext in memory for one-time display.
+     */
+    public function setTokenAttribute(string $value): void
+    {
+        $this->attributes['token_hash'] = static::hashToken($value);
+        $this->plainTextToken = $value;
+    }
+
+    /**
+     * The plaintext token is only available in-memory immediately after
+     * creation or rotation; otherwise this is null (it is not stored).
+     */
+    public function getTokenAttribute(): ?string
+    {
+        return $this->plainTextToken;
+    }
+
+    /**
+     * Generate a fresh token value, replacing the stored hash. Returns the new
+     * plaintext value (shown once) for display to the user.
+     */
+    public function rotate(): string
+    {
+        $this->token = static::generateToken();
+        $this->save();
+
+        return $this->plainTextToken;
     }
 
     public function isValid(): bool

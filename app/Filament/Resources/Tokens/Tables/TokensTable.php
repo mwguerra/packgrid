@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -19,6 +20,12 @@ use Illuminate\Support\Js;
 
 class TokensTable
 {
+    /**
+     * Placeholder used in copyable setup commands. The real token value is only
+     * available once, at creation/rotation; it is never stored in plaintext.
+     */
+    private const TOKEN_PLACEHOLDER = 'YOUR_PACKGRID_TOKEN';
+
     private static function getHost(): string
     {
         $url = config('app.url');
@@ -62,6 +69,36 @@ class TokensTable
             ));
     }
 
+    private static function rotateAction(): Action
+    {
+        return Action::make('rotate')
+            ->label(__('token.action.rotate'))
+            ->tooltip(__('token.action.rotate_tooltip'))
+            ->icon('heroicon-o-arrow-path')
+            ->color('warning')
+            ->requiresConfirmation()
+            ->modalHeading(__('token.action.rotate_confirm_heading'))
+            ->modalDescription(__('token.action.rotate_confirm_description'))
+            ->modalSubmitActionLabel(__('token.action.rotate'))
+            ->action(function (Token $record): void {
+                $newToken = $record->rotate();
+
+                Notification::make()
+                    ->title(__('token.notification.rotated'))
+                    ->body(__('token.notification.rotated_body'))
+                    ->warning()
+                    ->persistent()
+                    ->actions([
+                        Action::make('copy')
+                            ->label(__('token.action.copy'))
+                            ->icon('heroicon-o-clipboard-document')
+                            ->url("javascript:navigator.clipboard.writeText('{$newToken}')")
+                            ->close(),
+                    ])
+                    ->send();
+            });
+    }
+
     private static function buildCopyJs(string $text, string $notificationTitle): string
     {
         $textJs = Js::from($text);
@@ -94,8 +131,7 @@ class TokensTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyableState(fn (Token $record): string => $record->token)
-                    ->copyMessage(__('token.notification.copied'))
+                    ->copyMessage(__('token.notification.name_copied'))
                     ->description(function (Token $record): HtmlString {
                         $parts = [];
 
@@ -230,20 +266,12 @@ class TokensTable
             ])
             ->recordActions([
                 self::makeCopyAction(
-                    'copyToken',
-                    __('token.action.copy'),
-                    __('token.action.copy_tooltip'),
-                    'heroicon-o-clipboard-document',
-                    __('token.notification.token_copied'),
-                    fn (Token $record): string => $record->token,
-                ),
-                self::makeCopyAction(
                     'copyComposer',
                     __('token.action.copy_composer'),
                     __('token.action.copy_composer_tooltip'),
                     'heroicon-o-clipboard-document-list',
                     __('token.notification.composer_copied'),
-                    fn (Token $record): string => self::getComposerCommands($record->token),
+                    fn (Token $record): string => self::getComposerCommands(self::TOKEN_PLACEHOLDER),
                 ),
                 self::makeCopyAction(
                     'copyNpm',
@@ -251,13 +279,14 @@ class TokensTable
                     __('token.action.copy_npm_tooltip'),
                     'heroicon-o-clipboard-document-list',
                     __('token.notification.npm_copied'),
-                    fn (Token $record): string => self::getNpmCommands($record->token),
+                    fn (Token $record): string => self::getNpmCommands(self::TOKEN_PLACEHOLDER),
                 ),
                 ActionGroup::make([
                     ActionGroup::make([
                         ViewAction::make(),
                         EditAction::make(),
                     ])->dropdown(false),
+                    self::rotateAction(),
                     DeleteAction::make(),
                 ]),
             ])

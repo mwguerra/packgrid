@@ -42,10 +42,10 @@ class TokenInfolist
                             }),
                         TextEntry::make('token')
                             ->label(__('common.token'))
-                            ->icon('heroicon-o-clipboard-document')
-                            ->copyable()
-                            ->copyMessage(__('token.notification.copied'))
+                            ->icon('heroicon-o-lock-closed')
+                            ->state('••••••••••••••••••••••••')
                             ->fontFamily('mono')
+                            ->helperText(__('token.field.token_helper_edit'))
                             ->columnSpanFull(),
                     ])
                     ->columns(2)

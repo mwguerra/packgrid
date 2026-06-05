@@ -25,7 +25,7 @@ class ValidatePackgridToken
             return $this->unauthorized('Authentication required.');
         }
 
-        $token = Token::query()->where('token', $tokenValue)->first();
+        $token = Token::findByPlainText($tokenValue);
 
         if (! $token) {
             return $this->unauthorized('Invalid token.');

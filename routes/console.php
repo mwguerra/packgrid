@@ -21,3 +21,9 @@ Schedule::command('packgrid:docker-gc')
     ->at('03:00')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Prune download and sync logs past their retention period daily at 4 AM
+Schedule::command('packgrid:prune-logs')
+    ->dailyAt('04:00')
+    ->withoutOverlapping()
+    ->runInBackground();

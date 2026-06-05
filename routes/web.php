@@ -23,7 +23,7 @@ Route::get('/', function () {
 | Composer Registry Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['packgrid.token', 'feature:composer'])->group(function () {
+Route::middleware(['packgrid.token', 'feature:composer', 'throttle:packgrid-registry'])->group(function () {
     Route::get('/packages.json', [PackageMetadataController::class, 'index']);
     Route::get('/p/{vendor}/{package}.json', [PackageMetadataController::class, 'show']);
     Route::get('/dist/{owner}/{repo}/{ref}.zip', [PackageProxyController::class, 'download'])
@@ -35,7 +35,7 @@ Route::middleware(['packgrid.token', 'feature:composer'])->group(function () {
 | NPM Registry Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('npm')->middleware(['packgrid.token', 'feature:npm'])->group(function () {
+Route::prefix('npm')->middleware(['packgrid.token', 'feature:npm', 'throttle:packgrid-registry'])->group(function () {
     // Scoped packages: @scope/package (two path segments)
     Route::get('/@{scope}/{package}', [NpmMetadataController::class, 'showScoped']);
 
@@ -59,7 +59,7 @@ Route::prefix('npm')->middleware(['packgrid.token', 'feature:npm'])->group(funct
 |--------------------------------------------------------------------------
 */
 Route::prefix('git/{owner}/{repo}.git')
-    ->middleware(['packgrid.token', 'feature:git'])
+    ->middleware(['packgrid.token', 'feature:git', 'throttle:packgrid-registry'])
     ->group(function () {
         Route::get('/info/refs', [GitProxyController::class, 'infoRefs']);
         Route::post('/git-upload-pack', [GitProxyController::class, 'uploadPack']);
@@ -76,7 +76,7 @@ Route::match(['GET', 'HEAD'], '/v2/', VersionController::class);
 Route::match(['GET', 'HEAD'], '/v2', VersionController::class);
 
 // Authenticated Docker Registry routes
-Route::prefix('v2')->middleware(['docker.auth', 'feature:docker'])->group(function () {
+Route::prefix('v2')->middleware(['docker.auth', 'feature:docker', 'throttle:packgrid-registry'])->group(function () {
     // Catalog (list all repositories)
     Route::get('/_catalog', CatalogController::class);
 

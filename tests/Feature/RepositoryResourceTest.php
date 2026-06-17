@@ -575,7 +575,14 @@ describe('ViewRepository Sync action', function () {
 
 describe('ViewRepository Tags & Downloads', function () {
     it('renders available versions with their download counts', function () {
-        $repo = Repository::factory()->create(['format' => PackageFormat::Composer]);
+        // Explicit digit-free name/repo so the asserted download count cannot
+        // accidentally match a faker-generated identifier elsewhere on the page.
+        $repo = Repository::factory()->create([
+            'name' => 'Acme Tools',
+            'repo_full_name' => 'acme/tools',
+            'url' => 'https://github.com/acme/tools',
+            'format' => PackageFormat::Composer,
+        ]);
 
         app(PackageMetadataStore::class)->writeRepositoryMetadata($repo->id, [
             'acme/tools' => [
@@ -583,12 +590,15 @@ describe('ViewRepository Tags & Downloads', function () {
                 'v2.0.0' => ['name' => 'acme/tools', 'version' => 'v2.0.0'],
             ],
         ]);
-        DownloadLog::factory()->count(2)->forRepository($repo)->create(['package_version' => 'v1.0.0']);
+        // A distinctive count (7) that appears nowhere else on the page, so the
+        // assertion fails if the downloads badge is ever dropped from the schema.
+        DownloadLog::factory()->count(7)->forRepository($repo)->create(['package_version' => 'v1.0.0']);
 
         livewire(ViewRepository::class, ['record' => $repo->getKey()])
             ->assertOk()
             ->assertSee('v1.0.0')
-            ->assertSee('v2.0.0');
+            ->assertSee('v2.0.0')
+            ->assertSee('7'); // download count for v1.0.0 must be rendered
     });
 });
 

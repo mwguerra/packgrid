@@ -292,6 +292,25 @@ describe('EditRepository Page', function () {
             ->assertFormFieldVisible('visibility');
     });
 
+    it('exposes the autosync toggle', function () {
+        $repository = Repository::factory()->create();
+
+        livewire(EditRepository::class, ['record' => $repository->id])
+            ->assertFormFieldExists('autosync');
+    });
+
+    it('can enable autosync', function () {
+        $repository = Repository::factory()->create(['autosync' => false]);
+
+        livewire(EditRepository::class, ['record' => $repository->id])
+            ->fillForm(['autosync' => true])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $repository->refresh();
+        expect($repository->autosync)->toBeTrue();
+    });
+
     it('loads repository data correctly', function () {
         $repository = Repository::factory()->create([
             'url' => 'https://github.com/test/repo',

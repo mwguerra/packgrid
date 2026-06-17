@@ -150,6 +150,10 @@ class RepositoryResource extends Resource
                             ->label(__('common.enabled'))
                             ->helperText(__('repository.field.enabled_helper'))
                             ->default(true),
+                        Toggle::make('autosync')
+                            ->label(__('repository.field.autosync'))
+                            ->helperText(__('repository.field.autosync_helper'))
+                            ->default(false),
                         Toggle::make('clone_enabled')
                             ->label(__('repository.field.clone_enabled'))
                             ->helperText(__('repository.field.clone_enabled_helper'))

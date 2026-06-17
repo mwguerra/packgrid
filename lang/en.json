@@ -60,6 +60,8 @@
     "repository.field.refs_filter_placeholder": "e.g., v1.0.0, main, develop",
     "repository.field.refs_filter_helper": "Comma-separated list of specific tags or branches to sync. Leave empty to sync all tags and branches.",
     "repository.field.enabled_helper": "When disabled, this repository will be skipped during sync operations.",
+    "repository.field.autosync": "Autosync",
+    "repository.field.autosync_helper": "Sync this repository from GitHub on every Composer/NPM request before responding (cached for ~1 minute to avoid hammering GitHub).",
     "repository.field.recent_syncs": "Recent sync logs",
     "repository.table.status": "Status",
     "repository.table.last_sync": "Last sync",

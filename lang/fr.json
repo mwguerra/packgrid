@@ -60,6 +60,8 @@
     "repository.field.refs_filter_placeholder": "ex: v1.0.0, main, develop",
     "repository.field.refs_filter_helper": "Liste de tags ou branches spécifiques à synchroniser, séparée par des virgules. Laissez vide pour synchroniser tous les tags et branches.",
     "repository.field.enabled_helper": "Lorsque désactivé, ce dépôt sera ignoré lors des opérations de synchronisation.",
+    "repository.field.autosync": "Autosync",
+    "repository.field.autosync_helper": "Synchronise ce dépôt depuis GitHub à chaque requête Composer/NPM avant de répondre (mis en cache ~1 minute pour ne pas surcharger GitHub).",
     "repository.field.recent_syncs": "Journaux de synchronisation récents",
     "repository.table.status": "Statut",
     "repository.table.last_sync": "Dernière synchronisation",

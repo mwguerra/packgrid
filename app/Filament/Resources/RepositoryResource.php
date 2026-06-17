@@ -9,6 +9,7 @@ use App\Filament\Resources\RepositoryResource\Pages;
 use App\Models\Repository;
 use App\Services\RepositorySyncService;
 use App\Support\PackgridSettings;
+use App\Support\RepositoryTagReport;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -505,6 +506,31 @@ class RepositoryResource extends Resource
                                     ->color('danger'),
                             ])
                             ->columns(4),
+                    ])
+                    ->collapsible()
+                    ->collapsed()
+                    ->columnSpanFull(),
+
+                Section::make(__('repository.section.tags_downloads'))
+                    ->icon('heroicon-o-tag')
+                    ->description(__('repository.section.tags_downloads_description'))
+                    ->schema([
+                        RepeatableEntry::make('tags')
+                            ->label('')
+                            ->state(fn (Repository $record): array => app(RepositoryTagReport::class)->rows($record))
+                            ->schema([
+                                TextEntry::make('version')
+                                    ->label(__('repository.tags.version'))
+                                    ->badge()
+                                    ->color('gray'),
+                                TextEntry::make('package')
+                                    ->label(__('repository.tags.package')),
+                                TextEntry::make('downloads')
+                                    ->label(__('repository.tags.downloads'))
+                                    ->badge()
+                                    ->color('info'),
+                            ])
+                            ->columns(3),
                     ])
                     ->collapsible()
                     ->collapsed()

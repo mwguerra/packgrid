@@ -7,8 +7,10 @@ use App\Filament\Resources\RepositoryResource\Pages\EditRepository;
 use App\Filament\Resources\RepositoryResource\Pages\ListRepositories;
 use App\Filament\Resources\RepositoryResource\Pages\ViewRepository;
 use App\Models\Credential;
+use App\Models\DownloadLog;
 use App\Models\Repository;
 use App\Models\User;
+use App\Services\PackageMetadataStore;
 use App\Services\RepositorySyncService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -568,6 +570,25 @@ describe('ViewRepository Sync action', function () {
         livewire(ViewRepository::class, ['record' => $repo->getKey()])
             ->callAction('sync')
             ->assertOk();
+    });
+});
+
+describe('ViewRepository Tags & Downloads', function () {
+    it('renders available versions with their download counts', function () {
+        $repo = Repository::factory()->create(['format' => PackageFormat::Composer]);
+
+        app(PackageMetadataStore::class)->writeRepositoryMetadata($repo->id, [
+            'acme/tools' => [
+                'v1.0.0' => ['name' => 'acme/tools', 'version' => 'v1.0.0'],
+                'v2.0.0' => ['name' => 'acme/tools', 'version' => 'v2.0.0'],
+            ],
+        ]);
+        DownloadLog::factory()->count(2)->forRepository($repo)->create(['package_version' => 'v1.0.0']);
+
+        livewire(ViewRepository::class, ['record' => $repo->getKey()])
+            ->assertOk()
+            ->assertSee('v1.0.0')
+            ->assertSee('v2.0.0');
     });
 });
 

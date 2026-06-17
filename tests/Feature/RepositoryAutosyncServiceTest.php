@@ -12,7 +12,7 @@ describe('maybeSync', function () {
 
         $sync = Mockery::mock(RepositorySyncService::class);
         $sync->shouldReceive('sync')->once()
-            ->withArgs(fn ($r, $rebuild = true) => $r->id === $repo->id)
+            ->withArgs(fn ($r, $rebuild) => $r->id === $repo->id && $rebuild === true)
             ->andReturn(new SyncLog);
         app()->instance(RepositorySyncService::class, $sync);
 
@@ -59,5 +59,5 @@ describe('maybeSync', function () {
         app()->instance(RepositorySyncService::class, $sync);
 
         app(RepositoryAutosyncService::class)->maybeSync($repo); // must not throw
-    })->throwsNoExceptions();
+    });
 });

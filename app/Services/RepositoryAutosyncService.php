@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\PackageFormat;
 use App\Models\Repository;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
@@ -11,8 +10,6 @@ class RepositoryAutosyncService
 {
     public function __construct(
         private readonly RepositorySyncService $sync,
-        private readonly PackageIndexBuilder $composerIndex,
-        private readonly NpmIndexBuilder $npmIndex,
     ) {}
 
     /**

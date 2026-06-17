@@ -43,4 +43,20 @@ return [
         'download_logs_days' => (int) env('PACKGRID_DOWNLOAD_LOG_RETENTION_DAYS', 90),
         'sync_logs_days' => (int) env('PACKGRID_SYNC_LOG_RETENTION_DAYS', 90),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Autosync
+    |--------------------------------------------------------------------------
+    |
+    | When a repository has autosync enabled, registry requests (Composer index,
+    | NPM packument, downloads) refresh it before responding. fresh_seconds is
+    | the freshness window: a repo synced within this window is not re-synced.
+    | lock_seconds is the per-repo coalescing lock TTL.
+    |
+    */
+    'autosync' => [
+        'fresh_seconds' => (int) env('PACKGRID_AUTOSYNC_FRESH_SECONDS', 60),
+        'lock_seconds' => (int) env('PACKGRID_AUTOSYNC_LOCK_SECONDS', 30),
+    ],
 ];

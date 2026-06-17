@@ -69,7 +69,10 @@ class Repository extends Model
 
     public function needsSync(): bool
     {
-        return $this->last_sync_at === null || $this->last_sync_at->lt(now()->subMinute());
+        $seconds = (int) config('packgrid.autosync.fresh_seconds', 60);
+
+        return $this->last_sync_at === null
+            || $this->last_sync_at->lt(now()->subSeconds($seconds));
     }
 
     /**

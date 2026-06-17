@@ -244,4 +244,44 @@ describe('Auto-Sync on Download', function () {
 
         expect(DownloadLog::count())->toBe(1);
     });
+
+    it('triggers sync on an npm tarball download when autosync is on and stale', function () {
+        $repository = Repository::factory()->npm()->create([
+            'repo_full_name' => 'acme/npm-stale',
+            'autosync' => true,
+            'download_count' => 0,
+            'last_sync_at' => now()->subMinutes(2),
+        ]);
+
+        $syncService = Mockery::mock(RepositorySyncService::class);
+        $syncService->shouldReceive('sync')->once()
+            ->withArgs(fn ($repo, $rebuild = true) => $repo->id === $repository->id)
+            ->andReturn(new \App\Models\SyncLog);
+        app()->instance(RepositorySyncService::class, $syncService);
+
+        Http::fake([
+            'https://api.github.com/repos/acme/npm-stale/tarball/v1.0.0' => Http::response('tgz-content', 200),
+        ]);
+
+        $this->get('/npm/-/acme/npm-stale/v1.0.0.tgz')->assertOk();
+    });
+
+    it('does not trigger sync on an npm tarball download when autosync is off', function () {
+        $repository = Repository::factory()->npm()->create([
+            'repo_full_name' => 'acme/npm-noflag',
+            'autosync' => false,
+            'download_count' => 0,
+            'last_sync_at' => now()->subMinutes(5),
+        ]);
+
+        $syncService = Mockery::mock(RepositorySyncService::class);
+        $syncService->shouldNotReceive('sync');
+        app()->instance(RepositorySyncService::class, $syncService);
+
+        Http::fake([
+            'https://api.github.com/repos/acme/npm-noflag/tarball/v1.0.0' => Http::response('tgz-content', 200),
+        ]);
+
+        $this->get('/npm/-/acme/npm-noflag/v1.0.0.tgz')->assertOk();
+    });
 });

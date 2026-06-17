@@ -21,7 +21,7 @@ class RepositorySyncService
         private readonly NpmIndexBuilder $npmIndexBuilder
     ) {}
 
-    public function sync(Repository $repository): SyncLog
+    public function sync(Repository $repository, bool $rebuildIndex = true): SyncLog
     {
         $startedAt = Carbon::now();
         $log = SyncLog::create([
@@ -46,10 +46,14 @@ class RepositorySyncService
 
             if ($format === PackageFormat::Npm) {
                 $this->npmStore->writeRepositoryMetadata($repository->id, $packages);
-                $this->npmIndexBuilder->rebuild();
+                if ($rebuildIndex) {
+                    $this->npmIndexBuilder->rebuild();
+                }
             } else {
                 $this->composerStore->writeRepositoryMetadata($repository->id, $packages);
-                $this->composerIndexBuilder->rebuild();
+                if ($rebuildIndex) {
+                    $this->composerIndexBuilder->rebuild();
+                }
             }
 
             $packageCount = 0;

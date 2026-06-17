@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PackageFormat;
 use App\Models\Repository;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
@@ -10,6 +11,8 @@ class RepositoryAutosyncService
 {
     public function __construct(
         private readonly RepositorySyncService $sync,
+        private readonly PackageIndexBuilder $composerIndex,
+        private readonly NpmIndexBuilder $npmIndex,
     ) {}
 
     /**
@@ -44,5 +47,32 @@ class RepositoryAutosyncService
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Refresh every stale autosync repository of a format, then rebuild that
+     * format's registry index once. Used before serving registry metadata.
+     */
+    public function refreshIndex(PackageFormat $format): void
+    {
+        $repos = Repository::query()
+            ->where('enabled', true)
+            ->where('autosync', true)
+            ->where('format', $format)
+            ->get()
+            ->filter->needsSync();
+
+        if ($repos->isEmpty()) {
+            return;
+        }
+
+        foreach ($repos as $repo) {
+            $this->maybeSync($repo, rebuildIndex: false);
+        }
+
+        match ($format) {
+            PackageFormat::Npm => $this->npmIndex->rebuild(),
+            default => $this->composerIndex->rebuild(),
+        };
     }
 }

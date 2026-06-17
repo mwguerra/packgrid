@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Credential;
+use Closure;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -21,36 +23,34 @@ class GitHubClient
 
     public function getRepository(string $fullName, ?Credential $credential = null): array
     {
-        return $this->request($credential)
+        return $this->remember('gh:repo:'.$this->credKey($credential).':'.$fullName, fn (): array => $this->request($credential)
             ->get(self::API_BASE.'/repos/'.$fullName)
             ->throw()
-            ->json();
+            ->json());
     }
 
     public function listTags(string $fullName, ?Credential $credential = null): array
     {
-        return $this->request($credential)
+        return $this->remember('gh:tags:'.$this->credKey($credential).':'.$fullName, fn (): array => $this->request($credential)
             ->get(self::API_BASE.'/repos/'.$fullName.'/tags')
             ->throw()
-            ->json();
+            ->json());
     }
 
     public function listBranches(string $fullName, ?Credential $credential = null): array
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/branches', [
-                'per_page' => 100,
-            ])
+        return $this->remember('gh:branches:'.$this->credKey($credential).':'.$fullName, fn (): array => $this->request($credential)
+            ->get(self::API_BASE.'/repos/'.$fullName.'/branches', ['per_page' => 100])
             ->throw()
-            ->json();
+            ->json());
     }
 
     public function getBranch(string $fullName, string $branch, ?Credential $credential = null): array
     {
-        return $this->request($credential)
+        return $this->remember('gh:branch:'.$this->credKey($credential).':'.$fullName.':'.$branch, fn (): array => $this->request($credential)
             ->get(self::API_BASE.'/repos/'.$fullName.'/branches/'.$branch)
             ->throw()
-            ->json();
+            ->json());
     }
 
     public function getComposerJson(string $fullName, string $ref, ?Credential $credential = null): array
@@ -73,12 +73,12 @@ class GitHubClient
 
     public function getFileContent(string $fullName, string $path, string $ref, ?Credential $credential = null): array
     {
-        return $this->request($credential)
-            ->get(self::API_BASE.'/repos/'.$fullName.'/contents/'.$path, [
-                'ref' => $ref,
-            ])
+        $key = 'gh:contents:'.$this->credKey($credential).':'.$fullName.':'.$ref.':'.sha1($path);
+
+        return $this->remember($key, fn (): array => $this->request($credential)
+            ->get(self::API_BASE.'/repos/'.$fullName.'/contents/'.$path, ['ref' => $ref])
             ->throw()
-            ->json();
+            ->json());
     }
 
     public function downloadZipball(string $fullName, string $ref, ?Credential $credential = null): \Illuminate\Http\Client\Response
@@ -95,6 +95,18 @@ class GitHubClient
             ->withOptions(['stream' => true])
             ->get(self::API_BASE.'/repos/'.$fullName.'/tarball/'.$ref)
             ->throw();
+    }
+
+    private function remember(string $key, Closure $fetch): array
+    {
+        $ttl = (int) config('packgrid.github_cache.ttl', 60);
+
+        return $ttl > 0 ? Cache::remember($key, $ttl, $fetch) : $fetch();
+    }
+
+    private function credKey(?Credential $credential): string
+    {
+        return (string) ($credential?->getKey() ?? 'anon');
     }
 
     private function request(?Credential $credential): PendingRequest

@@ -59,4 +59,19 @@ return [
         'fresh_seconds' => (int) env('PACKGRID_AUTOSYNC_FRESH_SECONDS', 60),
         'lock_seconds' => (int) env('PACKGRID_AUTOSYNC_LOCK_SECONDS', 30),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | GitHub API Cache
+    |--------------------------------------------------------------------------
+    |
+    | Read-only GitHub API calls (tags, branches, file contents, repo metadata)
+    | are cached for this many seconds so bursts of registry requests for the
+    | same repository do not fan out into duplicate GitHub requests. Set to 0
+    | to disable. Binary downloads (zipball/tarball) are never cached.
+    |
+    */
+    'github_cache' => [
+        'ttl' => (int) env('PACKGRID_GITHUB_CACHE_TTL', 60),
+    ],
 ];

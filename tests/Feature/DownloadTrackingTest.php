@@ -157,36 +157,57 @@ describe('NPM Download Endpoint', function () {
 });
 
 // =============================================================================
-// AUTO-SYNC ON DOWNLOAD TESTS
+// AUTO-SYNC ON DOWNLOAD TESTS (gated by the autosync flag)
 // =============================================================================
 
 describe('Auto-Sync on Download', function () {
-    it('triggers sync when last_sync_at is stale', function () {
+    it('triggers sync when autosync is on and last_sync_at is stale', function () {
         $repository = Repository::factory()->create([
             'repo_full_name' => 'acme/stale',
             'format' => PackageFormat::Composer,
+            'autosync' => true,
             'download_count' => 0,
             'last_sync_at' => now()->subMinutes(2),
         ]);
 
         $syncService = Mockery::mock(RepositorySyncService::class);
-        $syncService->shouldReceive('sync')->once()->with(
-            Mockery::on(fn ($repo) => $repo->id === $repository->id)
-        )->andReturn(new \App\Models\SyncLog);
+        $syncService->shouldReceive('sync')->once()
+            ->withArgs(fn ($repo, $rebuild = true) => $repo->id === $repository->id)
+            ->andReturn(new \App\Models\SyncLog);
         app()->instance(RepositorySyncService::class, $syncService);
 
         Http::fake([
             'https://api.github.com/repos/acme/stale/zipball/v1.0.0' => Http::response('zip-content', 200),
         ]);
 
-        $this->get('/dist/acme/stale/v1.0.0.zip')
-            ->assertOk();
+        $this->get('/dist/acme/stale/v1.0.0.zip')->assertOk();
+    });
+
+    it('does not trigger sync when autosync is off', function () {
+        $repository = Repository::factory()->create([
+            'repo_full_name' => 'acme/noflag',
+            'format' => PackageFormat::Composer,
+            'autosync' => false,
+            'download_count' => 0,
+            'last_sync_at' => now()->subMinutes(5),
+        ]);
+
+        $syncService = Mockery::mock(RepositorySyncService::class);
+        $syncService->shouldNotReceive('sync');
+        app()->instance(RepositorySyncService::class, $syncService);
+
+        Http::fake([
+            'https://api.github.com/repos/acme/noflag/zipball/v1.0.0' => Http::response('zip-content', 200),
+        ]);
+
+        $this->get('/dist/acme/noflag/v1.0.0.zip')->assertOk();
     });
 
     it('does not trigger sync when last_sync_at is recent', function () {
         $repository = Repository::factory()->create([
             'repo_full_name' => 'acme/fresh',
             'format' => PackageFormat::Composer,
+            'autosync' => true,
             'download_count' => 0,
             'last_sync_at' => now()->subSeconds(30),
         ]);
@@ -199,14 +220,14 @@ describe('Auto-Sync on Download', function () {
             'https://api.github.com/repos/acme/fresh/zipball/v1.0.0' => Http::response('zip-content', 200),
         ]);
 
-        $this->get('/dist/acme/fresh/v1.0.0.zip')
-            ->assertOk();
+        $this->get('/dist/acme/fresh/v1.0.0.zip')->assertOk();
     });
 
     it('does not block download when sync fails', function () {
         $repository = Repository::factory()->create([
             'repo_full_name' => 'acme/sync-fail',
             'format' => PackageFormat::Composer,
+            'autosync' => true,
             'download_count' => 0,
             'last_sync_at' => now()->subMinutes(5),
         ]);
@@ -219,8 +240,7 @@ describe('Auto-Sync on Download', function () {
             'https://api.github.com/repos/acme/sync-fail/zipball/v1.0.0' => Http::response('zip-content', 200),
         ]);
 
-        $this->get('/dist/acme/sync-fail/v1.0.0.zip')
-            ->assertOk();
+        $this->get('/dist/acme/sync-fail/v1.0.0.zip')->assertOk();
 
         expect(DownloadLog::count())->toBe(1);
     });

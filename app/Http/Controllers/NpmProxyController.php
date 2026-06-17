@@ -6,7 +6,7 @@ use App\Enums\PackageFormat;
 use App\Models\DownloadLog;
 use App\Models\Repository;
 use App\Services\GitHubClient;
-use App\Services\RepositorySyncService;
+use App\Services\RepositoryAutosyncService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -36,13 +36,7 @@ class NpmProxyController extends Controller
         // Remove .tgz extension if present
         $ref = preg_replace('/\.tgz$/', '', $ref);
 
-        if ($repository->needsSync()) {
-            try {
-                app(RepositorySyncService::class)->sync($repository);
-            } catch (\Throwable) {
-                // Sync failure should not block the download
-            }
-        }
+        app(RepositoryAutosyncService::class)->maybeSync($repository);
 
         $response = $this->client->downloadTarball($fullName, $ref, $repository->credential);
 

@@ -30,6 +30,7 @@ class RepositoryFactory extends Factory
             'package_count' => 0,
             'clone_enabled' => false,
             'clone_count' => 0,
+            'autosync' => false,
             'last_sync_at' => null,
             'last_error' => null,
             'ref_filter' => null,

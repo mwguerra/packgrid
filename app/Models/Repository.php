@@ -29,6 +29,7 @@ class Repository extends Model
         'download_count',
         'clone_enabled',
         'clone_count',
+        'autosync',
         'last_sync_at',
         'last_error',
         'ref_filter',
@@ -42,6 +43,7 @@ class Repository extends Model
         'download_count' => 'integer',
         'clone_enabled' => 'boolean',
         'clone_count' => 'integer',
+        'autosync' => 'boolean',
         'last_sync_at' => 'datetime',
     ];
 

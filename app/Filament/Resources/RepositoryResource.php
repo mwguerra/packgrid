@@ -278,9 +278,7 @@ class RepositoryResource extends Resource
                 TextColumn::make('autosync')
                     ->label('')
                     ->badge()
-                    // A zero-width space keeps the state non-"blank" so Filament still
-                    // renders the pill, leaving an icon-only badge.
-                    ->state(fn (Repository $record): ?string => $record->autosync ? "\u{200B}" : null)
+                    ->state(fn (Repository $record): ?string => $record->autosync ? __('repository.field.autosync') : null)
                     ->icon(fn (Repository $record): ?string => $record->autosync ? 'heroicon-o-arrow-path' : null)
                     ->color('success')
                     ->tooltip(fn (Repository $record): ?string => $record->autosync ? __('repository.tooltip.autosync_enabled') : null),

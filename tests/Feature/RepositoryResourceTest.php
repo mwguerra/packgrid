@@ -646,8 +646,8 @@ describe('Repository autosync indicators', function () {
             ->assertSee(__('common.disabled'));
     });
 
-    it('renders the autosync badge tooltip only when autosync is enabled', function () {
-        Repository::factory()->create([
+    it('renders the autosync badge with its label and tooltip when enabled', function () {
+        $repo = Repository::factory()->create([
             'name' => 'Auto On',
             'repo_full_name' => 'acme/auto-on',
             'url' => 'https://github.com/acme/auto-on',
@@ -656,11 +656,12 @@ describe('Repository autosync indicators', function () {
 
         livewire(ListRepositories::class)
             ->assertOk()
+            ->assertTableColumnStateSet('autosync', __('repository.field.autosync'), $repo)
             ->assertSee(__('repository.tooltip.autosync_enabled'));
     });
 
-    it('does not render the autosync badge when no repo has autosync', function () {
-        Repository::factory()->create([
+    it('does not render the autosync badge when autosync is disabled', function () {
+        $repo = Repository::factory()->create([
             'name' => 'Auto Off',
             'repo_full_name' => 'acme/auto-off',
             'url' => 'https://github.com/acme/auto-off',
@@ -669,6 +670,7 @@ describe('Repository autosync indicators', function () {
 
         livewire(ListRepositories::class)
             ->assertOk()
+            ->assertTableColumnStateSet('autosync', null, $repo)
             ->assertDontSee(__('repository.tooltip.autosync_enabled'));
     });
 });

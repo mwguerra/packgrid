@@ -8,6 +8,7 @@
 
     "common.enabled": "Habilitado",
     "common.disabled": "Desabilitado",
+    "common.close": "Fechar",
     "common.active": "ativo",
     "common.expired": "expirado",
     "common.public": "Público",
@@ -93,6 +94,7 @@
     "repository.notification.partial_sync": "Sincronização concluída: :success sucesso, :failed falhou",
     "repository.notification.url_copied": "URL copiada para a área de transferência",
     "repository.tooltip.last_sync_attempt": "Última sincronização :time",
+    "repository.tooltip.autosync_enabled": "Autosync está ativado",
     "repository.infolist.credential_status": "Status da Credencial",
     "repository.infolist.unknown": "Desconhecido",
     "repository.infolist.github_repo": "Repositório GitHub",
@@ -926,7 +928,8 @@
     "token.table.restrictions_repos": ":count repo(s)",
     "token.error.repository_access_denied": "Token não autorizado para este repositório.",
 
-    "repository.table.downloads": "Downloads",
+    "repository.table.total_downloads": "Total de downloads",
+    "repository.table.versions": "Versões",
     "repository.action.download_logs": "Logs",
     "repository.modal.download_logs_heading": "Logs de Download",
     "repository.download_log.version": "Versão",

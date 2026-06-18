@@ -628,3 +628,101 @@ describe('Repository sync status', function () {
             ->and(Repository::factory()->create(['last_sync_at' => null, 'last_error' => null])->syncStatus())->toBe('pending');
     });
 });
+
+// =============================================================================
+// AUTOSYNC INDICATORS, VERSIONS COLUMN & ACTION TWEAKS
+// =============================================================================
+
+describe('Repository autosync indicators', function () {
+    it('shows autosync state near the status on the view page', function () {
+        $on = Repository::factory()->create(['autosync' => true]);
+        livewire(ViewRepository::class, ['record' => $on->getKey()])
+            ->assertOk()
+            ->assertSee(__('common.enabled'));
+
+        $off = Repository::factory()->create(['autosync' => false]);
+        livewire(ViewRepository::class, ['record' => $off->getKey()])
+            ->assertOk()
+            ->assertSee(__('common.disabled'));
+    });
+
+    it('renders the autosync badge tooltip only when autosync is enabled', function () {
+        Repository::factory()->create([
+            'name' => 'Auto On',
+            'repo_full_name' => 'acme/auto-on',
+            'url' => 'https://github.com/acme/auto-on',
+            'autosync' => true,
+        ]);
+
+        livewire(ListRepositories::class)
+            ->assertOk()
+            ->assertSee(__('repository.tooltip.autosync_enabled'));
+    });
+
+    it('does not render the autosync badge when no repo has autosync', function () {
+        Repository::factory()->create([
+            'name' => 'Auto Off',
+            'repo_full_name' => 'acme/auto-off',
+            'url' => 'https://github.com/acme/auto-off',
+            'autosync' => false,
+        ]);
+
+        livewire(ListRepositories::class)
+            ->assertOk()
+            ->assertDontSee(__('repository.tooltip.autosync_enabled'));
+    });
+});
+
+describe('Repository list table tweaks', function () {
+    it('lists the five most recent versions with an ellipsis when there are more', function () {
+        $repo = Repository::factory()->create([
+            'name' => 'Versioned',
+            'repo_full_name' => 'acme/versioned',
+            'url' => 'https://github.com/acme/versioned',
+        ]);
+
+        app(PackageMetadataStore::class)->writeRepositoryMetadata($repo->id, [
+            'acme/versioned' => [
+                'v1.0.0' => [], 'v2.0.0' => [], 'v3.0.0' => [],
+                'v4.0.0' => [], 'v5.0.0' => [], 'v6.0.0' => [],
+            ],
+        ]);
+
+        livewire(ListRepositories::class)
+            ->assertOk()
+            ->assertSee('v6.0.0')   // newest shown
+            ->assertSee('v2.0.0')   // fifth-newest shown
+            ->assertSee('…')        // ellipsis because there are more than five
+            ->assertDontSee('v1.0.0'); // sixth-newest is omitted
+    });
+
+    it('labels the downloads column as total downloads', function () {
+        Repository::factory()->create();
+
+        livewire(ListRepositories::class)
+            ->assertOk()
+            ->assertSee(__('repository.table.total_downloads'));
+    });
+});
+
+describe('Repository record actions', function () {
+    it('shows the repository name in the remove confirmation heading', function () {
+        $repo = Repository::factory()->create(['repo_full_name' => 'mwguerra/saas-kit']);
+
+        $component = livewire(ListRepositories::class)->mountTableAction('delete', $repo);
+
+        expect((string) $component->instance()->getMountedTableAction()->getModalHeading())
+            ->toContain('mwguerra/saas-kit');
+    });
+
+    it('uses a resolvable close label on the download logs modal', function () {
+        $repo = Repository::factory()->create();
+
+        $component = livewire(ListRepositories::class)->mountTableAction('download_logs', $repo);
+
+        // Must resolve to a real label, not the raw (unregistered) filament key.
+        expect($component->instance()->getMountedTableAction()->getModalCancelActionLabel())
+            ->toBe(__('common.close'))
+            ->not->toBe('filament-actions::modal.actions.close.label');
+    });
+});

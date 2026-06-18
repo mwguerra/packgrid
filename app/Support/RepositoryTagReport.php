@@ -20,9 +20,59 @@ class RepositoryTagReport
      */
     public function rows(Repository $repository): array
     {
+        $downloads = $this->downloadCounts($repository);
+
+        $rows = array_map(function (array $row) use ($downloads): array {
+            $row['downloads'] = (int) ($downloads[$this->canonical($row['version'])] ?? 0);
+
+            return $row;
+        }, $this->metadataRows($repository));
+
+        return $this->sortRows($rows);
+    }
+
+    /**
+     * The available version/tag strings for a repository, newest tags first.
+     *
+     * @return array<int, string>
+     */
+    public function versions(Repository $repository): array
+    {
+        return array_map(
+            fn (array $row): string => $row['version'],
+            $this->sortRows($this->metadataRows($repository)),
+        );
+    }
+
+    /**
+     * @return array<int, array{package: string, version: string, downloads: int}>
+     */
+    private function metadataRows(Repository $repository): array
+    {
         $store = $repository->format === PackageFormat::Npm ? $this->npmStore : $this->composerStore;
         $metadata = $store->readRepositoryMetadata($repository->id) ?? [];
 
+        $rows = [];
+        foreach ($metadata as $packageName => $versions) {
+            foreach (array_keys($versions) as $version) {
+                $rows[] = [
+                    'package' => $packageName,
+                    'version' => $version,
+                    'downloads' => 0,
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Per-version download totals, keyed by the canonical (prefix-stripped) version.
+     *
+     * @return array<string, int>
+     */
+    private function downloadCounts(Repository $repository): array
+    {
         $downloads = DownloadLog::query()
             ->where('repository_id', $repository->id)
             ->selectRaw('package_version, COUNT(*) as total')
@@ -35,18 +85,7 @@ class RepositoryTagReport
             $canonical[$key] = ($canonical[$key] ?? 0) + (int) $total;
         }
 
-        $rows = [];
-        foreach ($metadata as $packageName => $versions) {
-            foreach (array_keys($versions) as $version) {
-                $rows[] = [
-                    'package' => $packageName,
-                    'version' => $version,
-                    'downloads' => (int) ($canonical[$this->canonical((string) $version)] ?? 0),
-                ];
-            }
-        }
-
-        return $this->sortRows($rows);
+        return $canonical;
     }
 
     private function isBranch(string $version): bool

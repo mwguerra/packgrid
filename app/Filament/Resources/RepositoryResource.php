@@ -220,8 +220,25 @@ class RepositoryResource extends Resource
 
                         return new HtmlString('<span style="display:inline-flex;align-items:center;vertical-align:middle;gap:8px;flex-wrap:wrap">'.implode('<span style="display:inline-flex;align-items:center;color:#6b7280"> · </span>', $parts).'</span>');
                     }),
+                TextColumn::make('recent_versions')
+                    ->label(__('repository.table.versions'))
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('—')
+                    ->state(function (Repository $record): array {
+                        $versions = app(RepositoryTagReport::class)->versions($record);
+
+                        $recent = array_slice($versions, 0, 5);
+
+                        // Indicate there are more than the five shown.
+                        if (count($versions) > 5) {
+                            $recent[] = '…';
+                        }
+
+                        return $recent;
+                    }),
                 TextColumn::make('download_count')
-                    ->label(__('repository.table.downloads'))
+                    ->label(__('repository.table.total_downloads'))
                     ->sortable()
                     ->numeric()
                     ->badge()
@@ -258,6 +275,15 @@ class RepositoryResource extends Resource
 
                         return __('repository.status_tooltip.'.$record->syncStatus());
                     }),
+                TextColumn::make('autosync')
+                    ->label('')
+                    ->badge()
+                    // A zero-width space keeps the state non-"blank" so Filament still
+                    // renders the pill, leaving an icon-only badge.
+                    ->state(fn (Repository $record): ?string => $record->autosync ? "\u{200B}" : null)
+                    ->icon(fn (Repository $record): ?string => $record->autosync ? 'heroicon-o-arrow-path' : null)
+                    ->color('success')
+                    ->tooltip(fn (Repository $record): ?string => $record->autosync ? __('repository.tooltip.autosync_enabled') : null),
                 TextColumn::make('repo_full_name')
                     ->label(__('repository.section.repository'))
                     ->searchable()
@@ -291,7 +317,7 @@ class RepositoryResource extends Resource
                     ->color('info')
                     ->modalHeading(__('repository.modal.download_logs_heading'))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'))
+                    ->modalCancelActionLabel(__('common.close'))
                     ->infolist(function (Repository $record): array {
                         $logs = $record->downloadLogs()->with('token')->latest()->limit(50)->get();
 
@@ -328,35 +354,37 @@ class RepositoryResource extends Resource
                                 ->columns(5),
                         ];
                     }),
-                Action::make('sync')
-                    ->label(fn (Repository $record): string => $record->last_error
-                        ? __('repository.action.retry_sync')
-                        : __('repository.action.sync'))
-                    ->icon('heroicon-o-arrow-path')
-                    ->tooltip(__('repository.action.sync_tooltip'))
-                    ->color(fn (Repository $record): string => $record->last_error ? 'danger' : 'primary')
-                    ->action(function (Repository $record): void {
-                        try {
-                            app(RepositorySyncService::class)->sync($record);
-                            Notification::make()
-                                ->title(__('repository.notification.synced'))
-                                ->success()
-                                ->send();
-                        } catch (\Throwable $exception) {
-                            Notification::make()
-                                ->title(__('repository.notification.sync_failed'))
-                                ->body($exception->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                ViewAction::make(),
                 EditAction::make(),
                 ActionGroup::make([
+                    ActionGroup::make([
+                        Action::make('sync')
+                            ->label(fn (Repository $record): string => $record->last_error
+                                ? __('repository.action.retry_sync')
+                                : __('repository.action.sync'))
+                            ->icon('heroicon-o-arrow-path')
+                            ->tooltip(__('repository.action.sync_tooltip'))
+                            ->color(fn (Repository $record): string => $record->last_error ? 'danger' : 'primary')
+                            ->action(function (Repository $record): void {
+                                try {
+                                    app(RepositorySyncService::class)->sync($record);
+                                    Notification::make()
+                                        ->title(__('repository.notification.synced'))
+                                        ->success()
+                                        ->send();
+                                } catch (\Throwable $exception) {
+                                    Notification::make()
+                                        ->title(__('repository.notification.sync_failed'))
+                                        ->body($exception->getMessage())
+                                        ->danger()
+                                        ->send();
+                                }
+                            }),
+                        ViewAction::make(),
+                    ])->dropdown(false),
                     DeleteAction::make()
                         ->label(__('repository.action.remove'))
                         ->requiresConfirmation()
-                        ->modalHeading(__('repository.modal.remove_heading'))
+                        ->modalHeading(fn (Repository $record): string => __('repository.action.remove').' '.$record->repo_full_name)
                         ->modalDescription(__('repository.modal.remove_description'))
                         ->modalSubmitActionLabel(__('repository.action.remove')),
                 ]),
@@ -463,6 +491,12 @@ class RepositoryResource extends Resource
                                 'pending' => 'gray',
                                 default => 'gray',
                             }),
+                        TextEntry::make('autosync')
+                            ->label(__('repository.field.autosync'))
+                            ->badge()
+                            ->formatStateUsing(fn (bool $state): string => $state ? __('common.enabled') : __('common.disabled'))
+                            ->icon(fn (bool $state): string => $state ? 'heroicon-o-arrow-path' : 'heroicon-o-no-symbol')
+                            ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                         TextEntry::make('last_sync_at')
                             ->label(__('repository.table.last_sync'))
                             ->icon('heroicon-o-clock')
